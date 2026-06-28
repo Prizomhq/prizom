@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-neon-purple: #A855F7;
+  --color-electric-blue: #06B6D4;
+  --color-accent-pink: #EC4899;
+  --color-dark-card: rgba(0, 0, 0, 0.03);
+  --color-dark-border: rgba(0, 0, 0, 0.08);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Premium Design System Tokens */
+  --color-primary-brand: #0f172a;       /* Premium slate-900 */
+  --color-secondary-brand: #4f46e5;     /* Premium indigo-600 */
+  --color-accent-brand: #a855f7;        /* Premium purple-550 */
+  --color-success-brand: #10b981;       /* Emerald-500 */
+  --color-warning-brand: #f59e0b;       /* Amber-500 */
+  --color-danger-brand: #ef4444;        /* Red-500 */
+  
+  --radius-btn: 9999px;
+  --radius-card-premium: 2rem;
+  --radius-badge-rounded: 0.5rem;
+  
+  --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+  --shadow-glow-purple: 0 0 25px rgba(168, 85, 247, 0.35);
+  --shadow-glow-blue: 0 0 25px rgba(6, 182, 212, 0.35);
+
+  --animate-blob: blob 10s infinite;
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(40px, -60px) scale(1.1); }
+    66% { transform: translate(-30px, 40px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+}
+
+:root {
+  --background: #fcfcfc;
+  --foreground: #18181b;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+}
+
+.glass-nav {
+  background: rgba(252, 252, 252, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Hide scrollbar for clean masonry look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-purple);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(244, 244, 245, 0.9) 25%, rgba(228, 228, 230, 0.9) 50%, rgba(244, 244, 245, 0.9) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* WCAG AA Contrast Compliance on Light Backgrounds */
+:root {
+  --color-zinc-600: #52525b;
+  --color-zinc-700: #3f3f46;
+}
+
+.text-zinc-400:not(
+  [class*="bg-zinc-9"] *, 
+  [class*="bg-black"] *, 
+  [class*="bg-[#0"] *, 
+  [class*="bg-[#1"] *, 
+  [class*="bg-[#2"] *, 
+  [class*="dark"] *, 
+  .dark *
+) {
+  color: var(--color-zinc-600) !important;
+}
+
+.text-zinc-500:not(
+  [class*="bg-zinc-9"] *, 
+  [class*="bg-black"] *, 
+  [class*="bg-[#0"] *, 
+  [class*="bg-[#1"] *, 
+  [class*="bg-[#2"] *, 
+  [class*="dark"] *, 
+  .dark *
+) {
+  color: var(--color-zinc-700) !important;
+}
+
+/* Prevent Turnstile widget overflow/clipping on very narrow screens (e.g. 320px) */
+@media (max-width: 350px) {
+  #turnstile-container,
+  #turnstile-appeal-container,
+  #turnstile-contact-container {
+    transform: scale(0.85);
+    transform-origin: center;
+  }
+}
+
+/* E2E Mobile Overflows & Wrapping Fix */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+pre, code, p, h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Masonry grid column layout safety margins for narrow viewports */
+@media (max-width: 480px) {
+  .flex.gap-4 {
+    gap: 0.75rem !important;
+  }
+}
+
+
+

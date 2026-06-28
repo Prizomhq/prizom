@@ -1,0 +1,973 @@
+{
+  "admin_users": [
+    {
+      "email": "superadmin@prizom.com",
+      "role": "super_admin"
+    },
+    {
+      "email": "admin@prizom.com",
+      "role": "admin"
+    },
+    {
+      "email": "moderator@prizom.com",
+      "role": "moderator"
+    }
+  ],
+  "banned_users": [
+    {
+      "userId": "0e2f2d57-115b-4ed5-b7d9-dbbe3cebe840",
+      "email": "test_hide_50576@prizom.com",
+      "reason": "spam",
+      "bannedAt": "2026-06-02T17:15:02.858Z"
+    },
+    {
+      "userId": "6c4ba9e3-c886-4064-9a23-d84fa56d434c",
+      "email": "test_hide_279793@prizom.com",
+      "reason": "spam",
+      "bannedAt": "2026-06-02T17:15:19.099Z"
+    },
+    {
+      "userId": "f71be67d-8fdb-4316-9cb7-20ba6e547fc0",
+      "email": "test_hide_336612@prizom.com",
+      "reason": "unwanted",
+      "bannedAt": "2026-06-02T17:15:40.941Z"
+    }
+  ],
+  "hidden_prompts": [
+    "524db750-2193-4f22-addf-e26f98ac97a3"
+  ],
+  "featured_prompts": [
+    "3780618f-ea9b-44be-89c1-fa01453669ca"
+  ],
+  "manual_boosts": {},
+  "homepage_settings": {
+    "hero_title": "Discover, Remix, and Share Next-Generation AI Prompts",
+    "hero_subtitle": "Prizom is the creative home for next-generation AI creators. A collaborative open-source canvas to discover and dynamically remix prompt engineering masterpieces.",
+    "announcement": "Prizom v2.0 is live! Discover new branching prompt mechanics.",
+    "show_announcement": false,
+    "banner_text": "Join the Discord community for daily prompt challenges!",
+    "banner_link": "https://discord.gg",
+    "show_banner": false,
+    "spotlight_creators": [],
+    "hero_cta_text": "Discover Prompts",
+    "hero_cta_link": "/discover",
+    "hero_bg_images": [
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1200&auto=format&fit=crop"
+    ],
+    "hero_layout": "split",
+    "announcement_cta_text": "Learn More",
+    "why_prizom_cards": [
+      {
+        "id": "discover",
+        "icon": "🎨",
+        "title": "Discover AI Prompts",
+        "description": "Browse and search prompt templates for Midjourney, Flux, Stable Diffusion, and ChatGPT.",
+        "order": 1
+      },
+      {
+        "id": "learn",
+        "icon": "🎓",
+        "title": "Learn from Creators",
+        "description": "Inspect exact settings, seed weights, negative templates, and styles used by prompt engineers.",
+        "order": 2
+      },
+      {
+        "id": "remix",
+        "icon": "⚡",
+        "title": "Remix Ideas",
+        "description": "Remix any prompt to create variations and track the evolutionary lineage of artistic ideas.",
+        "order": 3
+      },
+      {
+        "id": "build",
+        "icon": "📸",
+        "title": "Build Better Images",
+        "description": "Combine community templates and generator tools to build stunning visuals instantly.",
+        "order": 4
+      }
+    ],
+    "how_it_works_steps": [
+      {
+        "id": "step-1",
+        "step_number": 1,
+        "title": "Discover Prompts",
+        "description": "Browse categories or search tags to find the visual style you need.",
+        "order": 1
+      },
+      {
+        "id": "step-2",
+        "step_number": 2,
+        "title": "Copy Prompt",
+        "description": "Click copy to retrieve the exact generator text and negative settings.",
+        "order": 2
+      },
+      {
+        "id": "step-3",
+        "step_number": 3,
+        "title": "Generate Images",
+        "description": "Paste the template into your favorite generator tool to render assets.",
+        "order": 3
+      },
+      {
+        "id": "step-4",
+        "step_number": 4,
+        "title": "Create Your Own",
+        "description": "Publish your own prompt masterworks to build a creator following.",
+        "order": 4
+      }
+    ],
+    "promo_blocks": []
+  },
+  "meet_developer": {
+    "name": "darshan vaghela",
+    "bio": "Building the future of open-source generative prompt registries.",
+    "avatar_url": "https://res.cloudinary.com/dkkshrl1p/image/upload/v1779851745/samples/zoom.avif",
+    "twitter": "https://twitter.com/prizom",
+    "github": "https://github.com/prizom",
+    "linkedin": "https://linkedin.com/company/prizom",
+    "show_section": true,
+    "custom_text": "Thank you for supporting this open-source commuity"
+  },
+  "footer_settings": {
+    "about_text": "The creative home for next-generation AI prompt engineering and collaborative remix culture. Evolve your prompt workflows together.",
+    "twitter_link": "https://twitter.com/prizom",
+    "instagram_link": "https://instagram.com/prizom",
+    "youtube_link": "https://youtube.com/prizom",
+    "legal_links": [
+      {
+        "label": "Terms of Service",
+        "url": "/terms"
+      },
+      {
+        "label": "Privacy Policy",
+        "url": "/privacy"
+      }
+    ],
+    "support_links": [
+      {
+        "label": "Contact Us",
+        "url": "/#contact"
+      }
+    ],
+    "copyright_text": "© 2026 Prizom. All rights reserved.",
+    "external_links": [
+      {
+        "label": "Discover",
+        "url": "/discover"
+      },
+      {
+        "label": "Trending",
+        "url": "/trending"
+      },
+      {
+        "label": "Settings",
+        "url": "/settings"
+      }
+    ]
+  },
+  "moderation_logs": [
+    {
+      "id": "wb00c2elx-mq6hsm3z",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "boost_prompt",
+      "targetId": "74889778-5f2d-48a3-b699-f8b23913d9da",
+      "reason": "Manual trending weight set to 1x",
+      "timestamp": "2026-06-09T10:23:56.399Z"
+    },
+    {
+      "id": "o3mwvy1c3-mq5hsiab",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "hide_prompt",
+      "targetId": "524db750-2193-4f22-addf-e26f98ac97a3",
+      "reason": "hide",
+      "timestamp": "2026-06-08T17:36:05.267Z"
+    },
+    {
+      "id": "k8oxvxdoy-mq405qth",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-06-07T16:34:43.589Z"
+    },
+    {
+      "id": "wpde3cwjs-mq3zew21",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-06-07T16:13:50.665Z"
+    },
+    {
+      "id": "ljqz80u9h-mq3bq538",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_category",
+      "targetId": "darshan",
+      "reason": "Updated category: darshan",
+      "timestamp": "2026-06-07T05:10:44.804Z"
+    },
+    {
+      "id": "nlt3e44ng-mq2moqiw",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "manual_verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification manually granted by Admin.",
+      "timestamp": "2026-06-06T17:29:48.872Z"
+    },
+    {
+      "id": "3fgemks79-mq2m378w",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "boost_prompt",
+      "targetId": "74889778-5f2d-48a3-b699-f8b23913d9da",
+      "reason": "Manual trending weight set to 1.2x",
+      "timestamp": "2026-06-06T17:13:04.113Z"
+    },
+    {
+      "id": "68woko8ut-mq2m2jq0",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "boost_prompt",
+      "targetId": "74889778-5f2d-48a3-b699-f8b23913d9da",
+      "reason": "Manual trending weight set to 1x",
+      "timestamp": "2026-06-06T17:12:33.624Z"
+    },
+    {
+      "id": "0i0lw81uz-mq2ljgr4",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-06-06T16:57:43.312Z"
+    },
+    {
+      "id": "d634rrffr-mpybi3cp",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "most-remixed",
+      "reason": "Updated section: Most Remixed",
+      "timestamp": "2026-06-03T17:05:38.425Z"
+    },
+    {
+      "id": "uaeq67pgk-mpybfsgk",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "featured",
+      "reason": "Updated section: Featured Prompts",
+      "timestamp": "2026-06-03T17:03:50.996Z"
+    },
+    {
+      "id": "9nvr3mx1a-mpwwf61b",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "ban_user",
+      "targetId": "f71be67d-8fdb-4316-9cb7-20ba6e547fc0",
+      "reason": "unwanted",
+      "timestamp": "2026-06-02T17:15:41.519Z"
+    },
+    {
+      "id": "s1aoqwzgm-mpwwep4w",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "ban_user",
+      "targetId": "6c4ba9e3-c886-4064-9a23-d84fa56d434c",
+      "reason": "spam",
+      "timestamp": "2026-06-02T17:15:19.616Z"
+    },
+    {
+      "id": "gn42y2mef-mpwwecpf",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "ban_user",
+      "targetId": "0e2f2d57-115b-4ed5-b7d9-dbbe3cebe840",
+      "reason": "spam",
+      "timestamp": "2026-06-02T17:15:03.507Z"
+    },
+    {
+      "id": "spx0y2x1o-mpwuqxfv",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "video-ai",
+      "reason": "Updated section: AI Video Prompts",
+      "timestamp": "2026-06-02T16:28:51.019Z"
+    },
+    {
+      "id": "j4g4f2tty-mpwuql2o",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "video-ai",
+      "reason": "Updated section: AI Video Prompts",
+      "timestamp": "2026-06-02T16:28:34.992Z"
+    },
+    {
+      "id": "gwxgb7hyv-mpwups1l",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_section_prompts",
+      "targetId": "featured",
+      "reason": "Updated prompts inside section: Featured Prompts",
+      "timestamp": "2026-06-02T16:27:57.369Z"
+    },
+    {
+      "id": "ns0mjhggx-mpwup917",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "video-ai",
+      "reason": "Updated section: AI Video Prompts",
+      "timestamp": "2026-06-02T16:27:32.731Z"
+    },
+    {
+      "id": "4ks4ao2sg-mpwt22kq",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "reorder_explore_sections",
+      "targetId": "all",
+      "reason": "Reordered explore sections list.",
+      "timestamp": "2026-06-02T15:41:31.658Z"
+    },
+    {
+      "id": "r8enoaou4-mpwt1pcz",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_explore_section",
+      "targetId": "featured",
+      "reason": "Updated section: Featured Prompts",
+      "timestamp": "2026-06-02T15:41:14.531Z"
+    },
+    {
+      "id": "10clxwrus-mpvgs8nz",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_developer_cms",
+      "targetId": "settings",
+      "reason": "Updated Developer profile section contents.",
+      "timestamp": "2026-06-01T17:10:11.423Z"
+    },
+    {
+      "id": "3jzy9fq3z-mpvezqkq",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-06-01T16:20:01.994Z"
+    },
+    {
+      "id": "2jv21gq4a-mpvek3vv",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-06-01T16:07:52.747Z"
+    },
+    {
+      "id": "unglok8jy-mpve1zxd",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "delete_ai_tool",
+      "targetId": "chatgpt-4",
+      "reason": "Deleted AI Tool ID: chatgpt-4",
+      "timestamp": "2026-06-01T15:53:47.809Z"
+    },
+    {
+      "id": "yp3ez252p-mpve0mql",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-06-01T15:52:44.061Z"
+    },
+    {
+      "id": "b2j0u8yzs-mpvak48m",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "reply_contact_message",
+      "targetId": "msg-7f2rwnr3y-mpvahz8p",
+      "reason": "Replied to: admin@prizom.com",
+      "timestamp": "2026-06-01T14:15:54.742Z"
+    },
+    {
+      "id": "km9ugb0pq-mps7vbob",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "b7a1ff7c-a184-44e9-b5a2-97f5d1f9398f",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-05-30T10:37:20.219Z"
+    },
+    {
+      "id": "yhuru1sfu-mps7n51g",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "create_category",
+      "targetId": "darshan",
+      "reason": "Created category: darshan",
+      "timestamp": "2026-05-30T10:30:58.372Z"
+    },
+    {
+      "id": "7z6u0vwzj-mps7mjaz",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "delete_category",
+      "targetId": "photography",
+      "reason": "Deleted category ID: photography",
+      "timestamp": "2026-05-30T10:30:30.204Z"
+    },
+    {
+      "id": "4r0rf5iop-mps20x6e",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "delete_ai_tool",
+      "targetId": "midjourney-v6",
+      "reason": "Deleted AI Tool ID: midjourney-v6",
+      "timestamp": "2026-05-30T07:53:43.670Z"
+    },
+    {
+      "id": "upgh9gns8-mps1ztzb",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "edit_category",
+      "targetId": "sports",
+      "reason": "Updated category: Sports",
+      "timestamp": "2026-05-30T07:52:52.872Z"
+    },
+    {
+      "id": "ac5jba3iv-mps12n0u",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-05-30T07:27:04.206Z"
+    },
+    {
+      "id": "2595ef131-mprwrjuj",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-05-30T05:26:28.411Z"
+    },
+    {
+      "id": "urd08d647-mprwoy2o",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-05-30T05:24:26.880Z"
+    },
+    {
+      "id": "rgcre9m9f-mprwo20o",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "broadcast_notification_all",
+      "targetId": "all",
+      "reason": "Global alert: hello good moring",
+      "timestamp": "2026-05-30T05:23:45.336Z"
+    },
+    {
+      "id": "huo22ptwb-mpr57asp",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "report_dismissed",
+      "targetId": "612d63ba-d06f-4823-aa09-50da0f545d9b",
+      "reason": "Type: user. Action explanation: No custom notes",
+      "timestamp": "2026-05-29T16:34:53.929Z"
+    },
+    {
+      "id": "wc6gufmum-mpr4ldqu",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-05-29T16:17:51.318Z"
+    },
+    {
+      "id": "tumsdax92-mpr3mljf",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-05-29T15:50:48.459Z"
+    },
+    {
+      "id": "2fyis1x8s-mpr393kq",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-05-29T15:40:18.650Z"
+    },
+    {
+      "id": "ff55bip67-mpr34sg0",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "show_prompt",
+      "targetId": "12a45e0e-9a88-48a1-bfaa-8d08218cb65a",
+      "reason": "Content restored.",
+      "timestamp": "2026-05-29T15:36:57.600Z"
+    },
+    {
+      "id": "8a6vd71gg-mpppb7c8",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "report_resolved",
+      "targetId": "c2868f3a-29b9-467a-93a0-3334a8075e26",
+      "reason": "Type: prompt. Action explanation: plese make it give cradit to him dont copy",
+      "timestamp": "2026-05-28T16:22:16.040Z"
+    },
+    {
+      "id": "8wgcaf4al-mpppb4rn",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "hide_prompt",
+      "targetId": "12a45e0e-9a88-48a1-bfaa-8d08218cb65a",
+      "reason": "Report Resolved: plese make it give cradit to him dont copy",
+      "timestamp": "2026-05-28T16:22:12.707Z"
+    },
+    {
+      "id": "ga70b9inr-mppp9rtz",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "report_under_review",
+      "targetId": "c2868f3a-29b9-467a-93a0-3334a8075e26",
+      "reason": "Type: prompt. Action explanation: No custom notes",
+      "timestamp": "2026-05-28T16:21:09.287Z"
+    },
+    {
+      "id": "pvesgp4n6-mppob1c1",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "unfeature_prompt",
+      "targetId": "74889778-5f2d-48a3-b699-f8b23913d9da",
+      "reason": "",
+      "timestamp": "2026-05-28T15:54:08.641Z"
+    },
+    {
+      "id": "u28etrbmm-mppoaq1b",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "feature_prompt",
+      "targetId": "74889778-5f2d-48a3-b699-f8b23913d9da",
+      "reason": "",
+      "timestamp": "2026-05-28T15:53:53.999Z"
+    },
+    {
+      "id": "raaxcsp36-mppfreub",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-05-28T11:54:56.099Z"
+    },
+    {
+      "id": "6kaywwc64-mppfr7oy",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "verify_user",
+      "targetId": "64a05320-de99-423e-aac4-7b76fa6bf037",
+      "reason": "Creator verification granted.",
+      "timestamp": "2026-05-28T11:54:46.834Z"
+    },
+    {
+      "id": "5d72p8mep-mppfoumx",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "broadcast_notification_all",
+      "targetId": "all",
+      "reason": "Global alert: welcome to the prizom dosto ",
+      "timestamp": "2026-05-28T11:52:56.601Z"
+    },
+    {
+      "id": "z2cqf8pr9-mppfnmtl",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "show_prompt",
+      "targetId": "cc728c10-1bb7-45fc-bc02-92f15e420723",
+      "reason": "Content restored.",
+      "timestamp": "2026-05-28T11:51:59.817Z"
+    },
+    {
+      "id": "tw1p5oa68-mppfne5t",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "hide_prompt",
+      "targetId": "cc728c10-1bb7-45fc-bc02-92f15e420723",
+      "reason": "Guidelines violation.",
+      "timestamp": "2026-05-28T11:51:48.593Z"
+    },
+    {
+      "id": "63inyzh5w-mppfncc3",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "show_prompt",
+      "targetId": "cc728c10-1bb7-45fc-bc02-92f15e420723",
+      "reason": "Content restored.",
+      "timestamp": "2026-05-28T11:51:46.228Z"
+    },
+    {
+      "id": "bq9zswy1t-mppfi0f5",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "hide_prompt",
+      "targetId": "cc728c10-1bb7-45fc-bc02-92f15e420723",
+      "reason": "sala itna bekar promt kon likhta hai",
+      "timestamp": "2026-05-28T11:47:37.505Z"
+    },
+    {
+      "id": "gsbu8vymv-mppfgk16",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_developer_cms",
+      "targetId": "settings",
+      "reason": "Updated Developer profile section contents.",
+      "timestamp": "2026-05-28T11:46:29.610Z"
+    },
+    {
+      "id": "r9njr1d7x-mppfebd0",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_homepage_cms",
+      "targetId": "settings",
+      "reason": "Updated homepage hero text or banner.",
+      "timestamp": "2026-05-28T11:44:45.060Z"
+    },
+    {
+      "id": "vfm0z06k0-mppfbwx7",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_developer_cms",
+      "targetId": "settings",
+      "reason": "Updated Developer profile section contents.",
+      "timestamp": "2026-05-28T11:42:53.035Z"
+    },
+    {
+      "id": "67s9gsji8-mppf8zg9",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "update_developer_cms",
+      "targetId": "settings",
+      "reason": "Updated Developer profile section contents.",
+      "timestamp": "2026-05-28T11:40:36.345Z"
+    },
+    {
+      "id": "227zyeaa0-mppenqmu",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "boost_prompt",
+      "targetId": "12a45e0e-9a88-48a1-bfaa-8d08218cb65a",
+      "reason": "Manual trending weight set to 1x",
+      "timestamp": "2026-05-28T11:24:05.142Z"
+    },
+    {
+      "id": "86ycpfnii-mppen40f",
+      "adminEmail": "superadmin@prizom.com",
+      "action": "boost_prompt",
+      "targetId": "12a45e0e-9a88-48a1-bfaa-8d08218cb65a",
+      "reason": "Manual trending weight set to 1x",
+      "timestamp": "2026-05-28T11:23:35.823Z"
+    }
+  ],
+  "contact_messages": [
+    {
+      "id": "msg-7f2rwnr3y-mpvahz8p",
+      "email": "admin@prizom.com",
+      "message": "hey can u activate my portel for moderatuon",
+      "status": "archived",
+      "createdAt": "2026-06-01T14:14:14.953Z",
+      "replies": [
+        {
+          "body": "uhkdsahdkahdkasduu\nfsdf\nsfsdf",
+          "repliedAt": "2026-06-01T14:15:54.707Z",
+          "adminEmail": "superadmin@prizom.com"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "anime",
+      "name": "Anime",
+      "order": 1,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "cinematic",
+      "name": "Cinematic",
+      "order": 2,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "realistic",
+      "name": "Realistic",
+      "order": 3,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "fantasy",
+      "name": "Fantasy",
+      "order": 4,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "portrait",
+      "name": "Portrait",
+      "order": 5,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "character-design",
+      "name": "Character Design",
+      "order": 6,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion",
+      "order": 7,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "product-photography",
+      "name": "Product Photography",
+      "order": 8,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture",
+      "order": 9,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "landscape",
+      "name": "Landscape",
+      "order": 10,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "sci-fi",
+      "name": "Sci-Fi",
+      "order": 11,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "cyberpunk",
+      "name": "Cyberpunk",
+      "order": 12,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "concept-art",
+      "name": "Concept Art",
+      "order": 13,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "logo-design",
+      "name": "Logo Design",
+      "order": 14,
+      "is_featured": false,
+      "show_on_explore": true,
+      "approved": true
+    },
+    {
+      "id": "3d-render",
+      "name": "3D Render",
+      "order": 15,
+      "is_featured": true,
+      "show_on_explore": true,
+      "approved": true
+    }
+  ],
+  "ai_tools": [
+    {
+      "id": "chatgpt",
+      "name": "ChatGPT",
+      "approved": true,
+      "order": 1
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "approved": true,
+      "order": 2
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "approved": true,
+      "order": 3
+    },
+    {
+      "id": "midjourney",
+      "name": "Midjourney",
+      "approved": true,
+      "order": 4
+    },
+    {
+      "id": "flux",
+      "name": "Flux",
+      "approved": true,
+      "order": 5
+    },
+    {
+      "id": "veo",
+      "name": "Veo",
+      "approved": true,
+      "order": 6
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "approved": true,
+      "order": 7
+    },
+    {
+      "id": "leonardo-ai",
+      "name": "Leonardo AI",
+      "approved": true,
+      "order": 8
+    },
+    {
+      "id": "ideogram",
+      "name": "Ideogram",
+      "approved": true,
+      "order": 9
+    },
+    {
+      "id": "recraft",
+      "name": "Recraft",
+      "approved": true,
+      "order": 10
+    }
+  ],
+  "explore_sections": [
+    {
+      "id": "featured",
+      "title": "Featured Prompts",
+      "type": "curated",
+      "prompt_ids": [
+        "3780618f-ea9b-44be-89c1-fa01453669ca"
+      ],
+      "is_hidden": true,
+      "is_featured": false,
+      "order": 1
+    },
+    {
+      "id": "trending",
+      "title": "Trending This Week",
+      "type": "dynamic",
+      "algorithm": "trending",
+      "is_hidden": false,
+      "is_featured": false,
+      "order": 2
+    },
+    {
+      "id": "video-ai",
+      "title": "AI Video Prompts",
+      "type": "curated",
+      "prompt_ids": [],
+      "is_hidden": true,
+      "is_featured": false,
+      "order": 3
+    },
+    {
+      "id": "most-remixed",
+      "title": "Most Remixed",
+      "type": "dynamic",
+      "algorithm": "most_remixed",
+      "is_hidden": true,
+      "is_featured": false,
+      "order": 4,
+      "prompt_ids": []
+    },
+    {
+      "id": "image-gen",
+      "title": "Image Generation Prompts",
+      "type": "curated",
+      "prompt_ids": [],
+      "is_hidden": false,
+      "is_featured": false,
+      "order": 5
+    },
+    {
+      "id": "chatgpt",
+      "title": "ChatGPT Prompts",
+      "type": "curated",
+      "prompt_ids": [],
+      "is_hidden": false,
+      "is_featured": false,
+      "order": 6
+    },
+    {
+      "id": "new-creators",
+      "title": "New Creators To Follow",
+      "type": "dynamic",
+      "algorithm": "new_creators",
+      "is_hidden": false,
+      "is_featured": false,
+      "order": 7
+    },
+    {
+      "id": "recently-uploaded",
+      "title": "Recently Uploaded",
+      "type": "dynamic",
+      "algorithm": "recent",
+      "is_hidden": false,
+      "is_featured": false,
+      "order": 8
+    }
+  ],
+  "aspect_ratios": [
+    {
+      "id": "1:1",
+      "label": "1:1 (Square)",
+      "icon": "□",
+      "order": 1
+    },
+    {
+      "id": "4:5",
+      "label": "4:5 (Portrait)",
+      "icon": "▯",
+      "order": 2
+    },
+    {
+      "id": "3:4",
+      "label": "3:4 (Portrait)",
+      "icon": "▯",
+      "order": 3
+    },
+    {
+      "id": "9:16",
+      "label": "9:16 (Vertical)",
+      "icon": "▮",
+      "order": 4
+    },
+    {
+      "id": "16:9",
+      "label": "16:9 (Landscape)",
+      "icon": "▯",
+      "order": 5
+    },
+    {
+      "id": "21:9",
+      "label": "21:9 (Ultra Wide)",
+      "icon": "▬",
+      "order": 6
+    },
+    {
+      "id": "2:3",
+      "label": "2:3",
+      "icon": "▯",
+      "order": 7
+    },
+    {
+      "id": "3:2",
+      "label": "3:2",
+      "icon": "▯",
+      "order": 8
+    }
+  ],
+  "suspended_users": [],
+  "appeals": [],
+  "about_settings": {
+    "platform_mission": "Empowering the next generation of AI artists and creators through a collaborative, visual-first canvas.",
+    "what_is_prizom": "Prizom is an open collaborative registry for AI prompts. We are a social prompt discovery platform built around endless visual exploration, personalized recommendations, and evolutionary prompt remixing.",
+    "creator_ecosystem": "A thriving community of prompt creators, digital artists, and generative developers. Share your masterpieces, build a following, and track the genetic lineage of your creative variations.",
+    "twitter_link": "https://twitter.com/prizom",
+    "instagram_link": "https://instagram.com/prizom",
+    "youtube_link": "https://youtube.com/prizom",
+    "discord_link": "https://discord.gg"
+  }
+}
