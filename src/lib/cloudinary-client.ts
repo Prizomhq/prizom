@@ -34,3 +34,27 @@ export function getOptimizedImageUrl(
   
   return url;
 }
+
+/**
+ * Safe parser for aspect ratio strings (e.g. '16:9', '4:5') into standard CSS aspect-ratio values (e.g. '16/9', '4/5').
+ * Limits extreme vertical or horizontal stretching to preserve layout rhythm.
+ */
+export function getAspectRatioStyle(ratio: string | null | undefined): string {
+  if (!ratio) return '1/1';
+  
+  const parts = ratio.split(':');
+  if (parts.length === 2) {
+    const w = parseFloat(parts[0]);
+    const h = parseFloat(parts[1]);
+    
+    if (!isNaN(w) && !isNaN(h) && h !== 0) {
+      const val = w / h;
+      // Safeguard: clamp ratios to avoid extreme stretching (max 2:1 horizontal, min 1:2 vertical)
+      if (val > 2.0) return '2/1';
+      if (val < 0.5) return '1/2';
+      return `${w}/${h}`;
+    }
+  }
+  
+  return '1/1';
+}

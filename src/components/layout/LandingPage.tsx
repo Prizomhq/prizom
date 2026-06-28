@@ -20,6 +20,8 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 import Avatar from '@/components/ui/Avatar';
+import PromptCard from '@/components/ui/PromptCard';
+import MasonryGrid from '@/components/ui/MasonryGrid';
 
 interface WhyCard {
   id: string;
@@ -177,56 +179,64 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
       title: 'Neon Cyberpunk Cityscape',
       tool: 'Midjourney',
       image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop',
-      tag: 'cyberpunk'
+      tag: 'cyberpunk',
+      aspectRatio: '16:9'
     },
     {
       id: 'insp-2',
       title: 'Ghibli-Style Summer Meadow',
       tool: 'Flux',
       image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop',
-      tag: 'anime'
+      tag: 'anime',
+      aspectRatio: '1:1'
     },
     {
       id: 'insp-3',
       title: 'Hyper-Realistic Studio Portrait',
       tool: 'Flux',
       image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop',
-      tag: 'portrait'
+      tag: 'portrait',
+      aspectRatio: '3:4'
     },
     {
       id: 'insp-4',
       title: 'Minimalist Vector Fox Logo',
       tool: 'Ideogram',
       image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&auto=format&fit=crop',
-      tag: 'logo-design'
+      tag: 'logo-design',
+      aspectRatio: '1:1'
     },
     {
       id: 'insp-5',
       title: 'Mythical Crystal Cave',
       tool: 'Midjourney',
       image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&auto=format&fit=crop',
-      tag: 'fantasy'
+      tag: 'fantasy',
+      aspectRatio: '3:2'
     },
     {
       id: 'insp-6',
       title: 'Dramatic Film Noir Scene',
       tool: 'Midjourney',
       image: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?w=600&auto=format&fit=crop',
-      tag: 'cinematic'
+      tag: 'cinematic',
+      aspectRatio: '16:9'
     },
     {
       id: 'insp-7',
       title: 'Sci-Fi Mech Concept Art',
       tool: 'Flux',
       image: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=600&auto=format&fit=crop',
-      tag: 'sci-fi'
+      tag: 'sci-fi',
+      aspectRatio: '4:3'
     },
     {
       id: 'insp-8',
       title: 'Sleek Cosmetic Studio Shot',
       tool: 'Flux',
       image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop',
-      tag: 'product-photography'
+      tag: 'product-photography',
+      aspectRatio: '1:1'
     }
   ];
 
@@ -440,57 +450,42 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
 
         {realPrompts.length >= 4 ? (
           // Display Real Supabase Prompts
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+          <MasonryGrid>
             {realPrompts.map((prompt) => (
-              <Link
+              <PromptCard
                 key={prompt.id}
-                href={`/prompt/${prompt.id}`}
-                className="block w-full mb-4 sm:mb-6 break-inside-avoid bg-white rounded-3xl relative group cursor-pointer border border-black/5 hover:border-[var(--color-neon-purple)]/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 overflow-hidden flex flex-col"
-              >
-                <div className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden aspect-[3/4]">
-                  <img
-                    src={prompt.image_url}
-                    alt={prompt.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-4 left-4 right-4 text-left opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[8px] font-black uppercase tracking-wider text-purple-300 bg-purple-900/50 px-2.5 py-1 rounded backdrop-blur-sm border border-purple-800/30">
-                      {prompt.ai_tool}
-                    </span>
-                    <h3 className="text-base font-black text-white uppercase tracking-wider mt-2 truncate">{prompt.title}</h3>
-                  </div>
-                </div>
-
-                {/* Creator Metadata (no fake counts/stats) */}
-                <div className="p-4 flex items-center justify-between border-t border-zinc-100/50 bg-[#fcfcfc]">
-                  <div className="flex items-center space-x-2 min-w-0">
-                    <Avatar 
-                      src={prompt.profiles?.avatar_url} 
-                      username={prompt.profiles?.username || 'P'} 
-                      size="xs" 
-                    />
-                    <span className="text-xs text-zinc-700 font-bold truncate">@{prompt.profiles?.username || 'creator'}</span>
-                  </div>
-                  {prompt.aspect_ratio && (
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded shrink-0">
-                      {prompt.aspect_ratio}
-                    </span>
-                  )}
-                </div>
-              </Link>
+                id={prompt.id}
+                title={prompt.title}
+                imageUrl={prompt.image_url}
+                tool={prompt.ai_tool}
+                creator={{
+                  username: prompt.profiles?.username || 'creator',
+                  avatarUrl: prompt.profiles?.avatar_url || null,
+                  displayName: prompt.profiles?.full_name || prompt.profiles?.username || 'creator',
+                  badges: prompt.profiles?.badges || []
+                }}
+                likes={prompt.likes_count || 0}
+                saves={prompt.saves_count || 0}
+                aspectRatio={prompt.aspect_ratio || '1:1'}
+                category={prompt.category || 'General'}
+                remixOf={prompt.remix_of}
+                remixCount={prompt.remix_count || 0}
+              />
             ))}
-          </div>
+          </MasonryGrid>
         ) : (
           // Display Pre-configured Aesthetic Showcase Blocks (No fake likes, creators, etc.)
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+          <MasonryGrid>
             {inspirationalShowcaseCards.map((tile) => (
               <div
                 key={tile.id}
                 onClick={() => handleTagClick(tile.tag)}
                 className="block w-full mb-4 sm:mb-6 break-inside-avoid bg-white rounded-3xl relative group cursor-pointer border border-black/5 hover:border-[var(--color-neon-purple)]/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 overflow-hidden flex flex-col animate-in fade-in"
               >
-                <div className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden aspect-[3/4]">
+                <div 
+                  className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden"
+                  style={{ aspectRatio: getAspectRatioStyle(tile.aspectRatio) }}
+                >
                   <img
                     src={tile.image}
                     alt={tile.title}
@@ -510,7 +505,7 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
                 </div>
               </div>
             ))}
-          </div>
+          </MasonryGrid>
         )}
       </section>
 

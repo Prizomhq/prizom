@@ -284,14 +284,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
     }
   }
 
-  let ratioClass = 'aspect-square';
-  if (prompt.aspect_ratio === '16:9') ratioClass = 'aspect-video';
-  else if (prompt.aspect_ratio === '4:5') ratioClass = 'aspect-[4/5]';
-  else if (prompt.aspect_ratio === '3:4') ratioClass = 'aspect-[3/4]';
-  else if (prompt.aspect_ratio === '9:16') ratioClass = 'aspect-[9/16]';
-  else if (prompt.aspect_ratio === '2:3') ratioClass = 'aspect-[2/3]';
-  else if (prompt.aspect_ratio === '3:2') ratioClass = 'aspect-[3/2]';
-  else if (prompt.aspect_ratio === '21:9') ratioClass = 'aspect-[21/9]';
+
 
   return (
     <div className="min-h-screen pb-6 md:pb-24 pt-8 bg-[#fcfcfc] relative overflow-hidden">
@@ -311,12 +304,12 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           {/* Left Column: Image & Details (Sticky Left) */}
           <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-24 h-fit">
             <div className="rounded-[2.5rem] overflow-hidden border border-zinc-200/60 bg-white/50 backdrop-blur-xl shadow-xl shadow-zinc-200/20 p-2 relative group">
-              <div className={`rounded-[2rem] overflow-hidden relative bg-zinc-100 w-full ${ratioClass}`}>
+              <div className="rounded-[2rem] overflow-hidden relative bg-zinc-100/50 w-full">
                 {prompt.image_url ? (
                   <img 
                     src={getOptimizedImageUrl(prompt.image_url, 'detail')} 
                     alt={prompt.title} 
-                    className="w-full h-full object-cover max-h-[75vh]"
+                    className="w-full h-auto max-h-[70vh] object-contain rounded-2xl md:rounded-[2rem] mx-auto block bg-zinc-950/5"
                     fetchPriority="high"
                     loading="eager"
                   />

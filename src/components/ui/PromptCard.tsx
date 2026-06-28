@@ -12,7 +12,7 @@ import SaveModal from '@/components/ui/SaveModal';
 import UnsaveModal from '@/components/ui/UnsaveModal';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
-import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
+import { getOptimizedImageUrl, getAspectRatioStyle } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
 import Avatar from '@/components/ui/Avatar';
 
@@ -52,15 +52,6 @@ function formatStatsNumber(num: number): string {
 export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, description, remixOf, remixCount, aspectRatio = '1:1', category = 'General' }: PromptCardProps) {
   const router = useRouter();
   
-  let ratioClass = 'aspect-square';
-  if (aspectRatio === '16:9') ratioClass = 'aspect-video';
-  else if (aspectRatio === '4:5') ratioClass = 'aspect-[4/5]';
-  else if (aspectRatio === '3:4') ratioClass = 'aspect-[3/4]';
-  else if (aspectRatio === '9:16') ratioClass = 'aspect-[9/16]';
-  else if (aspectRatio === '2:3') ratioClass = 'aspect-[2/3]';
-  else if (aspectRatio === '3:2') ratioClass = 'aspect-[3/2]';
-  else if (aspectRatio === '21:9') ratioClass = 'aspect-[21/9]';
-
   const supabase = createClient();
   const [isHovered, setIsHovered] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
@@ -389,7 +380,10 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
           setIsHovered(false);
         }}
       >
-        <div className={`relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden z-0 transition-all duration-300 ${ratioClass}`}>
+        <div 
+          className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden z-0 transition-all duration-300"
+          style={{ aspectRatio: getAspectRatioStyle(aspectRatio) }}
+        >
           {/* Remix Badges Overlay */}
           {remixOf && (
             <div className="absolute top-4 left-4 z-10 pointer-events-none">
