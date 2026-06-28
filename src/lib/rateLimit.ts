@@ -36,7 +36,18 @@ export async function rateLimit(
       return { success: true, limit, remaining: limit, resetAt: now };
     }
 
-    const result = data as { allowed: boolean; current_hits: number; reset_timestamp: string };
+    const resultList = data as {
+      allowed: boolean;
+      current_hits: number;
+      reset_timestamp: string;
+    }[];
+
+    if (!resultList || resultList.length === 0) {
+      console.warn('[RATE LIMIT WARNING] Empty response from rate limit RPC.');
+      return { success: true, limit, remaining: limit, resetAt: now };
+    }
+
+    const result = resultList[0];
     const resetAt = new Date(result.reset_timestamp);
     const remaining = Math.max(0, limit - result.current_hits);
 
