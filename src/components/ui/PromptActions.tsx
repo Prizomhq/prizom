@@ -270,8 +270,22 @@ export default function PromptActions({
           <span className="whitespace-nowrap truncate">Remix</span>
         </button>
 
+        {/* Edit Button (only visible to prompt owner) */}
+        {isOwner && (
+          <Link
+            href={`/prompt/${promptId}/edit`}
+            className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-2xl bg-white border border-zinc-200 hover:border-[var(--color-electric-blue)] hover:text-[var(--color-electric-blue)] text-zinc-700 transition-all duration-300 font-bold text-xs shadow-sm hover:bg-blue-50/[0.2] flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5 text-[var(--color-electric-blue)] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+            </svg>
+            <span className="whitespace-nowrap truncate">Edit</span>
+          </Link>
+        )}
+
         {/* Divider for desktop */}
         <div className="hidden sm:block w-px h-6 bg-zinc-200 mx-2.5"></div>
+
 
         {/* 3-Dot Options Dropdown */}
         <div className="relative" ref={menuRef}>

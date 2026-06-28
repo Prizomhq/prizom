@@ -143,3 +143,98 @@ export async function getPopularTags() {
   return { success: true, tags: sortedTags };
 }
 
+export async function updatePromptAction(
+  promptId: string,
+  promptData: {
+    title: string;
+    description?: string | null;
+    prompt_text: string;
+    negative_prompt?: string | null;
+    ai_tool: string;
+    category: string;
+    tags?: string[];
+    image_url?: string | null;
+    aspect_ratio: string;
+    is_hidden: boolean;
+  }
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  // 1. Fetch existing prompt to verify ownership
+  const { data: existingPrompt, error: fetchErr } = await supabase
+    .from('prompts')
+    .select('user_id, image_url')
+    .eq('id', promptId)
+    .single();
+
+  if (fetchErr || !existingPrompt) {
+    return { success: false, error: 'Prompt not found.' };
+  }
+
+  // Strict ownership check: only the creator can edit it
+  if (existingPrompt.user_id !== user.id) {
+    return { success: false, error: 'Forbidden: You do not have permission to edit this prompt.' };
+  }
+
+  // 2. Validate input fields
+  if (!promptData.title || !promptData.title.trim()) {
+    return { success: false, error: 'Title is required.' };
+  }
+  if (!promptData.prompt_text || !promptData.prompt_text.trim()) {
+    return { success: false, error: 'Prompt content is required.' };
+  }
+
+  try {
+    // Assert user is not suspended or permanently banned
+    await assertNotSuspendedOrBanned(user.id);
+
+    // 3. Perform update in database using user client (obeying RLS)
+    const { error: updateErr } = await supabase
+      .from('prompts')
+      .update({
+        title: promptData.title.trim(),
+        description: promptData.description ? promptData.description.trim() : null,
+        prompt_text: promptData.prompt_text.trim(),
+        negative_prompt: promptData.negative_prompt ? promptData.negative_prompt.trim() : null,
+        ai_tool: promptData.ai_tool,
+        category: promptData.category,
+        tags: promptData.tags || [],
+        image_url: promptData.image_url || null,
+        aspect_ratio: promptData.aspect_ratio || '1:1',
+        is_hidden: promptData.is_hidden,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', promptId);
+
+
+    if (updateErr) throw updateErr;
+
+    // 4. Delete old image from Cloudinary if it was replaced or removed
+    if (existingPrompt.image_url && existingPrompt.image_url !== promptData.image_url) {
+      try {
+        const { deleteCloudinaryAsset } = await import('@/lib/cloudinary');
+        await deleteCloudinaryAsset(existingPrompt.image_url);
+      } catch (delErr) {
+        console.warn('[CLOUDINARY CLEANUP WARN] Failed to delete old prompt image:', delErr);
+      }
+    }
+
+    // 5. Revalidate cache
+    revalidatePath('/');
+    revalidatePath('/discover');
+    revalidatePath('/trending');
+    revalidatePath(`/prompt/${promptId}`);
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error updating prompt:', err);
+    return { success: false, error: err.message || 'Failed to update prompt.' };
+  }
+}
+
+
