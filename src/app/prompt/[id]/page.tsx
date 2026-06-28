@@ -406,7 +406,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                     {prompt.category}
                   </Link>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black mb-4 text-zinc-900 leading-[1.1] tracking-tight">{prompt.title}</h1>
+                <h1 className="text-4xl md:text-5xl font-black mb-4 text-zinc-900 leading-[1.1] tracking-tight break-words">{prompt.title}</h1>
                 
                 {prompt.description && (
                   <p className="text-lg text-zinc-500 font-medium leading-relaxed mb-6">
@@ -470,7 +470,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   <CopyButton textToCopy={prompt.prompt_text} promptId={prompt.id} />
                 </div>
               </div>
-              <div className="bg-zinc-50/80 rounded-2xl p-6 text-zinc-800 font-mono text-base leading-relaxed border border-zinc-200/50 shadow-inner max-h-[400px] overflow-y-auto">
+              <div className="bg-zinc-50/80 rounded-2xl p-6 text-zinc-800 font-mono text-sm leading-relaxed border border-zinc-200/50 shadow-inner max-h-[400px] overflow-y-auto break-words whitespace-pre-wrap overflow-x-hidden">
                 {prompt.prompt_text}
               </div>
             </div>
@@ -485,7 +485,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   </h3>
                   <CopyButton textToCopy={prompt.negative_prompt} promptId={prompt.id} label="Copy Negative" successLabel="Negative Copied!" />
                 </div>
-                <div className="bg-red-50/50 rounded-2xl p-6 text-red-900/80 font-mono text-base leading-relaxed border border-red-100 shadow-inner">
+                <div className="bg-red-50/50 rounded-2xl p-6 text-red-900/80 font-mono text-sm leading-relaxed border border-red-100 shadow-inner break-words whitespace-pre-wrap overflow-x-hidden">
                   {prompt.negative_prompt}
                 </div>
               </div>

@@ -152,10 +152,10 @@ export default function ConsentGuard() {
   const allChecked = acceptedTerms && acceptedPrivacy && acceptedCookies;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in pointer-events-auto">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center py-4 sm:py-8 px-4 sm:px-6 overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in pointer-events-auto">
       
       {/* 1. Main Consent Onboarding Modal */}
-      <div className="relative w-full max-w-lg bg-white/90 border border-zinc-200/50 rounded-[2.5rem] p-8 sm:p-12 shadow-2xl backdrop-blur-xl animate-scale-up z-[110] overflow-hidden my-auto">
+      <div className="relative w-full max-w-lg bg-white/90 border border-zinc-200/50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl backdrop-blur-xl animate-scale-up z-[110] overflow-hidden my-auto">
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
@@ -300,11 +300,11 @@ export default function ConsentGuard() {
 
       {/* 2. In-Context Sub-Modal Legal Viewer */}
       {activeView !== 'none' && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in pointer-events-auto">
-          <div className="relative w-full max-w-2xl bg-white border border-zinc-200/50 rounded-[2.5rem] shadow-2xl backdrop-blur-xl animate-scale-up h-[80vh] flex flex-col overflow-hidden my-auto">
+        <div className="fixed inset-0 z-[120] flex items-start justify-center p-2 sm:p-4 md:p-6 bg-black/75 backdrop-blur-sm animate-fade-in pointer-events-auto overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white border border-zinc-200/50 rounded-2xl sm:rounded-[2.5rem] shadow-2xl backdrop-blur-xl animate-scale-up max-h-[85dvh] flex flex-col overflow-hidden my-auto">
             
             {/* Sticky Sub-Modal Header */}
-            <div className="flex items-center justify-between px-8 py-5 border-b border-zinc-200/60 shrink-0 bg-white relative z-10">
+            <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 border-b border-zinc-200/60 shrink-0 bg-white relative z-10">
               <div className="flex items-center space-x-2.5">
                 {activeView === 'terms' ? (
                   <>
@@ -329,7 +329,7 @@ export default function ConsentGuard() {
             </div>
 
             {/* Scrollable Sub-Modal Document Body */}
-            <div className="flex-1 overflow-y-auto px-8 py-6 w-full max-w-xl mx-auto text-xs sm:text-sm text-zinc-500 font-semibold leading-relaxed space-y-8 select-text no-scrollbar">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm text-zinc-500 font-semibold leading-relaxed space-y-8 select-text no-scrollbar">
               
               {activeView === 'terms' ? (
                 <>
@@ -554,14 +554,14 @@ export default function ConsentGuard() {
             </div>
 
             {/* Sticky Sub-Modal Footer */}
-            <div className="flex items-center justify-end px-8 py-4 border-t border-zinc-200/60 bg-zinc-50/50 shrink-0 rounded-b-[2.5rem]">
+            <div className="flex items-center justify-end px-4 sm:px-8 py-3 sm:py-4 border-t border-zinc-200/60 bg-zinc-50/50 shrink-0 rounded-b-2xl sm:rounded-b-[2.5rem]">
               <button
                 onClick={() => {
                   if (activeView === 'terms') setAcceptedTerms(true);
                   if (activeView === 'privacy') setAcceptedPrivacy(true);
                   setActiveView('none');
                 }}
-                className="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm hover:shadow hover:-translate-y-0.5 transition-all transform active:scale-98 focus:outline-none"
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm hover:shadow hover:-translate-y-0.5 transition-all transform active:scale-98 focus:outline-none min-w-0"
                 type="button"
               >
                 {activeView === 'terms' ? 'Read & Agree to Terms' : 'Read & Agree to Privacy'}

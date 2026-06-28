@@ -48,6 +48,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -165,6 +169,12 @@ img, video, iframe {
 pre, code, p, h1, h2, h3, h4, h5, h6 {
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+/* Safety net: any element rendering monospace prompt text as a display block */
+.font-mono {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Masonry grid column layout safety margins for narrow viewports */

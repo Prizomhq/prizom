@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-7xl mx-auto">
           
           {/* Mobile navigation ribbon */}
-          <div className="lg:hidden sticky top-[64px] bg-white/95 border-b border-zinc-200/80 backdrop-blur-md z-20 py-3.5 -mx-6 px-6 overflow-x-auto flex items-center space-x-3.5 no-scrollbar shadow-sm">
+          <div className="lg:hidden sticky top-[64px] bg-white/95 border-b border-zinc-200/80 backdrop-blur-md z-20 py-3.5 -mx-6 sm:-mx-8 px-6 sm:px-8 overflow-x-auto max-w-[100vw] flex items-center space-x-3.5 no-scrollbar shadow-sm">
             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest shrink-0">Sections:</span>
             {sections.map((sec) => (
               <button
