@@ -22,6 +22,7 @@ import PrizomLogo from '@/components/ui/PrizomLogo';
 import Avatar from '@/components/ui/Avatar';
 import PromptCard from '@/components/ui/PromptCard';
 import MasonryGrid from '@/components/ui/MasonryGrid';
+import { getAspectRatioStyle } from '@/lib/cloudinary-client';
 
 interface WhyCard {
   id: string;
