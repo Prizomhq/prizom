@@ -16,9 +16,9 @@ export function getOptimizedImageUrl(
     let transformation = 'f_auto,q_auto'; // Auto WebP format & auto quality compression
     
     if (type === 'avatar') {
-      transformation = 'c_thumb,g_face,w_100,h_100,f_auto,q_auto'; // Small face-cropped avatar (under 2KB)
+      transformation = 'c_fill,g_center,w_100,h_100,f_auto,q_auto'; // Small center-cropped avatar
     } else if (type === 'avatar-large') {
-      transformation = 'c_thumb,g_face,w_250,h_250,f_auto,q_auto'; // Large face-cropped avatar for headers
+      transformation = 'c_fill,g_center,w_400,h_400,f_auto,q_auto'; // Large center-cropped avatar for headers
     } else if (type === 'card') {
       transformation = 'c_limit,w_500,f_auto,q_auto'; // Masonry-grid card optimized preview width (saves ~65% bandwidth)
     } else if (type === 'detail') {

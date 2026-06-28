@@ -14,6 +14,7 @@ import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
 import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
+import Avatar from '@/components/ui/Avatar';
 
 interface PromptCardProps {
   id: string;
@@ -498,19 +499,12 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               onClick={(e) => e.stopPropagation()}
               className="flex items-center space-x-2 group/creator py-1 -my-1 min-w-0"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] flex items-center justify-center text-xs font-bold text-white shadow-xs group-hover/creator:shadow-sm transition-shadow overflow-hidden shrink-0">
-                {creator?.avatarUrl && !avatarError ? (
-                  <img 
-                    src={getOptimizedImageUrl(creator.avatarUrl, 'avatar')} 
-                    alt={creator?.username || 'Creator'} 
-                    className="w-full h-full object-cover" 
-                    onError={() => setAvatarError(true)}
-                    loading="lazy"
-                  />
-                ) : (
-                  (creator?.username || 'U').charAt(0).toUpperCase()
-                )}
-              </div>
+              <Avatar 
+                src={creator?.avatarUrl} 
+                username={creator?.username || 'U'} 
+                size="custom" 
+                className="w-7 h-7 text-xs group-hover/creator:shadow-sm transition-shadow border border-zinc-200/20" 
+              />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs text-zinc-900 font-bold group-hover/creator:text-[var(--color-neon-purple)] transition-colors leading-tight flex items-center gap-1 min-w-0">
                   <span className="truncate max-w-[80px] sm:max-w-[100px] shrink-0">

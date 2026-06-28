@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
+import Avatar from '@/components/ui/Avatar';
 
 interface WhyCard {
   id: string;
@@ -464,15 +465,11 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
                 {/* Creator Metadata (no fake counts/stats) */}
                 <div className="p-4 flex items-center justify-between border-t border-zinc-100/50 bg-[#fcfcfc]">
                   <div className="flex items-center space-x-2 min-w-0">
-                    <div className="h-6 w-6 rounded-full bg-zinc-200 overflow-hidden shrink-0">
-                      {prompt.profiles?.avatar_url ? (
-                        <img src={prompt.profiles.avatar_url} alt={prompt.profiles.username} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[10px] font-black bg-purple-100 text-purple-700 uppercase">
-                          {prompt.profiles?.username?.[0] || 'P'}
-                        </div>
-                      )}
-                    </div>
+                    <Avatar 
+                      src={prompt.profiles?.avatar_url} 
+                      username={prompt.profiles?.username || 'P'} 
+                      size="xs" 
+                    />
                     <span className="text-xs text-zinc-700 font-bold truncate">@{prompt.profiles?.username || 'creator'}</span>
                   </div>
                   {prompt.aspect_ratio && (

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
+import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -203,7 +204,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="p-4 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 flex items-center gap-3 animate-in fade-in duration-200">
             {adminUser.avatarUrl ? (
               <img 
-                src={adminUser.avatarUrl} 
+                src={getOptimizedImageUrl(adminUser.avatarUrl, 'avatar')} 
                 alt={adminUser.username || 'Admin'}
                 className="w-9 h-9 object-cover rounded-xl bg-zinc-800 animate-in zoom-in-95 duration-200"
               />

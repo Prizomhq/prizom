@@ -76,7 +76,7 @@ export async function updateProfile(formData: FormData) {
       const uploadOptions: any = {
         folder: 'prizom/avatars',
         transformation: [
-          { width: 250, height: 250, crop: 'thumb', gravity: 'face', quality: 'auto', fetch_format: 'auto' }
+          { width: 400, height: 400, crop: 'fill', gravity: 'center', quality: 'auto', fetch_format: 'auto' }
         ]
       };
 

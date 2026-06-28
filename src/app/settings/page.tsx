@@ -357,11 +357,12 @@ function SettingsContent() {
                       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
                         <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                           <div className="w-24 h-24 rounded-full bg-zinc-50 border-2 border-dashed border-zinc-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-[var(--color-neon-purple)]">
-                            {avatarUrl ? (
-                              <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                              <UserIcon className="w-8 h-8 text-zinc-400" />
-                            )}
+                            <Avatar 
+                              src={avatarUrl} 
+                              username={username || 'U'} 
+                              size="custom" 
+                              className="w-full h-full text-2xl" 
+                            />
                           </div>
                           <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <UploadCloud className="w-6 h-6 text-white" />
