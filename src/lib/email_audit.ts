@@ -15,7 +15,9 @@ const MOCK_TEMPLATE_VARIABLES: EmailTemplateData = {
   account_reinstated: { username: 'TestUserA' },
   contact_reply: { replyText: 'Thank you for reaching out. We have updated your portal clearance.', originalMessage: 'hey can u activate my portel for moderatuon' },
   admin_notification: { subject: 'Database load warning', alertText: 'High connection volume on pooler' },
-  account_warning: { username: 'TestUserA', reason: 'Suspicious guest copy velocity' }
+  account_warning: { username: 'TestUserA', reason: 'Suspicious guest copy velocity' },
+  account_deactivated: { username: 'TestUserA' },
+  account_deletion_requested: { username: 'TestUserA', deletionDate: '2026-07-13' }
 };
 
 export interface EmailAuditReport {

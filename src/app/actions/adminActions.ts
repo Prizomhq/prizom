@@ -776,7 +776,7 @@ export async function adminCancelDeletionAction(userId: string) {
   return { success: true };
 }
 
-export async function adminForceDeletionAction(userId: string) {
+export async function adminForceDeletionAction(userId: string): Promise<{ success: boolean; error?: string }> {
   await assertAdminOrAbove();
   
   try {
@@ -788,7 +788,7 @@ export async function adminForceDeletionAction(userId: string) {
   }
 }
 
-export async function safePermanentDelete(userId: string) {
+export async function safePermanentDelete(userId: string): Promise<{ success: boolean; error?: string }> {
   const adminSupabase = await createAdminClient();
 
   // 1. Fetch user's profile and prompts for Cloudinary media cleanups

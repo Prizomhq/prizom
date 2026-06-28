@@ -171,7 +171,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
   await recordPromptViewAction(prompt.id);
 
   // Fetch downstream remixes of this prompt using parent_prompt_id to survive deletion
-  let remixesQuery = supabase
+  const remixesQuery = supabase
     .from('prompts')
     .select('*, profiles!user_id(username, full_name, avatar_url, role, badges)')
     .eq('parent_prompt_id', prompt.id)
@@ -423,7 +423,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                     initialIsLiked={isLiked}
                     initialIsSaved={isSaved}
                     isLoggedIn={isLoggedIn}
-                    isOwner={user && user.id === prompt.user_id}
+                    isOwner={!!(user && user.id === prompt.user_id)}
                   />
                 </div>
               </div>
