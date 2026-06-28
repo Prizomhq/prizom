@@ -8,7 +8,7 @@ import { checkInteractionStatus, recordPromptViewAction } from '@/app/actions/in
 import FollowButton from '@/components/ui/FollowButton';
 import { checkIsFollowing } from '@/app/actions/follows';
 import Avatar from '@/components/ui/Avatar';
-import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
+import { getOptimizedImageUrl, getAspectRatioStyle } from '@/lib/cloudinary-client';
 import { getPublicCMS } from '@/app/actions/adminActions';
 import RelatedPromptsFeed from '@/components/ui/RelatedPromptsFeed';
 import { Metadata } from 'next';
@@ -282,9 +282,24 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
         originalRootStatus = 'deleted';
       }
     }
-  }
+  const ratioValue = (() => {
+    if (!prompt.aspect_ratio) return 1.0;
+    const parts = prompt.aspect_ratio.split(':');
+    if (parts.length === 2) {
+      const w = parseFloat(parts[0]);
+      const h = parseFloat(parts[1]);
+      if (!isNaN(w) && !isNaN(h) && h !== 0) return w / h;
+    }
+    return 1.0;
+  })();
 
+  const ratioStyle = getAspectRatioStyle(prompt.aspect_ratio);
 
+  const imageContainerStyle = prompt.image_url ? {
+    aspectRatio: ratioStyle,
+    maxWidth: `calc(70vh * ${ratioValue})`,
+    maxHeight: '70vh'
+  } : undefined;
 
   return (
     <div className="min-h-screen pb-6 md:pb-24 pt-8 bg-[#fcfcfc] relative overflow-hidden">
@@ -303,13 +318,16 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           
           {/* Left Column: Image & Details (Sticky Left) */}
           <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-24 h-fit">
-            <div className="rounded-[2.5rem] overflow-hidden border border-zinc-200/60 bg-white/50 backdrop-blur-xl shadow-xl shadow-zinc-200/20 p-2 relative group">
-              <div className="rounded-[2rem] overflow-hidden relative bg-zinc-100/50 w-full">
+            <div 
+              className="rounded-[2.5rem] overflow-hidden border border-zinc-200/60 bg-white/50 backdrop-blur-xl shadow-xl shadow-zinc-200/20 p-2 relative group mx-auto w-full"
+              style={imageContainerStyle}
+            >
+              <div className="rounded-[2rem] overflow-hidden relative bg-zinc-100/50 w-full h-full">
                 {prompt.image_url ? (
                   <img 
                     src={getOptimizedImageUrl(prompt.image_url, 'detail')} 
                     alt={prompt.title} 
-                    className="w-full h-auto max-h-[70vh] object-contain rounded-2xl md:rounded-[2rem] mx-auto block bg-zinc-950/5"
+                    className="w-full h-full object-cover rounded-[2rem]"
                     fetchPriority="high"
                     loading="eager"
                   />
