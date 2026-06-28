@@ -282,6 +282,8 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
         originalRootStatus = 'deleted';
       }
     }
+  }
+
   const ratioValue = (() => {
     if (!prompt.aspect_ratio) return 1.0;
     const parts = prompt.aspect_ratio.split(':');
