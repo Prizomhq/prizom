@@ -360,6 +360,8 @@ function CreateContent() {
 
     try {
       let imageUrl = null;
+      let imageWidth = null;
+      let imageHeight = null;
 
       if (file) {
         setUploadProgress(20);
@@ -381,6 +383,8 @@ function CreateContent() {
         }
 
         imageUrl = uploadResult.url;
+        imageWidth = uploadResult.width;
+        imageHeight = uploadResult.height;
       }
 
       setUploadProgress(85);
@@ -418,6 +422,8 @@ function CreateContent() {
         category: finalCategory,
         tags,
         image_url: imageUrl,
+        image_width: imageWidth,
+        image_height: imageHeight,
         aspect_ratio: aspectRatio,
         remix_of: remixId || null,
         remix_notes: remixId ? remixNotes : null,

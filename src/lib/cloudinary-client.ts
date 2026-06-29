@@ -58,3 +58,22 @@ export function getAspectRatioStyle(ratio: string | null | undefined): string {
   
   return '1/1';
 }
+
+/**
+ * Calculates the true rendering aspect ratio based on actual image dimensions.
+ * Falls back to parsing the user-selected aspect ratio if dimensions are not available.
+ */
+export function getTrueAspectRatioStyle(
+  selectedRatio: string | null | undefined,
+  width: number | null | undefined,
+  height: number | null | undefined
+): string {
+  if (width && height && height !== 0) {
+    const val = width / height;
+    if (val > 2.0) return '2/1';
+    if (val < 0.5) return '1/2';
+    return `${width}/${height}`;
+  }
+  return getAspectRatioStyle(selectedRatio);
+}
+

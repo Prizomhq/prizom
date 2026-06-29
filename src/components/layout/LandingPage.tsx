@@ -471,6 +471,8 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
                 category={prompt.category || 'General'}
                 remixOf={prompt.remix_of}
                 remixCount={prompt.remix_count || 0}
+                imageWidth={prompt.image_width}
+                imageHeight={prompt.image_height}
               />
             ))}
           </MasonryGrid>

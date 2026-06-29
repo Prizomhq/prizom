@@ -156,6 +156,8 @@ export default function RelatedPromptsFeed({
             remixCount={prompt.remix_count}
             aspectRatio={prompt.aspect_ratio}
             category={prompt.category}
+            imageWidth={prompt.image_width}
+            imageHeight={prompt.image_height}
           />
         ))}
       </MasonryGrid>

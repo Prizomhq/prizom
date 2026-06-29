@@ -12,7 +12,7 @@ import SaveModal from '@/components/ui/SaveModal';
 import UnsaveModal from '@/components/ui/UnsaveModal';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
-import { getOptimizedImageUrl, getAspectRatioStyle } from '@/lib/cloudinary-client';
+import { getOptimizedImageUrl, getAspectRatioStyle, getTrueAspectRatioStyle } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
 import Avatar from '@/components/ui/Avatar';
 
@@ -36,6 +36,8 @@ interface PromptCardProps {
   remixCount?: number;
   aspectRatio?: string;
   category?: string;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
 }
 
 function formatStatsNumber(num: number): string {
@@ -49,7 +51,7 @@ function formatStatsNumber(num: number): string {
   return num.toString();
 }
 
-export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, description, remixOf, remixCount, aspectRatio = '1:1', category = 'General' }: PromptCardProps) {
+export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, description, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight }: PromptCardProps) {
   const router = useRouter();
   
   const supabase = createClient();
@@ -382,7 +384,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
       >
         <div 
           className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden z-0 transition-all duration-300"
-          style={{ aspectRatio: getAspectRatioStyle(aspectRatio) }}
+          style={{ aspectRatio: getTrueAspectRatioStyle(aspectRatio, imageWidth, imageHeight) }}
         >
           {/* Remix Badges Overlay */}
           {remixOf && (

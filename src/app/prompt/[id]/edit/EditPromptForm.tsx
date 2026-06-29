@@ -295,10 +295,14 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
 
     try {
       let finalImageUrl = existingImageUrl;
+      let finalImageWidth = prompt.image_width || null;
+      let finalImageHeight = prompt.image_height || null;
 
       // Case A: Image was removed
       if (removeExistingImage && !file) {
         finalImageUrl = null;
+        finalImageWidth = null;
+        finalImageHeight = null;
       }
 
       // Case B: A new image was uploaded
@@ -321,6 +325,8 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
         }
 
         finalImageUrl = uploadResult.url;
+        finalImageWidth = uploadResult.width;
+        finalImageHeight = uploadResult.height;
       }
 
       setUploadProgress(80);
@@ -359,6 +365,8 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
         category: finalCategory,
         tags,
         image_url: finalImageUrl,
+        image_width: finalImageWidth,
+        image_height: finalImageHeight,
         aspect_ratio: aspectRatio,
         is_hidden: isHidden
       });

@@ -284,18 +284,36 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
     }
   }
 
-  const ratioValue = (() => {
-    if (!prompt.aspect_ratio) return 1.0;
-    const parts = prompt.aspect_ratio.split(':');
-    if (parts.length === 2) {
-      const w = parseFloat(parts[0]);
-      const h = parseFloat(parts[1]);
-      if (!isNaN(w) && !isNaN(h) && h !== 0) return w / h;
+  const { ratioValue, ratioStyle } = (() => {
+    if (prompt.image_width && prompt.image_height) {
+      const w = prompt.image_width;
+      const h = prompt.image_height;
+      const val = w / h;
+      const clampedVal = Math.max(0.5, Math.min(2.0, val));
+      let style = `${w}/${h}`;
+      if (val > 2.0) style = '2/1';
+      if (val < 0.5) style = '1/2';
+      return { ratioValue: clampedVal, ratioStyle: style };
     }
-    return 1.0;
+    
+    // Fallback to selected aspect ratio
+    let rVal = 1.0;
+    if (prompt.aspect_ratio) {
+      const parts = prompt.aspect_ratio.split(':');
+      if (parts.length === 2) {
+        const w = parseFloat(parts[0]);
+        const h = parseFloat(parts[1]);
+        if (!isNaN(w) && !isNaN(h) && h !== 0) rVal = w / h;
+      }
+    }
+    const style = getAspectRatioStyle(prompt.aspect_ratio);
+    const val = rVal;
+    const clampedVal = Math.max(0.5, Math.min(2.0, val));
+    let clampedStyle = style;
+    if (val > 2.0) clampedStyle = '2/1';
+    if (val < 0.5) clampedStyle = '1/2';
+    return { ratioValue: clampedVal, ratioStyle: clampedStyle };
   })();
-
-  const ratioStyle = getAspectRatioStyle(prompt.aspect_ratio);
 
   const imageContainerStyle = prompt.image_url ? {
     aspectRatio: ratioStyle,

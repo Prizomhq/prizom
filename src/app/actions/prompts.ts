@@ -15,6 +15,8 @@ export async function createPromptAction(promptData: {
   category: string;
   tags?: string[];
   image_url?: string;
+  image_width?: number | null;
+  image_height?: number | null;
   aspect_ratio: string;
   remix_of?: string | null;
   remix_notes?: string | null;
@@ -89,6 +91,8 @@ export async function createPromptAction(promptData: {
           category: promptData.category,
           tags: promptData.tags || [],
           image_url: promptData.image_url || null,
+          image_width: promptData.image_width || null,
+          image_height: promptData.image_height || null,
           aspect_ratio: promptData.aspect_ratio || '1:1',
           remix_of: promptData.remix_of || null,
           remix_notes: promptData.remix_notes || null,
@@ -154,6 +158,8 @@ export async function updatePromptAction(
     category: string;
     tags?: string[];
     image_url?: string | null;
+    image_width?: number | null;
+    image_height?: number | null;
     aspect_ratio: string;
     is_hidden: boolean;
   }
@@ -205,6 +211,8 @@ export async function updatePromptAction(
         category: promptData.category,
         tags: promptData.tags || [],
         image_url: promptData.image_url || null,
+        image_width: promptData.image_width || null,
+        image_height: promptData.image_height || null,
         aspect_ratio: promptData.aspect_ratio || '1:1',
         is_hidden: promptData.is_hidden,
         updated_at: new Date().toISOString()
