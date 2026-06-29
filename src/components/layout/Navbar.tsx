@@ -97,12 +97,16 @@ export default function Navbar() {
     if (pathname?.startsWith('/admin')) return;
 
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
-      if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (data) setProfile(data);
+        if (user) {
+          const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+          if (data) setProfile(data);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch user or profile on mount:', err);
       }
     };
     getUser();
@@ -111,7 +115,8 @@ export default function Navbar() {
       setUser(session?.user ?? null);
       if (session?.user) {
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
-          .then(({ data }) => { if (data) setProfile(data); });
+          .then(({ data }) => { if (data) setProfile(data); })
+          .catch(err => console.warn('Failed to fetch profile in onAuthStateChange:', err));
       } else {
         setProfile(null);
       }
@@ -226,7 +231,8 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center space-x-4 z-20 shrink-0">
               {user ? (
                 <>
-                  {profile && ['super_admin', 'admin', 'moderator'].includes(profile.role) && (
+                  {((profile && ['super_admin', 'admin', 'moderator'].includes(profile.role)) || 
+                    (user && ['super_admin', 'admin', 'moderator'].includes(user.user_metadata?.role))) && (
                     <Link 
                       href="/admin" 
                       className="flex items-center space-x-1.5 px-3 py-2 lg:px-4 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-wider transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] shadow-sm group"
@@ -379,7 +385,8 @@ export default function Navbar() {
                       Collections
                     </Link>
 
-                    {profile && ['super_admin', 'admin', 'moderator'].includes(profile.role) && (
+                    {((profile && ['super_admin', 'admin', 'moderator'].includes(profile.role)) || 
+                      (user && ['super_admin', 'admin', 'moderator'].includes(user.user_metadata?.role))) && (
                       <Link 
                         href="/admin" 
                         onClick={() => setIsOpen(false)} 

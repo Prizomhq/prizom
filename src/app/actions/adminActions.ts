@@ -81,7 +81,6 @@ export async function authenticateAdmin(email: string) {
 }
 
 // Post-auth helper to synchronize roles on profile during login
-// Post-auth helper to synchronize roles on profile during login
 export async function syncAdminRole() {
   const userSupabase = await createClient();
   const { data: { user } } = await userSupabase.auth.getUser();
@@ -107,7 +106,11 @@ export async function syncAdminRole() {
         .from('profiles')
         .update({ role: 'user' })
         .eq('id', userId);
+      
       if (!error) {
+        await supabase.auth.admin.updateUserById(userId, {
+          user_metadata: { role: 'user' }
+        });
         console.log(`[AUTO-SYNC DEMOTE] Demoted user ${email} back to standard 'user' role.`);
       }
       return { success: true, role: 'user' };
@@ -115,7 +118,7 @@ export async function syncAdminRole() {
     return { success: false, role: 'user' };
   }
 
-  // Set role in profiles table
+  // Set role in profiles table and auth metadata
   const { error } = await supabase
     .from('profiles')
     .update({ role: adminConfig.role })
@@ -126,6 +129,10 @@ export async function syncAdminRole() {
     const adminConfig = await store.isEmailAdmin(user.email!) || { role: 'user' };
     return { success: true, role: adminConfig.role };
   }
+
+  await supabase.auth.admin.updateUserById(userId, {
+    user_metadata: { role: adminConfig.role }
+  });
 
   return { success: true, role: adminConfig.role };
 }
@@ -2136,6 +2143,9 @@ export async function removeAdminUserAction(email: string) {
 
   if (userToDemote) {
     await supabase.from('profiles').update({ role: 'user' }).eq('id', userToDemote.id);
+    await supabase.auth.admin.updateUserById(userToDemote.id, {
+      user_metadata: { role: 'user' }
+    });
     await triggerNotification(userToDemote.id, null, 'moderation', null, `Your administrative privileges have been revoked.`);
   }
 
@@ -3015,6 +3025,9 @@ export async function updateAdminUserRole(email: string, newRole: 'super_admin' 
 
   if (userToUpdate) {
     await supabase.from('profiles').update({ role: newRole }).eq('id', userToUpdate.id);
+    await supabase.auth.admin.updateUserById(userToUpdate.id, {
+      user_metadata: { role: newRole }
+    });
     await triggerNotification(userToUpdate.id, null, 'moderation', null, `Your team role has been updated to ${newRole}.`);
   }
 
