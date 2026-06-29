@@ -268,7 +268,7 @@ async function runProductionAudit() {
       const { data: runs, error: runsErr } = await supabase
         .from('cron_runs')
         .select('id, status, error_message')
-        .eq('job_name', 'maintenance_cleanup')
+        .eq('job_name', 'moderation_cleanup')
         .gte('started_at', twoMinutesAgo)
         .order('started_at', { ascending: false });
 
