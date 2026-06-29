@@ -199,7 +199,7 @@ export async function saveOnboardingInterestsAction(
   try {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('badges')
+      .select('badges, interests')
       .eq('id', user.id)
       .single();
 
@@ -212,14 +212,15 @@ export async function saveOnboardingInterestsAction(
       ? currentBadges
       : [...currentBadges, 'onboarded'];
 
-    // Save the full weight-based interests object — compatible with recommendations engine
+    // Safely merge categories and tools into existing user interests
+    const currentInterests = (profile?.interests as Record<string, any>) || {};
     const interests = {
       categories: categoryWeights,
       tools: toolWeights,
-      aspectRatios: {},
-      tags: {},
-      creators: {},
-      searches: []
+      aspectRatios: currentInterests.aspectRatios || {},
+      tags: currentInterests.tags || {},
+      creators: currentInterests.creators || {},
+      searches: currentInterests.searches || []
     };
 
     const { error: updateError } = await supabase

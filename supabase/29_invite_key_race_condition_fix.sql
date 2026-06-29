@@ -12,13 +12,18 @@ BEGIN
   invite_key_val := new.raw_user_meta_data->>'invite_key';
   
   IF invite_key_val IS NOT NULL THEN
-    -- Increment uses atomically in a single statement (acquires row-level lock)
+    -- Increment uses atomically in a single statement (acquires row-level lock) - case insensitive comparison
     UPDATE public.invite_keys 
     SET uses = uses + 1 
-    WHERE key = invite_key_val AND is_active = true AND uses < max_uses;
+    WHERE LOWER(key) = LOWER(invite_key_val) AND is_active = true AND uses < max_uses;
     
     -- FOUND evaluates to true if the row was successfully matched and updated
     key_exists := FOUND;
+  END IF;
+
+  -- Block signup if key is not found or invalid
+  IF invite_key_val IS NULL OR NOT key_exists THEN
+    RAISE EXCEPTION 'Registration failed: A valid and active invite key is required.';
   END IF;
 
   INSERT INTO public.profiles (id, username, avatar_url, is_approved)

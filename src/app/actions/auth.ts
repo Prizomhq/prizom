@@ -40,7 +40,7 @@ export async function sendPasswordResetEmail(email: string) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
   });
 
   if (error) {
@@ -52,6 +52,12 @@ export async function sendPasswordResetEmail(email: string) {
 }
 
 export async function updateSecurePassword(password: string) {
+  // Validate password strength server-side (min 8 chars, uppercase, lowercase, number, special char)
+  const isStrong = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password);
+  if (!isStrong) {
+    return { success: false, error: 'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters.' };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.updateUser({
@@ -85,26 +91,32 @@ export async function signUpAction(
   turnstileToken: string,
   inviteKey: string
 ) {
-  // 1. Rate Limiting check
+  // 1. Validate password strength server-side (min 8 chars, uppercase, lowercase, number, special char)
+  const isStrong = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password);
+  if (!isStrong) {
+    return { success: false, error: 'Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters.' };
+  }
+
+  // 2. Rate Limiting check
   const ipHash = await getClientIpHash();
   const limitCheck = await rateLimit(ipHash, 'signup', 5, 5 * 60 * 1000);
   if (!limitCheck.success) {
     return { success: false, error: 'Too many signup attempts. Please try again in a few minutes.' };
   }
 
-  // 2. Turnstile CAPTCHA Token validation
+  // 3. Turnstile CAPTCHA Token validation
   const captchaCheck = await verifyTurnstileToken(turnstileToken);
   if (!captchaCheck.success) {
     return { success: false, error: captchaCheck.error || 'CAPTCHA validation failed.' };
   }
 
-  // 3. Username availability check
+  // 4. Username availability check
   const availability = await checkUsernameAvailability(username);
   if (!availability.available) {
     return { success: false, error: availability.error || 'Username is not available.' };
   }
 
-  // 4. Invite Key validation
+  // 5. Invite Key validation
   if (!inviteKey || !inviteKey.trim()) {
     return { success: false, error: 'Invite key is required.' };
   }
@@ -113,7 +125,7 @@ export async function signUpAction(
   const { data: keyData, error: keyError } = await adminSupabase
     .from('invite_keys')
     .select('*')
-    .eq('key', inviteKey.trim())
+    .ilike('key', inviteKey.trim())
     .eq('is_active', true)
     .maybeSingle();
 

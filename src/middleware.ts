@@ -57,6 +57,15 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Helper to copy cookies from supabaseResponse to any redirect/rewrite response
+  // to avoid dropping refreshed session cookies.
+  const copyCookies = (fromRes: NextResponse, toRes: NextResponse) => {
+    fromRes.cookies.getAll().forEach(c => {
+      toRes.cookies.set(c.name, c.value, c);
+    });
+    return toRes;
+  };
+
   let userRole = 'user';
   let isDeactivated = false;
   let isPendingDeletion = false;
@@ -85,13 +94,13 @@ export async function middleware(request: NextRequest) {
       if (request.nextUrl.pathname !== '/restore-account') {
         const url = request.nextUrl.clone();
         url.pathname = '/restore-account';
-        return NextResponse.redirect(url);
+        return copyCookies(supabaseResponse, NextResponse.redirect(url));
       }
     } else if (isDeactivated) {
       if (request.nextUrl.pathname !== '/reactivate-account') {
         const url = request.nextUrl.clone();
         url.pathname = '/reactivate-account';
-        return NextResponse.redirect(url);
+        return copyCookies(supabaseResponse, NextResponse.redirect(url));
       }
     }
   }
@@ -100,12 +109,12 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/reactivate-account' && (!user || !isDeactivated)) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
-    return NextResponse.redirect(url);
+    return copyCookies(supabaseResponse, NextResponse.redirect(url));
   }
   if (request.nextUrl.pathname === '/restore-account' && (!user || !isPendingDeletion)) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
-    return NextResponse.redirect(url);
+    return copyCookies(supabaseResponse, NextResponse.redirect(url));
   }
 
   // Suspended or Banned routing checks
@@ -121,13 +130,13 @@ export async function middleware(request: NextRequest) {
       if (!isSuspendedPage && !isAppealPage && !isAuthApi) {
         const url = request.nextUrl.clone();
         url.pathname = '/suspended';
-        return NextResponse.redirect(url);
+        return copyCookies(supabaseResponse, NextResponse.redirect(url));
       }
     } else if (userRole === 'permanently_banned') {
       if (!isSuspendedPage && !isAuthApi) {
         const url = request.nextUrl.clone();
         url.pathname = '/suspended';
-        return NextResponse.redirect(url);
+        return copyCookies(supabaseResponse, NextResponse.redirect(url));
       }
     }
   }
@@ -142,24 +151,25 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    return copyCookies(supabaseResponse, NextResponse.redirect(url))
   }
 
   // Admin routes protection (both pages and APIs under /admin or /api/admin)
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') ||
+  // Exclude /admin/login from the protection rewrite check to allow unauthenticated access
+  const isAdminRoute = (request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') ||
                        request.nextUrl.pathname.startsWith('/api/admin');
 
   if (isAdminRoute) {
     if (!user) {
       // Silently rewrite to /not-found to completely obfuscate route existence (returns 404)
-      return NextResponse.rewrite(new URL('/not-found', request.url));
+      return copyCookies(supabaseResponse, NextResponse.rewrite(new URL('/not-found', request.url)));
     }
 
     const isAdmin = ['super_admin', 'admin', 'moderator'].includes(userRole);
 
     if (!isAdmin) {
       // Silently rewrite to /not-found to completely obfuscate route existence (returns 404)
-      return NextResponse.rewrite(new URL('/not-found', request.url));
+      return copyCookies(supabaseResponse, NextResponse.rewrite(new URL('/not-found', request.url)));
     }
 
     // Strict sub-route permissions checks
@@ -168,14 +178,14 @@ export async function middleware(request: NextRequest) {
     // 1. Super admin only routes: Team configurations
     const isTeamSettings = path === '/admin/content' && request.nextUrl.searchParams.get('tab') === 'team';
     if (isTeamSettings && userRole !== 'super_admin') {
-      return NextResponse.rewrite(new URL('/not-found', request.url));
+      return copyCookies(supabaseResponse, NextResponse.rewrite(new URL('/not-found', request.url)));
     }
 
     // 2. Admin & Super Admin only routes: Users and general content management
     const isUsersManagement = path === '/admin/users';
     const isContentManagement = path === '/admin/content' && !isTeamSettings;
     if ((isUsersManagement || isContentManagement) && !['super_admin', 'admin'].includes(userRole)) {
-      return NextResponse.rewrite(new URL('/not-found', request.url));
+      return copyCookies(supabaseResponse, NextResponse.rewrite(new URL('/not-found', request.url)));
     }
   }
 

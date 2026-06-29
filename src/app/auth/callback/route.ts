@@ -23,7 +23,11 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/admin`);
         }
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      let safeNext = '/';
+      if (next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')) {
+        safeNext = next;
+      }
+      return NextResponse.redirect(`${origin}${safeNext}`);
     }
   }
 
