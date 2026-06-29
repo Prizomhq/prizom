@@ -10,7 +10,7 @@ import CookieBanner from "@/components/shared/CookieBanner";
 import MainLayoutWrapper from "@/components/layout/MainLayoutWrapper";
 import GuestTracker from "@/components/analytics/GuestTracker";
 import { validateEnvironment } from "@/lib/environment_audit";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import GoogleAnalyticsWrapper from "@/components/analytics/GoogleAnalyticsWrapper";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -81,7 +81,7 @@ export default function RootLayout({
             <ConsentGuard />
             <OnboardingWizard />
             <CookieBanner />
-            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXX"} />
+            <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXX"} />
           </>
         )}
       </body>
