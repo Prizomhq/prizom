@@ -3,9 +3,13 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
   const urlObj = new URL(request.url);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
     ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '') 
     : `${urlObj.protocol}//${urlObj.host}`;
+
+  if (siteUrl.includes('://prizom.in')) {
+    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
+  }
 
   const supabase = await createAdminClient();
 

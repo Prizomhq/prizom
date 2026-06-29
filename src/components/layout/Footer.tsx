@@ -28,9 +28,9 @@ export default function Footer() {
   }
 
   const aboutText = settings?.about_text || "The creative home for next-generation AI image prompts and collaborative remix culture. Evolve your creative workflows together.";
-  const twitterLink = settings?.twitter_link || "https://twitter.com";
-  const instagramLink = settings?.instagram_link || "https://instagram.com";
-  const youtubeLink = settings?.youtube_link || "https://youtube";
+  const twitterLink = settings?.twitter_link || "https://x.com/prizomHQ";
+  const instagramLink = settings?.instagram_link || "https://instagram.com/prizomHQ";
+  const youtubeLink = settings?.youtube_link || "https://youtube.com/prizomhq";
   
   const legalLinks = settings?.legal_links || [
     { label: "Terms of Service", url: "/terms" },

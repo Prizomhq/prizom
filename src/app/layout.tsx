@@ -24,9 +24,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prizom.in"),
+  metadataBase: new URL(
+    (process.env.NEXT_PUBLIC_SITE_URL || "https://www.prizom.in").replace("://prizom.in", "://www.prizom.in")
+  ),
   title: "Prizom | Collaborative AI Prompt Registry",
   description: "Discover, save, remix, and showcase next-generation AI prompts in a collaborative registry.",
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({
@@ -82,6 +87,23 @@ export default function RootLayout({
             <OnboardingWizard />
             <CookieBanner />
             <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXX"} />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Organization",
+                  "name": "Prizom",
+                  "url": "https://www.prizom.in",
+                  "logo": "https://www.prizom.in/logo.png",
+                  "sameAs": [
+                    "https://x.com/prizomHQ",
+                    "https://instagram.com/prizomHQ",
+                    "https://youtube.com/prizomhq"
+                  ]
+                })
+              }}
+            />
           </>
         )}
       </body>
