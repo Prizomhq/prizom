@@ -1,0 +1,16 @@
+{
+  "name": "Prizom",
+  "short_name": "Prizom",
+  "description": "Discover, save, remix, and showcase next-generation AI prompts in a collaborative registry.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
