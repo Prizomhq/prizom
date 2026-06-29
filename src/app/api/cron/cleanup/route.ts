@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const { data: runLog, error: logError } = await supabaseAdmin
       .from('cron_runs')
       .insert({
-        job_name: 'maintenance_cleanup',
+        job_name: 'moderation_cleanup',
         status: 'running',
         started_at: new Date().toISOString()
       })
