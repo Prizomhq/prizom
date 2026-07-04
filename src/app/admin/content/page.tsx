@@ -325,6 +325,7 @@ function AdminContentPageInner() {
 
   useEffect(() => {
     if (tab && ['homepage', 'developer', 'footer', 'team', 'logs', 'categories', 'explore', 'about'].includes(tab)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(tab as any);
     }
   }, [tab]);
@@ -1997,7 +1998,7 @@ function AdminContentPageInner() {
                           <td colSpan={4} className="px-6 py-6 border-t border-zinc-800">
                             <div className="space-y-6 text-left">
                               <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                                Category Prompt Assignment: "{cat.name}"
+                                Category Prompt Assignment: &quot;{cat.name}&quot;
                               </h4>
                               <form onSubmit={handleSearchAssignPrompts} className="flex gap-2.5 max-w-md">
                                 <input
@@ -2562,7 +2563,7 @@ function AdminContentPageInner() {
                             <td colSpan={5} className="px-6 py-6 border-t border-zinc-800">
                               <div className="space-y-6">
                                 <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                                  Curation Workspace: Add Prompts to "{sec.title}"
+                                  Curation Workspace: Add Prompts to &quot;{sec.title}&quot;
                                 </h4>
                                 <form onSubmit={handleSearchPrompts} className="flex gap-2.5 max-w-md">
                                   <input
@@ -2804,7 +2805,7 @@ function AdminContentPageInner() {
           <div className="bg-[#121215] border border-zinc-800 p-6 rounded-[2rem] w-full max-w-md space-y-4">
             <h3 className="text-sm font-black text-white uppercase tracking-wider">Merge Categories</h3>
             <p className="text-[11px] text-zinc-400 font-bold leading-normal">
-              Select the target category to merge <span className="text-indigo-400">"{categories.find(c => c.id === mergingCatSourceId)?.name}"</span> into:
+              Select the target category to merge <span className="text-indigo-400">&quot;{categories.find(c => c.id === mergingCatSourceId)?.name}&quot;</span> into:
             </p>
             <div>
               <label className="block text-[9px] font-black uppercase tracking-wider text-zinc-500 mb-2">Target Category</label>
@@ -2880,7 +2881,7 @@ function AdminContentPageInner() {
           <div className="bg-[#121215] border border-zinc-800 p-6 rounded-[2rem] w-full max-w-md space-y-4">
             <h3 className="text-sm font-black text-white uppercase tracking-wider">Merge AI Tools</h3>
             <p className="text-[11px] text-zinc-400 font-bold leading-normal">
-              Select the target AI Tool to merge <span className="text-indigo-400">"{aiTools.find(t => t.id === mergingToolSourceId)?.name}"</span> into:
+              Select the target AI Tool to merge <span className="text-indigo-400">&quot;{aiTools.find(t => t.id === mergingToolSourceId)?.name}&quot;</span> into:
             </p>
             <div>
               <label className="block text-[9px] font-black uppercase tracking-wider text-zinc-555 mb-2">Target AI Tool</label>

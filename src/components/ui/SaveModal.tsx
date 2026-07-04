@@ -2,6 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
+
+interface CollectionItem {
+  id: string;
+  name: string;
+  isSaved?: boolean;
+  is_private?: boolean;
+  saved_prompts?: {
+    prompt_id?: string;
+    prompts?: {
+      image_url?: string | null;
+    } | null;
+  }[];
+}
 import { X, Bookmark, Plus, Loader2, Image as ImageIcon, Sparkles, FolderPlus } from 'lucide-react';
 import { getUserCollections, createCollection, togglePromptInCollection } from '@/app/actions/interactions';
 
@@ -13,7 +27,7 @@ interface SaveModalProps {
 }
 
 export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: SaveModalProps) {
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<CollectionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   
@@ -26,6 +40,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
 
   // Manage body scroll and portal mounting
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -132,7 +147,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
             </div>
             <h2 className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">Create your first collection</h2>
             <p className="text-zinc-500 font-medium mb-8">
-              Organize your favorite prompts by creating a collection. e.g. "Cinematic Prompts"
+              Organize your favorite prompts by creating a collection. e.g. &quot;Cinematic Prompts&quot;
             </p>
 
             <form onSubmit={handleCreate} className="space-y-4 text-left">
@@ -251,8 +266,8 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
               <div className="space-y-2">
                 {collections.map((col) => {
                   const promptCount = col.saved_prompts?.length || 0;
-                  const coverImage = promptCount > 0 && col.saved_prompts[0]?.prompts?.image_url 
-                    ? col.saved_prompts[0].prompts.image_url 
+                  const coverImage = promptCount > 0 && col.saved_prompts?.[0]?.prompts?.image_url 
+                    ? col.saved_prompts?.[0]?.prompts?.image_url 
                     : null;
 
                   return (
@@ -261,12 +276,12 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
                       className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
                         col.isSaved ? 'bg-[var(--color-neon-purple)]/5 border-[var(--color-neon-purple)]/20 hover:bg-[var(--color-neon-purple)]/10' : 'bg-transparent border-transparent hover:bg-zinc-50'
                       }`}
-                      onClick={() => handleToggle(col.id, col.isSaved)}
+                      onClick={() => handleToggle(col.id, col.isSaved ?? false)}
                     >
                       <div className="flex items-center space-x-4 overflow-hidden px-2">
                         <div className="w-14 h-14 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0 overflow-hidden relative shadow-sm border border-zinc-200/50">
                           {coverImage ? (
-                            <img src={coverImage} alt={col.name} className="w-full h-full object-cover" />
+                            <Image src={coverImage} alt={col.name} fill className="object-cover" unoptimized />
                           ) : (
                             <ImageIcon className="w-5 h-5 text-zinc-300" />
                           )}

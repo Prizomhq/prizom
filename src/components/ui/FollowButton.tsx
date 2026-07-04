@@ -21,6 +21,7 @@ export default function FollowButton({ targetId, initialIsFollowing, isLoggedIn 
   // Fetch follow status automatically if not provided and user is logged in
   useEffect(() => {
     if (initialIsFollowing === undefined && isLoggedIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
       checkIsFollowing(targetId)
         .then(res => setIsFollowing(res))

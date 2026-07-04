@@ -110,7 +110,7 @@ export default function RestoreAccountPage() {
           )}
 
           <p className="text-sm text-zinc-500 leading-relaxed text-center font-semibold">
-            You can restore your profile, prompts, and dashboard immediately. Click "Cancel Deletion" to keep your account.
+            You can restore your profile, prompts, and dashboard immediately. Click &quot;Cancel Deletion&quot; to keep your account.
           </p>
 
           <div className="flex flex-col gap-3">

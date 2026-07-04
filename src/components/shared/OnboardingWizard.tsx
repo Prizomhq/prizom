@@ -182,7 +182,7 @@ export default function OnboardingWizard() {
           {step === 1 ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h3 className="text-2xl font-black text-zinc-900 tracking-tight mb-2">Which AI models do you use?</h3>
-              <p className="text-sm text-zinc-500 font-medium mb-6">Select the AI tools you write image prompts for. We'll tailor your feed accordingly.</p>
+              <p className="text-sm text-zinc-500 font-medium mb-6">Select the AI tools you write image prompts for. We&apos;ll tailor your feed accordingly.</p>
 
               {fetchingOptions ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

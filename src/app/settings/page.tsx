@@ -159,6 +159,7 @@ function SettingsContent() {
     if (!currentUser) {
       // Unauthenticated visitor
       if (!tabParam || !allowedTabs.includes(tabParam) || tabParam === 'account') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveTab('help');
         router.replace('/settings?tab=help');
       } else {

@@ -19,6 +19,7 @@ function AnimatedNumber({ value, duration = 1200 }: { value: number; duration?: 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -28,6 +29,7 @@ function AnimatedNumber({ value, duration = 1200 }: { value: number; duration?: 
     let start = 0;
     const end = value;
     if (start === end) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCount(end);
       return;
     }

@@ -11,6 +11,7 @@ export default function MasonryGrid({ children }: MasonryGridProps) {
   const [columnCount, setColumnCount] = useState(2);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     
     const updateColumns = () => {

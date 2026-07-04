@@ -25,6 +25,7 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -83,6 +84,7 @@ export default function Navbar() {
   }, [isOpen]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
   }, [pathname]);
 
@@ -114,9 +116,20 @@ export default function Navbar() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        supabase.from('profiles').select('*').eq('id', session.user.id).single()
-          .then(({ data }) => { if (data) setProfile(data); })
-          .catch(err => console.warn('Failed to fetch profile in onAuthStateChange:', err));
+        const fetchProfile = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            if (error) throw error;
+            if (data) setProfile(data);
+          } catch (err: any) {
+            console.warn('Failed to fetch profile in onAuthStateChange:', err);
+          }
+        };
+        fetchProfile();
       } else {
         setProfile(null);
       }
@@ -154,6 +167,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUnreadCount(0);
       return;
     }

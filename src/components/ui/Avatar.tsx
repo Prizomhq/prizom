@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
+import Image from 'next/image';
 
 interface AvatarProps {
   src?: string | null;
@@ -15,6 +16,7 @@ export default function Avatar({ src, username, size = 'md', className = '' }: A
 
   // Reset error state if src changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(false);
   }, [src]);
 
@@ -33,15 +35,16 @@ export default function Avatar({ src, username, size = 'md', className = '' }: A
 
   return (
     <div 
-      className={`rounded-full bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] flex items-center justify-center font-bold text-white shadow-sm overflow-hidden shrink-0 transition-all select-none ${selectedSizeClass} ${className}`}
+      className={`relative rounded-full bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] flex items-center justify-center font-bold text-white shadow-sm overflow-hidden shrink-0 transition-all select-none ${selectedSizeClass} ${className}`}
     >
       {src && !error ? (
-        <img 
+        <Image 
           src={getOptimizedImageUrl(src, optType)} 
           alt={username} 
-          className="w-full h-full object-cover" 
+          fill
+          className="object-cover" 
           onError={() => setError(true)}
-          loading="lazy"
+          unoptimized
         />
       ) : (
         <span>{initial}</span>

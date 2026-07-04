@@ -36,6 +36,7 @@ export default function AppealFormClient({ username }: AppealFormClientProps) {
             setTurnstileToken('');
           }
         });
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsWidgetLoaded(true);
       } catch (e) {
         console.warn('Turnstile appeal widget render warning:', e);

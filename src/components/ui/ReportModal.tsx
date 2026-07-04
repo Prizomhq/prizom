@@ -89,7 +89,7 @@ export default function ReportModal({ isOpen, onClose, type, entityId, entityNam
             </div>
             <h3 className="text-xl font-black text-zinc-900 mb-2">Report Submitted</h3>
             <p className="text-zinc-500 text-sm font-semibold max-w-xs leading-relaxed">
-              Thank you for keeping Prizom safe. Our moderation team has received your report and will audit "{entityName}" shortly.
+              Thank you for keeping Prizom safe. Our moderation team has received your report and will audit &quot;{entityName}&quot; shortly.
             </p>
           </div>
         ) : (

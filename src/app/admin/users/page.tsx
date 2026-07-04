@@ -60,12 +60,14 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadUsers();
   }, []);
 
   // Fetch detailed verification criteria asynchronously when a creator is selected
   useEffect(() => {
     if (selectedUser && isReviewOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDetailsLoading(true);
       getCreatorVerificationDetails(selectedUser.id).then(res => {
         if (res.success && res.stats) {
@@ -391,7 +393,7 @@ export default function AdminUsersPage() {
                       {/* Bio preview */}
                       {reviewDetails.bio && (
                         <p className="text-[10px] text-zinc-400 font-semibold mt-2.5 italic line-clamp-2">
-                          "{reviewDetails.bio}"
+                          &quot;{reviewDetails.bio}&quot;
                         </p>
                       )}
                     </div>

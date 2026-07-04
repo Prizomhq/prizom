@@ -81,7 +81,7 @@ export default async function HiddenPromptsPage() {
             </div>
             <h3 className="text-2xl font-black text-zinc-900 mb-2">Vault is Empty</h3>
             <p className="text-zinc-500 font-semibold text-sm max-w-xs mb-8 leading-relaxed">
-              You haven't hidden any prompt templates yet. Prompts you hide from prompt cards will display here.
+              You haven&apos;t hidden any prompt templates yet. Prompts you hide from prompt cards will display here.
             </p>
             <Link 
               href="/discover" 

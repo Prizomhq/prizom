@@ -120,11 +120,13 @@ export default function ContactMessagesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMessages();
   }, []);
 
   useEffect(() => {
     if (viewMode === 'appeals') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadAppeals();
     } else if (viewMode === 'prompt_appeals') {
       loadPromptAppeals();

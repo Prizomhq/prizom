@@ -82,7 +82,7 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
     if (currentTitle === defaultTitle || currentTitle === "Discover AI Prompts Worth Saving" || currentTitle === "Create Images Worth Sharing") {
       return (
         <>
-          Build on the World's <br className="hidden lg:inline" />
+          Build on the World&apos;s <br className="hidden lg:inline" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-neon-purple)] via-indigo-500 to-[var(--color-electric-blue)]">
             AI Image Prompts
           </span>

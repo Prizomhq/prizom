@@ -177,7 +177,7 @@ export default function CopyButton({
             <h3 className="text-2xl font-black text-zinc-900 mb-3 leading-snug">Limit Reached</h3>
             
             <p className="text-zinc-500 font-semibold text-xs leading-relaxed mb-8 max-w-sm mx-auto">
-              You've reached your free discovery limit. Create an account to continue exploring Prizom.
+              You&apos;ve reached your free discovery limit. Create an account to continue exploring Prizom.
             </p>
 
             <div className="space-y-3">

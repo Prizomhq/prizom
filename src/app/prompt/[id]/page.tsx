@@ -478,7 +478,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   <Zap className="w-4 h-4 mr-1.5 text-[var(--color-neon-purple)] animate-pulse" />
                   Remix Notes
                 </h4>
-                <p className="text-zinc-700 text-sm leading-relaxed font-semibold">"{prompt.remix_notes}"</p>
+                <p className="text-zinc-700 text-sm leading-relaxed font-semibold">&quot;{prompt.remix_notes}&quot;</p>
               </div>
             )}
 
@@ -548,7 +548,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                         ) : (
                           <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full">
                             <Link href={`/prompt/${originalRootPrompt.id}`} className="text-sm font-bold text-zinc-800 hover:text-[var(--color-neon-purple)] transition-colors truncate hover:underline min-w-0 flex-1">
-                              "{originalRootPrompt.title}"
+                              &quot;{originalRootPrompt.title}&quot;
                             </Link>
                             <span className="text-xs text-zinc-400 shrink-0">by @{originalRootPrompt.profiles?.username || 'unknown'}</span>
                           </div>
@@ -571,7 +571,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                         ) : (
                           <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full">
                             <Link href={`/prompt/${parentPrompt.id}`} className="text-sm font-bold text-zinc-800 hover:text-[var(--color-neon-purple)] transition-colors truncate hover:underline min-w-0 flex-1">
-                              "{parentPrompt.title}"
+                              &quot;{parentPrompt.title}&quot;
                             </Link>
                             <span className="text-xs text-zinc-400 shrink-0">by @{parentPrompt.profiles?.username || 'unknown'}</span>
                           </div>
@@ -588,7 +588,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[8px] font-black text-blue-700 bg-blue-50 uppercase tracking-wider mb-1">
                         You Are Here
                       </span>
-                      <h5 className="text-sm font-black text-zinc-900 truncate">"{prompt.title}"</h5>
+                      <h5 className="text-sm font-black text-zinc-900 truncate">&quot;{prompt.title}&quot;</h5>
                       <p className="text-[10px] text-zinc-450 font-bold uppercase mt-1">Current Version</p>
                     </div>
                   </div>
@@ -645,7 +645,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   <Link href={`/prompt/${remix.id}`} className="block px-1 flex-1">
                     <h4 className="font-extrabold text-zinc-950 text-sm leading-snug group-hover:text-[var(--color-neon-purple)] transition-colors line-clamp-1">{remix.title}</h4>
                     {remix.remix_notes && (
-                      <p className="text-zinc-500 text-xs mt-1 italic line-clamp-2">"{remix.remix_notes}"</p>
+                      <p className="text-zinc-500 text-xs mt-1 italic line-clamp-2">&quot;{remix.remix_notes}&quot;</p>
                     )}
                   </Link>
                 </div>

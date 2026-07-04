@@ -39,7 +39,7 @@ export default function CopyrightPolicy() {
         <div className="max-w-3xl mx-auto prose prose-zinc prose-sm">
           <div className="space-y-12">
             <div className="bg-white/45 border border-zinc-200/50 p-6 rounded-2xl text-xs sm:text-sm text-zinc-500 font-semibold leading-relaxed shadow-sm">
-              Prizom respects the intellectual property rights of digital artists and prompt engineers. In accordance with the Digital Millennium Copyright Act ("DMCA") and international IP frameworks, we respond expeditiously to clear notices of alleged copyright infringement.
+              Prizom respects the intellectual property rights of digital artists and prompt engineers. In accordance with the Digital Millennium Copyright Act (&quot;DMCA&quot;) and international IP frameworks, we respond expeditiously to clear notices of alleged copyright infringement.
             </div>
 
             {/* Section 1 */}

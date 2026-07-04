@@ -54,7 +54,7 @@ export default function CommunityGuidelines() {
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li><strong>Preserve Lineage:</strong> Any prompt created by copying, modifying, or branching a pre-existing prompt on Prizom must maintain its parent-creator attribution database indexes.</li>
-                  <li><strong>No Image Theft:</strong> You are strictly forbidden from downloading other creators' output images and publishing them as your own original generated work.</li>
+                  <li><strong>No Image Theft:</strong> You are strictly forbidden from downloading other creators&apos; output images and publishing them as your own original generated work.</li>
                   <li><strong>Impersonation:</strong> Do not register handles or usernames pretending to be other notable digital artists or prompt engineers.</li>
                 </ul>
               </div>
@@ -122,7 +122,7 @@ export default function CommunityGuidelines() {
               </h3>
               <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                 <p>
-                  If you spot prompts or images that violate these rules, please click the "Report" button on the prompt details page, or report them directly by emailing:
+                  If you spot prompts or images that violate these rules, please click the &quot;Report&quot; button on the prompt details page, or report them directly by emailing:
                 </p>
                 <div className="p-5 bg-white border border-zinc-200 rounded-2xl shadow-sm text-xs font-bold space-y-1.5 w-fit">
                   <p className="text-zinc-900">Prizom Safety Desk</p>
