@@ -119,7 +119,7 @@ export default function PrivacyPolicy() {
             <div className="space-y-12">
               
               <div className="bg-white/40 border border-zinc-200/50 p-6 rounded-2xl text-xs sm:text-sm text-zinc-500 font-semibold leading-relaxed shadow-sm">
-                Prizom ("we", "our", or "us") is dedicated to protecting the privacy, identity, and personal records of our prompt creators. This Privacy Policy details how we collect, process, index, and safeguard your account parameters, cloud metadata, files, and interactions across our Supabase servers and cloud integrations.
+                Prizom (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is dedicated to protecting the privacy, identity, and personal records of our prompt creators. This Privacy Policy details how we collect, process, index, and safeguard your account parameters, cloud metadata, files, and interactions across our Supabase servers and cloud integrations.
               </div>
 
               {/* 1 */}
@@ -147,7 +147,7 @@ export default function PrivacyPolicy() {
                     All creator accounts are registered and secured using **Supabase Authentication** pipelines.
                   </p>
                   <p>
-                    When establishing a profile, we collect your verified email address, chosen username, display name, and avatar image. Passwords are encrypted instantly on Supabase's secure infrastructure. Prizom engineers never store, see, or transmit plain-text passwords or hashes on external nodes. Secure access tokens (JWT) are dispatched to verify your identity on subsequent refreshes.
+                    When establishing a profile, we collect your verified email address, chosen username, display name, and avatar image. Passwords are encrypted instantly on Supabase&apos;s secure infrastructure. Prizom engineers never store, see, or transmit plain-text passwords or hashes on external nodes. Secure access tokens (JWT) are dispatched to verify your identity on subsequent refreshes.
                   </p>
                 </div>
               </section>
@@ -234,10 +234,10 @@ export default function PrivacyPolicy() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom's signature remix engine logs parent prompt relationships.
+                    Prizom&apos;s signature remix engine logs parent prompt relationships.
                   </p>
                   <p>
-                    When you click the "Remix" button, our database tracks the origin prompt ID to establish the genetic lineage. This relationship, including your creator username and the linked parent profile avatar, is published to the public prompt details page to acknowledge dual attribution.
+                    When you click the &quot;Remix&quot; button, our database tracks the origin prompt ID to establish the genetic lineage. This relationship, including your creator username and the linked parent profile avatar, is published to the public prompt details page to acknowledge dual attribution.
                   </p>
                 </div>
               </section>
@@ -294,7 +294,7 @@ export default function PrivacyPolicy() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom's search canvas integrates multiple cloud modules, including:
+                    Prizom&apos;s search canvas integrates multiple cloud modules, including:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li><strong className="text-zinc-700">Supabase:</strong> For relational tables, file storage nodes, and auth handlers.</li>
@@ -315,7 +315,7 @@ export default function PrivacyPolicy() {
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>Enforced SSL/TLS 1.3 encryption protocols for all data in transit.</li>
-                    <li>Strict Supabase Row-Level Security (RLS) filters preventing creators from modifying or editing other engineers' prompt entries.</li>
+                    <li>Strict Supabase Row-Level Security (RLS) filters preventing creators from modifying or editing other engineers&apos; prompt entries.</li>
                     <li>AES-256 cloud encryption parameters for data at rest.</li>
                   </ul>
                 </div>
@@ -403,7 +403,7 @@ export default function PrivacyPolicy() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    We may update this Privacy Policy from time to time. When modifications are performed, we will publish the adjusted policy here and revise the "Last Updated" metric at the top of the portal.
+                    We may update this Privacy Policy from time to time. When modifications are performed, we will publish the adjusted policy here and revise the &quot;Last Updated&quot; metric at the top of the portal.
                   </p>
                 </div>
               </section>

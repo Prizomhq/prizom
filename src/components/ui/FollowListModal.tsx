@@ -35,12 +35,14 @@ export default function FollowListModal({
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
       setError(null);
       setSearchQuery('');
@@ -198,7 +200,11 @@ export default function FollowListModal({
                 onClick={() => {
                   setLoading(true);
                   setError(null);
-                  type === 'followers' ? getFollowers(userId).then(setUsers).finally(() => setLoading(false)) : getFollowing(userId).then(setUsers).finally(() => setLoading(false));
+                  if (type === 'followers') {
+                    getFollowers(userId).then(setUsers).finally(() => setLoading(false));
+                  } else {
+                    getFollowing(userId).then(setUsers).finally(() => setLoading(false));
+                  }
                 }}
                 className="px-5 py-2.5 bg-zinc-900 hover:bg-black transition-colors text-xs font-bold text-white rounded-xl"
               >

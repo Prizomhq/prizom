@@ -334,7 +334,7 @@ export default function ConsentGuard() {
               {activeView === 'terms' ? (
                 <>
                   <div className="bg-zinc-50 border border-zinc-200/50 p-5 rounded-2xl text-[11px] leading-relaxed text-zinc-400">
-                    This Prizom Terms of Service ("Agreement") represents a binding contract. Please read the full 19 sections detailed below.
+                    This Prizom Terms of Service (&quot;Agreement&quot;) represents a binding contract. Please read the full 19 sections detailed below.
                   </div>
 
                   <div className="space-y-6">
@@ -411,7 +411,7 @@ export default function ConsentGuard() {
 
                     <div>
                       <h4 className="font-black text-zinc-900 mb-2">14. Disclaimer of Warranties</h4>
-                      <p className="uppercase tracking-wide text-[10px] text-zinc-400">Prizom services are offered "as is" without implied merchantability warranties or quality guarantees.</p>
+                      <p className="uppercase tracking-wide text-[10px] text-zinc-400">Prizom services are offered &quot;as is&quot; without implied merchantability warranties or quality guarantees.</p>
                     </div>
 
                     <div>

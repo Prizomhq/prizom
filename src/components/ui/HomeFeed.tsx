@@ -114,7 +114,7 @@ export default function HomeFeed() {
         </div>
         <h3 className="text-2xl font-black text-zinc-900 mb-3 tracking-tight">Your feed is warming up</h3>
         <p className="text-zinc-500 font-medium text-sm leading-relaxed mb-8">
-          Discover and follow creators to build a personalized feed. Or dive straight into the community's best work.
+          Discover and follow creators to build a personalized feed. Or dive straight into the community&apos;s best work.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
           <Link href="/discover" className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] text-white text-sm font-bold hover:shadow-[0_8px_20px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5">
@@ -154,6 +154,8 @@ export default function HomeFeed() {
             remixCount={prompt.remix_count}
             aspectRatio={prompt.aspect_ratio}
             category={prompt.category}
+            imageWidth={prompt.image_width}
+            imageHeight={prompt.image_height}
           />
         ))}
       </MasonryGrid>
@@ -174,7 +176,7 @@ export default function HomeFeed() {
 
       {!hasMore && prompts.length > 0 && (
         <div className="flex justify-center items-center py-16 text-center text-zinc-400 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
-          ✨ You've discovered all current prompt masterpieces! ✨
+          ✨ You&apos;ve discovered all current prompt masterpieces! ✨
         </div>
       )}
     </div>

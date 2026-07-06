@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
             <Lock className="h-8 w-8 text-[var(--color-neon-purple)]" />
           </div>
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">Forgot password?</h1>
-          <p className="text-zinc-500">No worries, we'll send you reset instructions.</p>
+          <p className="text-zinc-500">No worries, we&apos;ll send you reset instructions.</p>
         </div>
 
         <div className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/40">

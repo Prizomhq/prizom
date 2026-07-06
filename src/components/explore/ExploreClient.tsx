@@ -100,6 +100,7 @@ export default function ExploreClient({
 
   // Sync state if filters change externally
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchVal(activeFilters.query || '');
     setActiveCategory(activeFilters.category || '');
     setActiveTool(activeFilters.tool || '');
@@ -494,7 +495,7 @@ export default function ExploreClient({
             <h3 className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">No results found</h3>
             <p className="text-zinc-500 font-medium text-sm leading-relaxed mb-2">
               {searchVal
-                ? <>No prompts match <strong className="text-zinc-800">"{searchVal}"</strong>. Try different keywords or clear your filters.</>
+                ? <>No prompts match <strong className="text-zinc-800">&quot;{searchVal}&quot;</strong>. Try different keywords or clear your filters.</>
                 : "No prompts match your active filters. Try a different combination."}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-6 mb-8">
@@ -547,6 +548,8 @@ export default function ExploreClient({
                   remixCount={prompt.remix_count}
                   aspectRatio={prompt.aspect_ratio}
                   category={prompt.category}
+                  imageWidth={prompt.image_width}
+                  imageHeight={prompt.image_height}
                 />
               ))}
             </MasonryGrid>

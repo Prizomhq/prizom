@@ -42,6 +42,7 @@ export default function ContactForm({ developer: initialDeveloper }: { developer
             setTurnstileToken('');
           }
         });
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsWidgetLoaded(true);
       } catch (e) {
         console.warn('Turnstile contact widget render warning:', e);
@@ -153,7 +154,7 @@ export default function ContactForm({ developer: initialDeveloper }: { developer
               Drop Us a Message
             </h3>
             <p className="text-zinc-500 font-semibold text-xs mb-8 leading-relaxed">
-              Have questions about the prompt registry, remix systems, or API partnerships? We'd love to hear from you.
+              Have questions about the prompt registry, remix systems, or API partnerships? We&apos;d love to hear from you.
             </p>
 
             {isSuccess ? (

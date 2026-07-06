@@ -82,7 +82,9 @@ export async function POST(req: NextRequest) {
     // Return the secure, compressed, WebP-optimized CDN URL
     return NextResponse.json({ 
       url: result.secure_url,
-      publicId: result.public_id
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height
     });
 
   } catch (err: any) {

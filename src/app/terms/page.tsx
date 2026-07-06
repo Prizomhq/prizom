@@ -118,7 +118,7 @@ export default function TermsOfService() {
             <div className="space-y-12">
               
               <div className="bg-white/40 border border-zinc-200/50 p-6 rounded-2xl text-xs sm:text-sm text-zinc-500 font-semibold leading-relaxed shadow-sm">
-                These Terms of Service ("Terms") represent a legally binding electronic contract between you ("User", "Creator", or "you") and Prizom ("we", "our", or "us") governing your access to, integration with, and general use of our generative prompt registries, software applications, APIs, database tables, and website domains. By accessing our services, you accept and agree to be fully bound by these Terms.
+                These Terms of Service (&quot;Terms&quot;) represent a legally binding electronic contract between you (&quot;User&quot;, &quot;Creator&quot;, or &quot;you&quot;) and Prizom (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) governing your access to, integration with, and general use of our generative prompt registries, software applications, APIs, database tables, and website domains. By accessing our services, you accept and agree to be fully bound by these Terms.
               </div>
 
               {/* 1 */}
@@ -131,7 +131,7 @@ export default function TermsOfService() {
                     By registering an account with Prizom, utilizing our web portals, retrieving prompt templates via our APIs, or interacting with our Supabase services, you acknowledge that you have read, understood, and agreed to be bound by these Terms and our Privacy Policy.
                   </p>
                   <p>
-                    If you are agreeing to these Terms on behalf of an enterprise or legal entity, you represent and warrant that you hold full organizational authority to bind such entity. If you lack this authority or do not agree to every clause within these Terms, you must immediately cease utilizing Prizom's systems.
+                    If you are agreeing to these Terms on behalf of an enterprise or legal entity, you represent and warrant that you hold full organizational authority to bind such entity. If you lack this authority or do not agree to every clause within these Terms, you must immediately cease utilizing Prizom&apos;s systems.
                   </p>
                 </div>
               </section>
@@ -158,7 +158,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom celebrates creator ownership. You retain complete, absolute title, ownership, and intellectual property rights over any original visual output images you generate and publish on Prizom ("User Content").
+                    Prizom celebrates creator ownership. You retain complete, absolute title, ownership, and intellectual property rights over any original visual output images you generate and publish on Prizom (&quot;User Content&quot;).
                   </p>
                   <p className="font-bold text-zinc-800">
                     Prompt Text Licensing (CC0 Dedication):
@@ -194,7 +194,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom's primary creative core is built upon an open **Remix Culture**. Prompt templates published to public registries are shared with the community, allowing creators to dynamically remix existing instructions to test new style parameters.
+                    Prizom&apos;s primary creative core is built upon an open **Remix Culture**. Prompt templates published to public registries are shared with the community, allowing creators to dynamically remix existing instructions to test new style parameters.
                   </p>
                   <p className="font-extrabold text-zinc-800">
                     To maintain community integrity, any prompt created by copying, modifying, or remixing a pre-existing prompt on Prizom must maintain its parent-creator lineage.
@@ -235,7 +235,7 @@ export default function TermsOfService() {
                   <ul className="list-disc pl-5 space-y-2">
                     <li>Hate speech, extreme harassment, malicious defamation, or threat payloads.</li>
                     <li>Explicit pornographic materials, non-consensual sexual imagery, or violence.</li>
-                    <li>Prompts intentionally engineered to bypass safety filters of generative systems ("jailbreak scripts" designed to generate illegal or toxic materials on external models).</li>
+                    <li>Prompts intentionally engineered to bypass safety filters of generative systems (&quot;jailbreak scripts&quot; designed to generate illegal or toxic materials on external models).</li>
                   </ul>
                   <p>
                     For detailed rules, read our dedicated <Link href="/community-guidelines" className="text-indigo-600 hover:underline">Community Guidelines</Link>.
@@ -266,7 +266,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom respects intellectual property. Under the Digital Millennium Copyright Act ("DMCA"), we will immediately process valid copyright infringement notifications. If you believe your original content is hosted on Prizom without permission, please email our Designated Agent at <a href="mailto:copyright@prizom.in" className="text-indigo-600 font-bold hover:underline">copyright@prizom.in</a> in accordance with our complete <Link href="/copyright-policy" className="text-indigo-600 hover:underline">Copyright Policy</Link>.
+                    Prizom respects intellectual property. Under the Digital Millennium Copyright Act (&quot;DMCA&quot;), we will immediately process valid copyright infringement notifications. If you believe your original content is hosted on Prizom without permission, please email our Designated Agent at <a href="mailto:copyright@prizom.in" className="text-indigo-600 font-bold hover:underline">copyright@prizom.in</a> in accordance with our complete <Link href="/copyright-policy" className="text-indigo-600 hover:underline">Copyright Policy</Link>.
                   </p>
                 </div>
               </section>
@@ -278,7 +278,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    You represent and covenant that you will not: (i) engage in screen-scraping, automated database harvesting, or script querying of our public feeds without express API integration licenses; (ii) overload, stress-test, or conduct denial-of-service (DoS) attempts against our Supabase clusters; (iii) reverse-engineer Prizom's layout architectures; or (iv) bypass authentication states to gain access to private prompt collections.
+                    You represent and covenant that you will not: (i) engage in screen-scraping, automated database harvesting, or script querying of our public feeds without express API integration licenses; (ii) overload, stress-test, or conduct denial-of-service (DoS) attempts against our Supabase clusters; (iii) reverse-engineer Prizom&apos;s layout architectures; or (iv) bypass authentication states to gain access to private prompt collections.
                   </p>
                 </div>
               </section>
@@ -332,7 +332,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold uppercase tracking-wide bg-zinc-50 p-6 rounded-2xl border border-zinc-200/50 space-y-4">
                   <p>
-                    PRIZOM'S SERVICES ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. PRIZOM EXPRESSLY DISCLAIMS ALL WARRANTIES, GUARANTEES, OR REPRESENTATIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OPERATIONAL UP-TIME, PROMPT SUCCESS RATES, AND NON-INFRINGEMENT.
+                    PRIZOM&apos;S SERVICES ARE PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS. PRIZOM EXPRESSLY DISCLAIMS ALL WARRANTIES, GUARANTEES, OR REPRESENTATIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OPERATIONAL UP-TIME, PROMPT SUCCESS RATES, AND NON-INFRINGEMENT.
                   </p>
                   <p>
                     WE DO NOT WARRANT THAT OUR DATABASES WILL OPERATE SECURELY WITHOUT DOWNTIME, OR THAT INDEXED PROMPTS WILL RENDER IDENTICALLY ACROSS THIRD-PARTY AI NEURAL NETWORKS.
@@ -359,7 +359,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    You agree to defend, indemnify, and hold harmless Prizom and its affiliates, core operators, and suppliers from and against any claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including attorney's fees) arising from: (i) your access to the platform; (ii) your violation of these Terms; or (iii) any copyright or privacy infringement caused by your published prompt scripts.
+                    You agree to defend, indemnify, and hold harmless Prizom and its affiliates, core operators, and suppliers from and against any claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including attorney&apos;s fees) arising from: (i) your access to the platform; (ii) your violation of these Terms; or (iii) any copyright or privacy infringement caused by your published prompt scripts.
                   </p>
                 </div>
               </section>
@@ -386,7 +386,7 @@ export default function TermsOfService() {
                 </h3>
                 <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                   <p>
-                    Prizom reserves the right to modify or replace these Terms at any time. When material adjustments are made, we will notify creators by updating the "Last Updated" date at the top of this page.
+                    Prizom reserves the right to modify or replace these Terms at any time. When material adjustments are made, we will notify creators by updating the &quot;Last Updated&quot; date at the top of this page.
                   </p>
                   <p>
                     By continuing to access Prizom or publish prompt parameters following the execution of changes, you declare your active consent to the revised terms.

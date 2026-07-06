@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface PrizomLogoProps {
   className?: string;
   size?: number;
@@ -7,7 +9,7 @@ interface PrizomLogoProps {
 
 export default function PrizomLogo({ className = '', size = 32 }: PrizomLogoProps) {
   return (
-    <img
+    <Image
       src="/logo.png"
       alt="Prizom Logo"
       width={size}

@@ -66,7 +66,7 @@ export default function CookiePolicy() {
                 <div>
                   <h4 className="font-extrabold text-xs text-zinc-900 uppercase tracking-wide">A. Essential Cookies (Strictly Necessary)</h4>
                   <p className="mt-1">
-                    These cookies are necessary for Prizom's core operations. We use them strictly to log you in, secure databases access via JWT tokens, authenticate calls to Supabase databases, and keep track of account deactivation/deletion requests. Because the site cannot function without these trackers, you cannot disable them.
+                    These cookies are necessary for Prizom&apos;s core operations. We use them strictly to log you in, secure databases access via JWT tokens, authenticate calls to Supabase databases, and keep track of account deactivation/deletion requests. Because the site cannot function without these trackers, you cannot disable them.
                   </p>
                 </div>
 
@@ -82,7 +82,7 @@ export default function CookiePolicy() {
                 <div>
                   <h4 className="font-extrabold text-xs text-zinc-900 uppercase tracking-wide">C. Analytics & Search Telemetry</h4>
                   <p className="mt-1">
-                    Under the EU Privacy and Electronic Communications Directive (PECR), analytics cookies require active opt-in. We track guest page views and search parameters to order feed algorithms and recommend trending prompts. We do not trigger guest event trackers unless you explicitly click "Accept All" or opt-in to Analytics inside our Cookie Banner.
+                    Under the EU Privacy and Electronic Communications Directive (PECR), analytics cookies require active opt-in. We track guest page views and search parameters to order feed algorithms and recommend trending prompts. We do not trigger guest event trackers unless you explicitly click &quot;Accept All&quot; or opt-in to Analytics inside our Cookie Banner.
                   </p>
                 </div>
 
@@ -114,7 +114,7 @@ export default function CookiePolicy() {
               </h3>
               <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">
                 <p>
-                  We may adjust our cookie tracking protocols from time to time. When we make updates, we will adjust the "Last Updated" metric at the top of this page. If you have questions regarding our cookie practices, please contact us at <a href="mailto:privacy@prizom.in" className="text-indigo-600 hover:underline">privacy@prizom.in</a>.
+                  We may adjust our cookie tracking protocols from time to time. When we make updates, we will adjust the &quot;Last Updated&quot; metric at the top of this page. If you have questions regarding our cookie practices, please contact us at <a href="mailto:privacy@prizom.in" className="text-indigo-600 hover:underline">privacy@prizom.in</a>.
                 </p>
               </div>
             </section>

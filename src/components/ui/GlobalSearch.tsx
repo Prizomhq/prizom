@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 import { Search, X, Loader2, Sparkles, User, History, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,6 +27,7 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -64,6 +66,7 @@ export default function GlobalSearch() {
     const saved = localStorage.getItem('prizom_recent_searches');
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRecentSearches(JSON.parse(saved));
       } catch (e) {
         console.error(e);
@@ -74,6 +77,7 @@ export default function GlobalSearch() {
   // Reset tab to all if query is empty
   useEffect(() => {
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('all');
     }
   }, [query]);
@@ -133,6 +137,7 @@ export default function GlobalSearch() {
   // Debounce search query
   useEffect(() => {
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults({ prompts: [], profiles: [], tags: [] });
       setLoading(false);
       return;
@@ -428,7 +433,7 @@ export default function GlobalSearch() {
                     >
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200 relative">
                         {prompt.image_url ? (
-                          <img src={prompt.image_url} alt={prompt.title} className="w-full h-full object-cover" />
+                          <Image src={prompt.image_url} alt={prompt.title} fill className="object-cover" unoptimized />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <BookOpen className="w-4 h-4 text-zinc-300" />
@@ -466,7 +471,7 @@ export default function GlobalSearch() {
               onClick={() => executeFullSearch(query)}
               className="w-full pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-black text-electric-blue uppercase tracking-wider cursor-pointer hover:text-neon-purple transition-colors px-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-purple/50 rounded-lg"
             >
-              <span>Search all prompts for "{query}"</span>
+              <span>Search all prompts for &quot;{query}&quot;</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </>

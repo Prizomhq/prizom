@@ -24,12 +24,14 @@ function Combobox({ label, value, onChange, options, placeholder, required = fal
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearch(value);
     setIsDirty(false);
   }, [value]);
 
   useEffect(() => {
     if (!isDirty) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredOptions(options);
     } else {
       const results = options.filter(opt =>
@@ -129,7 +131,7 @@ function Combobox({ label, value, onChange, options, placeholder, required = fal
               className="w-full px-4 py-2.5 text-left text-xs font-black text-indigo-650 bg-indigo-50/30 hover:bg-indigo-50 hover:text-indigo-850 border-t border-zinc-100 flex items-center gap-1.5 transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
-              Create "{search.trim()}"
+              Create &quot;{search.trim()}&quot;
             </button>
           )}
         </div>
@@ -208,6 +210,7 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
 
   useEffect(() => {
     if (tagInput.trim() === '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredTags([]);
       setShowTagSuggestions(false);
     } else {
@@ -295,10 +298,14 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
 
     try {
       let finalImageUrl = existingImageUrl;
+      let finalImageWidth = prompt.image_width || null;
+      let finalImageHeight = prompt.image_height || null;
 
       // Case A: Image was removed
       if (removeExistingImage && !file) {
         finalImageUrl = null;
+        finalImageWidth = null;
+        finalImageHeight = null;
       }
 
       // Case B: A new image was uploaded
@@ -321,6 +328,8 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
         }
 
         finalImageUrl = uploadResult.url;
+        finalImageWidth = uploadResult.width;
+        finalImageHeight = uploadResult.height;
       }
 
       setUploadProgress(80);
@@ -359,6 +368,8 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
         category: finalCategory,
         tags,
         image_url: finalImageUrl,
+        image_width: finalImageWidth,
+        image_height: finalImageHeight,
         aspect_ratio: aspectRatio,
         is_hidden: isHidden
       });

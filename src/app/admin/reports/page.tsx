@@ -92,11 +92,13 @@ export default function AdminReportsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReports();
   }, []);
 
   // Update status filter default when switching tabs
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatusFilter('pending');
     setSelectedReport(null);
     setMobileView('list');
@@ -635,7 +637,7 @@ export default function AdminReportsPage() {
                       {selectedReport.type.includes('appeal') ? 'User Supporting Statement' : 'Custom Review Notes / Details'}
                     </span>
                     <p className="text-zinc-300 text-xs font-semibold leading-relaxed mt-1.5 p-3 bg-zinc-950/30 border border-zinc-900 rounded-xl shadow-inner italic">
-                      "{selectedReport.type.includes('appeal') ? selectedReport.reason : selectedReport.details || 'No additional details provided.'}"
+                      &quot;{selectedReport.type.includes('appeal') ? selectedReport.reason : selectedReport.details || 'No additional details provided.'}&quot;
                     </p>
                   </div>
 

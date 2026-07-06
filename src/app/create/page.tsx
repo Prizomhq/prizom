@@ -27,12 +27,14 @@ function Combobox({ label, value, onChange, options, placeholder, required = fal
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearch(value);
     setIsDirty(false);
   }, [value]);
 
   useEffect(() => {
     if (!isDirty) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredOptions(options);
     } else {
       const results = options.filter(opt =>
@@ -132,7 +134,7 @@ function Combobox({ label, value, onChange, options, placeholder, required = fal
               className="w-full px-4 py-2.5 text-left text-xs font-black text-indigo-650 bg-indigo-50/30 hover:bg-indigo-50 hover:text-indigo-850 border-t border-zinc-100 flex items-center gap-1.5 transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
-              Create "{search.trim()}"
+              Create &quot;{search.trim()}&quot;
             </button>
           )}
         </div>
@@ -242,6 +244,7 @@ function CreateContent() {
 
   useEffect(() => {
     if (tagInput.trim() === '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredTags([]);
       setShowTagSuggestions(false);
     } else {
@@ -360,6 +363,8 @@ function CreateContent() {
 
     try {
       let imageUrl = null;
+      let imageWidth = null;
+      let imageHeight = null;
 
       if (file) {
         setUploadProgress(20);
@@ -381,6 +386,8 @@ function CreateContent() {
         }
 
         imageUrl = uploadResult.url;
+        imageWidth = uploadResult.width;
+        imageHeight = uploadResult.height;
       }
 
       setUploadProgress(85);
@@ -418,6 +425,8 @@ function CreateContent() {
         category: finalCategory,
         tags,
         image_url: imageUrl,
+        image_width: imageWidth,
+        image_height: imageHeight,
         aspect_ratio: aspectRatio,
         remix_of: remixId || null,
         remix_notes: remixId ? remixNotes : null,

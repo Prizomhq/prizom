@@ -166,7 +166,10 @@ export default function CreatorTabs({
                   tags={prompt.tags}
                   remixOf={prompt.remix_of}
                   remixCount={prompt.remix_count}
+                  aspectRatio={prompt.aspect_ratio || '1:1'}
                   category={prompt.category}
+                  imageWidth={prompt.image_width}
+                  imageHeight={prompt.image_height}
                 />
               ))}
             </MasonryGrid>
@@ -227,7 +230,10 @@ export default function CreatorTabs({
                   tags={prompt.tags}
                   remixOf={prompt.remix_of}
                   remixCount={prompt.remix_count}
+                  aspectRatio={prompt.aspect_ratio || '1:1'}
                   category={prompt.category}
+                  imageWidth={prompt.image_width}
+                  imageHeight={prompt.image_height}
                 />
               ))}
             </MasonryGrid>
