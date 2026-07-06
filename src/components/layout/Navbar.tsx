@@ -114,9 +114,14 @@ export default function Navbar() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        supabase.from('profiles').select('*').eq('id', session.user.id).single()
-          .then(({ data }) => { if (data) setProfile(data); })
-          .catch(err => console.warn('Failed to fetch profile in onAuthStateChange:', err));
+        (async () => {
+          try {
+            const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            if (data) setProfile(data);
+          } catch (err) {
+            console.warn('Failed to fetch profile in onAuthStateChange:', err);
+          }
+        })();
       } else {
         setProfile(null);
       }
