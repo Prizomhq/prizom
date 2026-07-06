@@ -411,7 +411,7 @@ export default function ExploreClient({
                 
                 {/* AI Tool */}
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-2">AI Tool Model</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-2">AI Tool Model</label>
                   <select
                     value={activeTool}
                     onChange={(e) => setActiveTool(e.target.value)}
@@ -426,7 +426,7 @@ export default function ExploreClient({
 
                 {/* Aspect Ratio Filter */}
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-2">Aspect Ratio Shape</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-2">Aspect Ratio Shape</label>
                   <select
                     value={activeAspectRatio}
                     onChange={(e) => setActiveAspectRatio(e.target.value)}
@@ -474,7 +474,7 @@ export default function ExploreClient({
           <h2 className="text-xl font-black text-zinc-900 uppercase tracking-wide flex items-center gap-2">
             <Grid className="w-5 h-5 text-indigo-500" />
             {activeCategory ? `${activeCategory} Prompts` : 'All Prompt Discoveries'}
-            {prompts.length > 0 && <span className="text-zinc-400 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
+            {prompts.length > 0 && <span className="text-zinc-500 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
           </h2>
         </div>
 
@@ -508,7 +508,7 @@ export default function ExploreClient({
             </div>
             {visibleCategories.length > 0 && (
               <div className="w-full">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Try browsing a category</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Try browsing a category</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {visibleCategories.slice(0, 6).map((cat) => (
                     <button
@@ -566,7 +566,7 @@ export default function ExploreClient({
             )}
 
             {!hasMore && prompts.length > 0 && (
-              <div className="flex justify-center items-center py-16 text-center text-zinc-400 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
+              <div className="flex justify-center items-center py-16 text-center text-zinc-500 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
                 ✨ End of Discover ✨
               </div>
             )}

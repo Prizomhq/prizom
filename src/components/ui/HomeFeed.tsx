@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import PromptCard from '@/components/ui/PromptCard';
 import MasonryGrid from '@/components/ui/MasonryGrid';
+import SkeletonCard from '@/components/ui/SkeletonCard';
 import { fetchRecommendedPrompts } from '@/app/actions/recommendations';
 import { getUserInterests } from '@/lib/recommendations-client';
 import { Loader2, Sparkles, Compass, TrendingUp } from 'lucide-react';
@@ -90,9 +91,12 @@ export default function HomeFeed() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 w-full">
-        <Loader2 className="w-10 h-10 animate-spin text-[var(--color-neon-purple)] mb-4" />
-        <p className="text-zinc-500 font-black uppercase tracking-wider text-xs">Assembling personalized feed...</p>
+      <div className="w-full">
+        <MasonryGrid>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </MasonryGrid>
       </div>
     );
   }

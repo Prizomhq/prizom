@@ -109,7 +109,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
   const modalContent = (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
       <div 
-        className={`bg-white rounded-[2rem] w-full ${isFirstTime && !loading ? 'max-w-md' : 'max-w-md'} overflow-hidden shadow-2xl border border-white/50 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 relative`}
+        className={`bg-white rounded-[2rem] w-full ${isFirstTime && !loading ? 'max-w-md' : 'max-w-md'} max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-white/50 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 relative`}
         onClick={e => e.stopPropagation()}
       >
         <button 
@@ -200,7 +200,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
           </div>
         ) : (
           // HAS COLLECTIONS VIEW
-          <div className="flex flex-col h-full max-h-[85vh]">
+          <div className="flex flex-col overflow-hidden flex-1">
             <div className="p-6 border-b border-zinc-100 shrink-0 pr-16">
               <h2 className="text-xl font-black text-zinc-900 tracking-tight">Save Prompt</h2>
             </div>

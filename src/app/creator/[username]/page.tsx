@@ -38,7 +38,7 @@ export async function generateMetadata(
   const title = `${displayName} (@${creator.username}) | Prizom`;
   const description = creator.bio || `View prompt collections and remixes from creator ${displayName} on Prizom, the collaborative AI prompt registry.`;
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in';
   const canonicalUrl = `${siteUrl}/creator/${creator.username}`;
   const ogImage = creator.avatar_url || `${siteUrl}/default-avatar.png`;
 

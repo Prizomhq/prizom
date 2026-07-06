@@ -37,7 +37,7 @@ export async function generateMetadata(
   const title = `"${prompt.title}" by ${creatorName} | Prizom`;
   const description = prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`;
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in';
   const canonicalUrl = `${siteUrl}/prompt/${resolvedParams.id}`;
   const ogImage = prompt.image_url || `${siteUrl}/og-image.png`;
 
@@ -655,6 +655,27 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             creatorUsername={prompt.profiles?.username || ''}
           />
         </div>
+
+        {/* Dynamic JSON-LD Structured Data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CreativeWork",
+              "name": prompt.title,
+              "description": prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`,
+              "image": prompt.image_url,
+              "author": {
+                "@type": "Person",
+                "name": prompt.profiles?.full_name || prompt.profiles?.username || "Prizom Creator"
+              },
+              "dateCreated": prompt.created_at,
+              "keywords": prompt.tags ? prompt.tags.join(', ') : "",
+              "genre": prompt.category
+            })
+          }}
+        />
 
       </div>
     </div>

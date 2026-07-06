@@ -147,7 +147,7 @@ export async function signUpAction(
         username: username.toLowerCase().trim(),
         invite_key: inviteKey.trim(),
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.com'}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in'}/auth/callback`,
     },
   });
 

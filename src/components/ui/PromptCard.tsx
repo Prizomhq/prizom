@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Bookmark, MoreHorizontal, Link2, EyeOff, AlertTriangle, BadgeCheck, Zap, Sparkles, GitFork, Copy } from 'lucide-react';
+import { Heart, Bookmark, MoreHorizontal, Link2, EyeOff, AlertTriangle, BadgeCheck, Zap, Sparkles, GitFork } from 'lucide-react';
 import { toggleLike, removePromptFromAllCollections, checkInteractionStatus } from '@/app/actions/interactions';
 import { createClient } from '@/lib/supabase/client';
 import { hidePromptUser } from '@/app/actions/hiddenActions';
@@ -12,7 +12,7 @@ import SaveModal from '@/components/ui/SaveModal';
 import UnsaveModal from '@/components/ui/UnsaveModal';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
-import { getOptimizedImageUrl, getAspectRatioStyle } from '@/lib/cloudinary-client';
+import { getAspectRatioStyle } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
 import Avatar from '@/components/ui/Avatar';
 
@@ -51,13 +51,13 @@ function formatStatsNumber(num: number): string {
 
 export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, description, remixOf, remixCount, aspectRatio = '1:1', category = 'General' }: PromptCardProps) {
   const router = useRouter();
-  
   const supabase = createClient();
+  
   const [isHovered, setIsHovered] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(initialSaves > 0 ? true : false); // Optimistic default, ideally passed from parent
+  const [isSaved, setIsSaved] = useState(initialSaves > 0 ? true : false);
   const [likes, setLikes] = useState(initialLikes);
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isUnsaveOpen, setIsUnsaveOpen] = useState(false);
@@ -67,6 +67,8 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
   const [menuOpen, setMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -82,11 +84,10 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
   const updateMenuPosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const dropdownWidth = 144; // w-36 = 144px
+      const dropdownWidth = 144;
       const margin = 8;
       
       let left = rect.right + window.scrollX - dropdownWidth;
-      // Ensure it doesn't overflow screen left/right
       if (left < window.scrollX + margin) {
         left = window.scrollX + margin;
       } else if (left + dropdownWidth > window.scrollX + window.innerWidth - margin) {
@@ -178,7 +179,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
 
   const showToast = (message: string) => {
     setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   const handleCardClick = () => {
@@ -188,6 +189,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isLiking) return;
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -195,24 +197,36 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
       return;
     }
 
+    setIsLiking(true);
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
     if (!isOwner) {
       setLikes(prev => wasLiked ? prev - 1 : prev + 1);
     }
 
-    const res = await toggleLike(id, wasLiked);
-    if (!res.success) {
+    try {
+      const res = await toggleLike(id, wasLiked);
+      if (!res.success) {
+        setIsLiked(wasLiked);
+        if (!isOwner) {
+          setLikes(prev => wasLiked ? prev + 1 : prev - 1);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
       setIsLiked(wasLiked);
       if (!isOwner) {
         setLikes(prev => wasLiked ? prev + 1 : prev - 1);
       }
+    } finally {
+      setIsLiking(false);
     }
   };
 
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isSaving) return;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -228,12 +242,21 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
   };
 
   const handleUnsaveConfirm = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     setIsSaved(false);
-    const res = await removePromptFromAllCollections(id);
-    if (!res.success) {
+    try {
+      const res = await removePromptFromAllCollections(id);
+      if (!res.success) {
+        setIsSaved(true);
+      } else {
+        showToast('Removed from collections.');
+      }
+    } catch (err) {
+      console.error('Failed to unsave prompt:', err);
       setIsSaved(true);
-    } else {
-      showToast('Removed from collections.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -417,7 +440,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/[0.03] via-transparent to-transparent pointer-events-none" />
               {/* Top row: Tool badge */}
               <div className="flex justify-between items-start">
-                <span className="px-2.5 py-1 rounded-full bg-zinc-900/5 text-[9px] font-black uppercase tracking-wider text-zinc-600 border border-zinc-900/5 backdrop-blur-xs">
+                <span className="px-2.5 py-1 rounded-full bg-zinc-900/5 text-[9px] font-black uppercase tracking-wider text-zinc-650 border border-zinc-900/5 backdrop-blur-xs">
                   {tool}
                 </span>
                 <Sparkles className="w-4 h-4 text-purple-400" />
@@ -432,7 +455,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               </div>
 
               {/* Bottom: Registry label */}
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
                 <span>Collaborative Prompt Registry</span>
               </div>
             </div>
@@ -460,8 +483,6 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
                 </button>
               </div>
             </div>
-
-
 
             {/* Bottom-left overlay: Aspect ratio and Tool badges */}
             <div className={`absolute bottom-4 left-4 flex flex-wrap gap-1.5 pointer-events-none z-40 transition-all duration-300 ${menuOpen ? 'translate-y-0 opacity-100' : 'md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 translate-y-0 opacity-100'}`}>

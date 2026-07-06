@@ -133,8 +133,32 @@ export async function getTrendingData(timeframe: 'Today' | 'This Week' | 'This M
         avatar_url: p.avatar_url,
         badges: p.badges
       },
-      trendScore: p.trend_score
+      trendScore: p.trend_score,
+      aspect_ratio: p.aspect_ratio || '1:1',
+      image_width: p.image_width || null,
+      image_height: p.image_height || null
     }));
+
+  // Fetch true aspect ratios and image dimensions from the prompts table
+  const promptIds = formattedScoredPrompts.map(p => p.id);
+  if (promptIds.length > 0) {
+    const { data: dims } = await supabase
+      .from('prompts')
+      .select('id, aspect_ratio, image_width, image_height')
+      .in('id', promptIds);
+      
+    if (dims && dims.length > 0) {
+      const dimMap = new Map(dims.map(d => [d.id, d]));
+      formattedScoredPrompts.forEach(p => {
+        const d = dimMap.get(p.id);
+        if (d) {
+          p.aspect_ratio = d.aspect_ratio || '1:1';
+          p.image_width = d.image_width || null;
+          p.image_height = d.image_height || null;
+        }
+      });
+    }
+  }
 
   // 4. Split into Prompts and Remixes
   const trendingPrompts = formattedScoredPrompts.filter((p: any) => !p.remix_of).slice(0, 30);

@@ -48,6 +48,10 @@ export default function PromptActions({
   const [menuOpen, setMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  
+  // Lock state
+  const [isLiking, setIsLiking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -93,7 +97,9 @@ export default function PromptActions({
       setIsLoginRequiredOpen(true);
       return;
     }
+    if (isLiking) return;
     
+    setIsLiking(true);
     // Optimistic update
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
@@ -101,14 +107,25 @@ export default function PromptActions({
       setLikes(prev => wasLiked ? prev - 1 : prev + 1);
     }
 
-    const res = await toggleLike(promptId, wasLiked);
-    if (!res.success) {
-      // Revert on failure
+    try {
+      const res = await toggleLike(promptId, wasLiked);
+      if (!res.success) {
+        // Revert on failure
+        setIsLiked(wasLiked);
+        if (!isOwner) {
+          setLikes(prev => wasLiked ? prev + 1 : prev - 1);
+        }
+        showToast('Error updating like.');
+      }
+    } catch (err) {
+      console.error(err);
       setIsLiked(wasLiked);
       if (!isOwner) {
         setLikes(prev => wasLiked ? prev + 1 : prev - 1);
       }
       showToast('Error updating like.');
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -117,6 +134,7 @@ export default function PromptActions({
       setIsLoginRequiredOpen(true);
       return;
     }
+    if (isSaving) return;
     
     if (isSaved) {
       setIsUnsaveOpen(true);
@@ -126,13 +144,23 @@ export default function PromptActions({
   };
 
   const handleUnsaveConfirm = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     setIsSaved(false);
-    const res = await removePromptFromAllCollections(promptId);
-    if (!res.success) {
+    try {
+      const res = await removePromptFromAllCollections(promptId);
+      if (!res.success) {
+        setIsSaved(true);
+        showToast('Error unsaving prompt.');
+      } else {
+        showToast('Removed from collections.');
+      }
+    } catch (err) {
+      console.error(err);
       setIsSaved(true);
       showToast('Error unsaving prompt.');
-    } else {
-      showToast('Removed from collections.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
