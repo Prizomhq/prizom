@@ -36,6 +36,11 @@ CREATE POLICY "Users can insert own saved_prompts." ON public.saved_prompts
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND is_approved = true
     )
+    -- Hardened ownership check:
+    AND EXISTS (
+      SELECT 1 FROM public.collections 
+      WHERE id = collection_id AND user_id = auth.uid()
+    )
   );
 
 -- D. Comments

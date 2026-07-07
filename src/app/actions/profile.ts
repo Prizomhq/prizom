@@ -264,6 +264,12 @@ export async function deactivateAccountAction(reason: string, feedback?: string)
 
     if (error) throw error;
 
+    // Sync Auth metadata
+    const adminSupabase = await createAdminClient();
+    await adminSupabase.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, is_deactivated: true }
+    });
+
     // Send deactivation email
     const { data: profile } = await supabase
       .from('profiles')
@@ -310,6 +316,12 @@ export async function reactivateAccountAction() {
 
     if (error) throw error;
 
+    // Sync Auth metadata
+    const adminSupabase = await createAdminClient();
+    await adminSupabase.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, is_deactivated: false }
+    });
+
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (err: any) {
@@ -352,6 +364,12 @@ export async function requestAccountDeletionAction(password: string, reason: str
       .eq('id', user.id);
 
     if (error) throw error;
+
+    // Sync Auth metadata
+    const adminSupabase = await createAdminClient();
+    await adminSupabase.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, is_deactivated: true, pending_deletion: true }
+    });
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -398,6 +416,12 @@ export async function cancelAccountDeletionAction() {
       .eq('id', user.id);
 
     if (error) throw error;
+
+    // Sync Auth metadata
+    const adminSupabase = await createAdminClient();
+    await adminSupabase.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, is_deactivated: false, pending_deletion: false }
+    });
 
     revalidatePath('/', 'layout');
     return { success: true };

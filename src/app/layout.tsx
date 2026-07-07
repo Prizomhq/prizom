@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -14,11 +14,16 @@ import GoogleAnalyticsWrapper from "@/components/analytics/GoogleAnalyticsWrappe
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
-  variable: "--font-geist-sans",
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
 const inter = Inter({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
@@ -48,10 +53,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
+      className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-white" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-[#fcfcfc] text-zinc-900" suppressHydrationWarning>
         {!envCheck.success ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-zinc-950 min-h-screen text-center">
             <div className="max-w-md w-full bg-zinc-900 border border-red-500/30 rounded-2xl p-8 shadow-2xl shadow-red-950/20">

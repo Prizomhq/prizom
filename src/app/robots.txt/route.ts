@@ -12,13 +12,17 @@ export async function GET(request: Request) {
 
   const robots = `User-agent: *
 Allow: /
-
 # Directories
 Disallow: /admin/
 Disallow: /api/
 Disallow: /settings
 Disallow: /create
-
+Disallow: /profile
+Disallow: /notifications
+Disallow: /restore-account
+Disallow: /reactivate-account
+Disallow: /suspended
+Disallow: /account-appeal
 # Sitemap
 Sitemap: ${siteUrl}/sitemap.xml
 `;

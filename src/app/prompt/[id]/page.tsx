@@ -615,12 +615,19 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                 <div key={remix.id} className="bg-white border border-zinc-200/60 rounded-3xl p-3 hover:shadow-xl hover:border-zinc-300 transition-all group flex flex-col h-full relative overflow-hidden">
                   {/* Thumbnail */}
                   <Link href={`/prompt/${remix.id}`} className="aspect-square w-full rounded-2xl overflow-hidden bg-zinc-100 relative block mb-3 border border-zinc-100">
-                    <img 
-                      src={getOptimizedImageUrl(remix.image_url, 'card')} 
-                      alt={remix.title} 
-                      className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300" 
-                      loading="lazy"
-                    />
+                    {remix.image_url ? (
+                      <img 
+                        src={getOptimizedImageUrl(remix.image_url, 'card')} 
+                        alt={remix.title} 
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300" 
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50/50 flex flex-col items-center justify-center p-4 text-center">
+                        <Sparkles className="w-6 h-6 text-purple-300 mb-1" />
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Text Prompt</span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="text-xs font-bold text-white bg-black/60 px-3 py-1.5 rounded-full tracking-wider">View Variation</span>
                     </div>

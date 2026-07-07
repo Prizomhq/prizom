@@ -16,7 +16,9 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
   const aspectRatioFilter = typeof resolvedParams.aspectRatio === 'string' ? resolvedParams.aspectRatio : undefined;
   const searchQuery = typeof resolvedParams.query === 'string' 
     ? resolvedParams.query 
-    : (typeof resolvedParams.search === 'string' ? resolvedParams.search : undefined);
+    : (typeof resolvedParams.search === 'string' 
+       ? resolvedParams.search 
+       : (typeof resolvedParams.q === 'string' ? resolvedParams.q : undefined));
 
   // 1. Fetch categories and tools directories
   const { categories, ai_tools } = await getPlatformCategoriesAndTools();

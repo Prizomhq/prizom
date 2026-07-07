@@ -272,7 +272,7 @@ export async function getAdminAnalytics() {
 
     // Active Prompt Saves count
     const { count: activeSaves } = await supabase
-      .from('saves')
+      .from('saved_prompts')
       .select('*', { count: 'exact', head: true });
 
     // Active Prompt Copies count
@@ -767,6 +767,18 @@ export async function adminCancelDeletionAction(userId: string) {
     .eq('id', userId);
 
   if (error) return { success: false, error: error.message };
+
+  // Sync Auth metadata
+  try {
+    const { data: { user: targetUser } } = await supabase.auth.admin.getUserById(userId);
+    if (targetUser) {
+      await supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { ...targetUser.user_metadata, is_deactivated: false, pending_deletion: false }
+      });
+    }
+  } catch (metaErr) {
+    console.warn('[ADMIN SYNC WARN] Failed to sync auth metadata for cancel deletion:', metaErr);
+  }
 
   // Log action
   const { data: { user } } = await (await createClient()).auth.getUser();

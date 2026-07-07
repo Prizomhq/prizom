@@ -29,6 +29,17 @@ export async function createPromptAction(promptData: {
     return { success: false, error: 'Unauthorized: Authentication required.' };
   }
 
+  // Validate input constraints
+  if (!promptData.title || promptData.title.trim().length < 3 || promptData.title.trim().length > 100) {
+    return { success: false, error: 'Title must be between 3 and 100 characters.' };
+  }
+  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 5000) {
+    return { success: false, error: 'Prompt text must be between 10 and 5000 characters.' };
+  }
+  if (promptData.tags && promptData.tags.some(t => t.length > 25)) {
+    return { success: false, error: 'Tags cannot exceed 25 characters each.' };
+  }
+
   // Check if user is approved (required for invite-only publishing)
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
@@ -188,11 +199,14 @@ export async function updatePromptAction(
   }
 
   // 2. Validate input fields
-  if (!promptData.title || !promptData.title.trim()) {
-    return { success: false, error: 'Title is required.' };
+  if (!promptData.title || promptData.title.trim().length < 3 || promptData.title.trim().length > 100) {
+    return { success: false, error: 'Title must be between 3 and 100 characters.' };
   }
-  if (!promptData.prompt_text || !promptData.prompt_text.trim()) {
-    return { success: false, error: 'Prompt content is required.' };
+  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 5000) {
+    return { success: false, error: 'Prompt text must be between 10 and 5000 characters.' };
+  }
+  if (promptData.tags && promptData.tags.some(t => t.length > 25)) {
+    return { success: false, error: 'Tags cannot exceed 25 characters each.' };
   }
 
   try {

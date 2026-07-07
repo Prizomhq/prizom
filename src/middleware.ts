@@ -71,16 +71,10 @@ export async function middleware(request: NextRequest) {
   let isPendingDeletion = false;
 
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, is_deactivated, pending_deletion')
-      .eq('id', user.id)
-      .single();
-    if (profile) {
-      userRole = profile.role || 'user';
-      isDeactivated = profile.is_deactivated || false;
-      isPendingDeletion = profile.pending_deletion || false;
-    }
+    // Session meta claims synced during login/sync actions:
+    userRole = user.user_metadata?.role || 'user';
+    isDeactivated = user.user_metadata?.is_deactivated || false;
+    isPendingDeletion = user.user_metadata?.pending_deletion || false;
   }
 
   // Account Lifecycle routing checks

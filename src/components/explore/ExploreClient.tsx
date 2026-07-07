@@ -43,7 +43,16 @@ export default function ExploreClient({
   
   // Local state for search text and filter drawer
   const [searchVal, setSearchVal] = useState(activeFilters.query || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchVal);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Debounce input changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchVal);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchVal]);
 
   // Filter states
   const [activeCategory, setActiveCategory] = useState(activeFilters.category || '');
@@ -119,7 +128,7 @@ export default function ExploreClient({
           limit: 12,
           interests,
           filters: {
-            query: searchVal,
+            query: debouncedSearch,
             category: activeCategory,
             tool: activeTool,
             aspectRatio: activeAspectRatio
@@ -135,7 +144,7 @@ export default function ExploreClient({
       }
     }
     loadFilteredFeed();
-  }, [searchVal, activeCategory, activeTool, activeAspectRatio]);
+  }, [debouncedSearch, activeCategory, activeTool, activeAspectRatio]);
 
   const saveRecentSearch = (term: string) => {
     if (!term.trim()) return;
@@ -165,7 +174,7 @@ export default function ExploreClient({
               limit: 12,
               interests,
               filters: {
-                query: searchVal,
+                query: debouncedSearch,
                 category: activeCategory,
                 tool: activeTool,
                 aspectRatio: activeAspectRatio
@@ -199,7 +208,7 @@ export default function ExploreClient({
     }
 
     return () => observer.disconnect();
-  }, [page, hasMore, loading, loadingMore, searchVal, activeCategory, activeTool, activeAspectRatio]);
+  }, [page, hasMore, loading, loadingMore, debouncedSearch, activeCategory, activeTool, activeAspectRatio]);
 
   // Handle category visual card selection
   const handleCategorySelect = (catName: string) => {
