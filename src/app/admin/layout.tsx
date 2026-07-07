@@ -86,9 +86,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center text-zinc-400">
+      <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center text-zinc-600">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--color-neon-purple)]" />
           <span className="text-xs font-black uppercase tracking-widest">Validating Clearance...</span>
         </div>
       </div>
@@ -161,17 +161,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const filteredNav = navItems.filter(item => item.roles.includes(adminUser.role));
 
   return (
-    <div className="h-screen overflow-hidden bg-[#0a0a0c] text-zinc-100 flex flex-col md:flex-row font-sans">
+    <div className="h-screen overflow-hidden bg-[#fcfcfc] text-zinc-800 flex flex-col md:flex-row font-sans">
       
       {/* Mobile Top Navigation Header */}
-      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-[#121215] border-b border-zinc-800 shrink-0 z-40 relative">
+      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-zinc-200 shrink-0 z-40 relative">
         <Link href="/admin" className="flex items-center space-x-2.5">
           <PrizomLogo size={36} />
-          <span className="font-black text-lg tracking-tight text-white">Prizom Admin</span>
+          <span className="font-black text-lg tracking-tight text-zinc-900">Prizom Admin</span>
         </Link>
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1.5 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
+          className="p-1.5 rounded-xl hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -187,34 +187,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Admin Panel Sidebar Shell */}
       <aside className={`
-        fixed md:sticky top-0 left-0 bottom-0 w-64 h-full bg-[#121215]/95 border-r border-zinc-800/80 z-35 flex flex-col justify-between shrink-0 p-6 transition-transform duration-300 backdrop-blur-xl md:translate-x-0
+        fixed md:sticky top-0 left-0 bottom-0 w-64 h-full bg-white border-r border-zinc-200 z-35 flex flex-col justify-between shrink-0 p-6 transition-transform duration-300 backdrop-blur-xl md:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="flex flex-col space-y-8 overflow-y-auto no-scrollbar flex-1 mb-6">
           {/* Logo & Header */}
           <Link href="/admin" className="hidden md:flex items-center space-x-3 w-fit group">
             <PrizomLogo size={40} className="transition-transform group-hover:scale-105 duration-300" />
-            <span className="font-black text-xl tracking-tight text-white">
+            <span className="font-black text-xl tracking-tight text-zinc-900">
               Prizom
             </span>
-            <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase">ctrl</span>
+            <span className="text-[9px] font-black tracking-widest text-zinc-550 uppercase">ctrl</span>
           </Link>
 
           {/* Admin Info Badge */}
-          <div className="p-4 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 flex items-center gap-3 animate-in fade-in duration-200">
+          <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center gap-3 animate-in fade-in duration-200">
             {adminUser.avatarUrl ? (
               <img 
                 src={getOptimizedImageUrl(adminUser.avatarUrl, 'avatar')} 
                 alt={adminUser.username || 'Admin'}
-                className="w-9 h-9 object-cover rounded-xl bg-zinc-800 animate-in zoom-in-95 duration-200"
+                className="w-9 h-9 object-cover rounded-xl bg-zinc-100 animate-in zoom-in-95 duration-200"
               />
             ) : (
-              <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-xs font-black uppercase text-zinc-300 animate-in zoom-in-95 duration-200">
+              <div className="w-9 h-9 rounded-xl bg-zinc-200 flex items-center justify-center text-xs font-black uppercase text-zinc-650 animate-in zoom-in-95 duration-200">
                 {adminUser.username?.[0] || adminUser.email?.[0] || 'A'}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-zinc-200 truncate">{adminUser.username || 'System Node'}</p>
+              <p className="text-xs font-black text-zinc-800 truncate">{adminUser.username || 'System Node'}</p>
               <span className={`inline-flex px-2 py-0.5 mt-1 border rounded-md text-[9px] font-black uppercase tracking-wider ${roleColors[adminUser.role]}`}>
                 {roleLabels[adminUser.role]}
               </span>
@@ -236,15 +236,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   className={`
                     flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all duration-200 group/nav
                     ${isActive 
-                      ? 'bg-indigo-600 text-white shadow-[0_4px_15px_rgba(99,102,241,0.25)]' 
-                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40'}
+                      ? 'bg-[var(--color-neon-purple)] text-white shadow-md' 
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'}
                   `}
                 >
                   <span className="flex items-center gap-3">
-                    <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-zinc-500 group-hover/nav:text-zinc-300 transition-colors'}`} />
+                    <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-zinc-500 group-hover/nav:text-zinc-700 transition-colors'}`} />
                     {item.label}
                   </span>
-                  <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover/nav:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-zinc-600'}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover/nav:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-zinc-650'}`} />
                 </Link>
               );
             })}
@@ -252,17 +252,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Footer Actions - Bottom Locked */}
-        <div className="space-y-4 pt-6 border-t border-zinc-800/80 shrink-0">
+        <div className="space-y-4 pt-6 border-t border-zinc-200 shrink-0">
           <Link 
             href="/" 
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white text-xs font-black uppercase tracking-wider transition-all duration-200"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 text-zinc-700 hover:text-zinc-900 text-xs font-black uppercase tracking-wider transition-all duration-200"
           >
             <Activity className="w-4 h-4 text-[var(--color-electric-blue)]" />
             Return to Main Site
           </Link>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-950/40 hover:bg-red-950/20 border border-zinc-800 hover:border-red-900/30 text-zinc-400 hover:text-red-400 text-xs font-black uppercase tracking-wider transition-all duration-200"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-50 hover:bg-red-50 border border-zinc-200 hover:border-red-200 text-zinc-600 hover:text-red-650 text-xs font-black uppercase tracking-wider transition-all duration-200"
           >
             <span className="flex items-center gap-3">
               <LogOut className="w-4.5 h-4.5" />

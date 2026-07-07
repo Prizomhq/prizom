@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Loader2, UserMinus, UserCheck, UserPlus } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import Link from 'next/link';
 import Avatar from '@/components/ui/Avatar';
 import { getFollowers, getFollowing, removeFollower, toggleFollow } from '@/app/actions/follows';
+import { FollowUser } from '@/types';
 
 interface FollowListModalProps {
   isOpen: boolean;
@@ -22,17 +23,15 @@ export default function FollowListModal({
   onClose,
   userId,
   type,
-  isLoggedIn,
   currentUserId,
   creatorName
 }: FollowListModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<FollowUser[]>([]);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -60,7 +59,7 @@ export default function FollowListModal({
             const myFollowing = await getFollowing(currentUserId);
             setFollowingIds(new Set((myFollowing || []).map(u => u.id)));
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error(err);
           setError('Failed to load list. Please try again.');
         } finally {
@@ -77,6 +76,47 @@ export default function FollowListModal({
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, userId, type, currentUserId]);
+
+  // Keyboard accessibility and focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        const modalElement = document.getElementById('follow-list-modal');
+        if (!modalElement) return;
+
+        const focusableElementsString = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const focusableElements = modalElement.querySelectorAll(focusableElementsString);
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !mounted) return null;
 
@@ -143,14 +183,18 @@ export default function FollowListModal({
       onClick={onClose}
     >
       <div 
+        id="follow-list-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="follow-list-title"
         className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl border border-white/50 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col max-h-[80vh] relative"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-xl font-black text-zinc-900 tracking-tight">{title}</h2>
-            <p className="text-xs text-zinc-400 font-semibold mt-0.5">{creatorName}</p>
+            <h2 id="follow-list-title" className="text-xl font-black text-zinc-900 tracking-tight">{title}</h2>
+            <p className="text-xs text-zinc-650 font-semibold mt-0.5">{creatorName}</p>
           </div>
           <button 
             onClick={onClose}
@@ -216,7 +260,7 @@ export default function FollowListModal({
               <p className="text-zinc-500 font-bold">
                 {searchQuery ? 'No matching users found' : `No ${type} yet`}
               </p>
-              <p className="text-xs text-zinc-400 mt-1 max-w-[220px]">
+              <p className="text-xs text-zinc-600 mt-1 max-w-[220px]">
                 {searchQuery ? 'Try typing a different name.' : `Follower metrics sync instantly.`}
               </p>
             </div>
@@ -243,7 +287,7 @@ export default function FollowListModal({
                         <span className="font-extrabold text-[14px] text-zinc-900 truncate leading-tight group-hover:text-[var(--color-neon-purple)] transition-colors">
                           {userItem.full_name || userItem.username}
                         </span>
-                        <span className="text-xs text-zinc-400 font-bold truncate leading-tight mt-0.5">
+                        <span className="text-xs text-zinc-650 font-bold truncate leading-tight mt-0.5">
                           @{userItem.username}
                         </span>
                         {userItem.bio && (

@@ -3,9 +3,11 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-neon-purple: #A855F7;
-  --color-electric-blue: #06B6D4;
-  --color-accent-pink: #EC4899;
+  --color-neon-purple: #4f46e5;
+  --color-electric-blue: #0f172a;
+  --color-accent-pink: #1e293b;
+  --color-zinc-550: #71717a;
+  --color-zinc-650: #4b5563;
   --color-dark-card: rgba(0, 0, 0, 0.03);
   --color-dark-border: rgba(0, 0, 0, 0.08);
   --font-sans: var(--font-geist-sans);
@@ -124,30 +126,6 @@ body {
 :root {
   --color-zinc-600: #52525b;
   --color-zinc-700: #3f3f46;
-}
-
-.text-zinc-400:not(
-  [class*="bg-zinc-9"] *, 
-  [class*="bg-black"] *, 
-  [class*="bg-[#0"] *, 
-  [class*="bg-[#1"] *, 
-  [class*="bg-[#2"] *, 
-  [class*="dark"] *, 
-  .dark *
-) {
-  color: var(--color-zinc-600) !important;
-}
-
-.text-zinc-500:not(
-  [class*="bg-zinc-9"] *, 
-  [class*="bg-black"] *, 
-  [class*="bg-[#0"] *, 
-  [class*="bg-[#1"] *, 
-  [class*="bg-[#2"] *, 
-  [class*="dark"] *, 
-  .dark *
-) {
-  color: var(--color-zinc-700) !important;
 }
 
 /* Prevent Turnstile widget overflow/clipping on very narrow screens (e.g. 320px) */

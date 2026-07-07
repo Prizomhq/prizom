@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Check, ChevronRight, ChevronLeft, Loader2, ArrowRight } from 'lucide-react';
+import { Sparkles, Check, ChevronRight, ChevronLeft, Loader2, ArrowRight, Palette, Compass, Theater, Camera, Trophy, Image as ImageIcon, Film, Cpu, Lightbulb } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import DynamicDialog from '@/components/ui/DynamicDialog';
 import {
@@ -22,8 +22,19 @@ const TOOL_COLORS = [
   'from-yellow-500/10 to-orange-500/10 text-yellow-700 border-yellow-200',
 ];
 
-// Category emoji palette — applied in order to DB-fetched categories
-const CATEGORY_ICONS = ['✨', '🎨', '🌌', '🎭', '📸', '🏆', '🖼️', '🎬', '🤖', '💡'];
+// Category Lucide icons palette — applied in order to DB-fetched categories
+const CATEGORY_ICONS = [
+  Sparkles,
+  Palette,
+  Compass,
+  Theater,
+  Camera,
+  Trophy,
+  ImageIcon,
+  Film,
+  Cpu,
+  Lightbulb
+];
 
 export default function OnboardingWizard() {
   const [isOpen, setIsOpen] = useState(false);
@@ -240,7 +251,7 @@ export default function OnboardingWizard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {dbCategories.map((cat, idx) => {
                     const isSelected = selectedCategories.includes(cat.name);
-                    const icon = CATEGORY_ICONS[idx % CATEGORY_ICONS.length];
+                    const IconComponent = CATEGORY_ICONS[idx % CATEGORY_ICONS.length];
                     return (
                       <button
                         key={cat.id}
@@ -252,7 +263,7 @@ export default function OnboardingWizard() {
                         }`}
                       >
                         <div className="flex items-center gap-3 overflow-hidden">
-                          <span className="text-2xl shrink-0">{icon}</span>
+                          <IconComponent className={`w-6 h-6 shrink-0 ${isSelected ? 'text-[var(--color-neon-purple)]' : 'text-zinc-500'}`} />
                           <div className="flex flex-col">
                             <span className="font-extrabold text-[15px] text-zinc-900">{cat.name}</span>
                             {cat.description && (

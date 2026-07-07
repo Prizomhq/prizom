@@ -16,7 +16,7 @@ interface CollectionItem {
     } | null;
   }[];
 }
-import { X, Bookmark, Plus, Loader2, Image as ImageIcon, Sparkles, FolderPlus } from 'lucide-react';
+import { X, Bookmark, Loader2, Image as ImageIcon, FolderPlus } from 'lucide-react';
 import { getUserCollections, createCollection, togglePromptInCollection } from '@/app/actions/interactions';
 
 interface SaveModalProps {
@@ -65,6 +65,47 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, promptId]);
+
+  // Keyboard accessibility and focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        const modalElement = document.getElementById('save-modal');
+        if (!modalElement) return;
+
+        const focusableElementsString = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const focusableElements = modalElement.querySelectorAll(focusableElementsString);
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !mounted) return null;
 
@@ -124,6 +165,10 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
   const modalContent = (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
       <div 
+        id="save-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="save-modal-title"
         className={`bg-white rounded-[2rem] w-full ${isFirstTime && !loading ? 'max-w-md' : 'max-w-md'} max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-white/50 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 relative`}
         onClick={e => e.stopPropagation()}
       >
@@ -145,7 +190,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
             <div className="w-20 h-20 bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[var(--color-neon-purple)]/30">
               <FolderPlus className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">Create your first collection</h2>
+            <h2 id="save-modal-title" className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">Create your first collection</h2>
             <p className="text-zinc-500 font-medium mb-8">
               Organize your favorite prompts by creating a collection. e.g. &quot;Cinematic Prompts&quot;
             </p>
@@ -217,7 +262,7 @@ export default function SaveModal({ isOpen, onClose, promptId, onSaveSuccess }: 
           // HAS COLLECTIONS VIEW
           <div className="flex flex-col overflow-hidden flex-1">
             <div className="p-6 border-b border-zinc-100 shrink-0 pr-16">
-              <h2 className="text-xl font-black text-zinc-900 tracking-tight">Save Prompt</h2>
+              <h2 id="save-modal-title" className="text-xl font-black text-zinc-900 tracking-tight">Save Prompt</h2>
             </div>
             
             {/* Create inline */}

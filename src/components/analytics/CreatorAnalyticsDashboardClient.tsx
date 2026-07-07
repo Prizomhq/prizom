@@ -117,7 +117,7 @@ export default function CreatorAnalyticsDashboardClient({
     } else if (initialCopies >= 10) {
       return { title: 'Rising Pro Creator', level: 2, theme: 'from-blue-500 to-indigo-500 text-blue-300' };
     } else {
-      return { title: 'Community Creator', level: 1, theme: 'from-zinc-500 to-zinc-400 text-zinc-300' };
+      return { title: 'Community Creator', level: 1, theme: 'from-zinc-500 to-zinc-400 text-zinc-700' };
     }
   }, [initialCopies, creator.follower_count]);
 
@@ -313,7 +313,7 @@ export default function CreatorAnalyticsDashboardClient({
         target: 500,
         current: initialCopies,
         unlocked: initialCopies >= 500,
-        badgeTheme: 'from-indigo-500/20 to-purple-500/20 border-indigo-500/30 text-indigo-400 shadow-indigo-500/10'
+        badgeTheme: 'from-indigo-500/20 to-purple-500/20 border-indigo-400/30 text-indigo-700 shadow-indigo-500/10'
       },
       {
         id: '1000_copies',
@@ -331,7 +331,7 @@ export default function CreatorAnalyticsDashboardClient({
         target: 1,
         current: creator.badges?.includes('verified') ? 1 : 0,
         unlocked: creator.badges?.includes('verified'),
-        badgeTheme: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10'
+        badgeTheme: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-700 shadow-emerald-500/10'
       },
       {
         id: 'top_trending',
@@ -373,7 +373,7 @@ export default function CreatorAnalyticsDashboardClient({
   }, [initialCopies, creator.follower_count, creator.badges, prompts]);
 
   return (
-    <div className="min-h-screen pb-24 pt-8 bg-[#0a0a0c] text-zinc-100 relative overflow-hidden select-none">
+    <div className="min-h-screen pb-24 pt-8 bg-[#fcfcfc] text-zinc-800 relative overflow-hidden select-none">
       
       {/* Premium Ambient Background Glows */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-[var(--color-electric-blue)]/5 via-indigo-500/5 to-transparent rounded-full blur-[130px] pointer-events-none -z-10 animate-pulse"></div>
@@ -382,35 +382,35 @@ export default function CreatorAnalyticsDashboardClient({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 animate-in fade-in duration-300">
         
         {/* Back Link */}
-        <Link href={`/creator/${creator.username}`} className="inline-flex items-center text-zinc-500 hover:text-white font-black text-xs uppercase tracking-wider transition-colors mb-10 group">
+        <Link href={`/creator/${creator.username}`} className="inline-flex items-center text-zinc-700 hover:text-zinc-950 font-black text-xs uppercase tracking-wider transition-colors mb-10 group">
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-0.5 transition-transform" />
           Exit Creator Studio
         </Link>
 
         {/* Dashboard Profile Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-zinc-800/80 pb-8 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-zinc-200 pb-8 mb-10">
           <div className="flex items-center gap-4.5">
             <Avatar 
               src={creator.avatar_url} 
               username={creator.username} 
               size="lg" 
-              className="border-2 border-indigo-500 shadow-lg shadow-indigo-500/20"
+              className="border-2 border-indigo-400 shadow-lg shadow-indigo-500/20"
             />
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 border border-indigo-900/30 bg-indigo-950/20 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-md">
+                <span className="px-2.5 py-0.5 border border-indigo-200 bg-indigo-50 text-indigo-700 text-[8px] font-black uppercase tracking-widest rounded-md">
                   Studio mode
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Telemetry Node Online</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-700">Telemetry Node Online</span>
               </div>
-              <h1 className="text-3xl font-black text-white mt-1 leading-tight flex items-center gap-2">
+              <h1 className="text-3xl font-black text-zinc-900 mt-1 leading-tight flex items-center gap-2">
                 {creator.full_name || creator.username}
-                <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase flex items-center gap-1">
+                <span className="text-emerald-700 bg-emerald-50 border border-emerald-250 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   Verified Creator
                 </span>
               </h1>
-              <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
+              <p className="text-zinc-700 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
                 <span className={`inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-r ${creatorLevelInfo.theme}`} />
                 {creatorLevelInfo.title}
                 <span className="text-zinc-650">•</span>
@@ -421,13 +421,13 @@ export default function CreatorAnalyticsDashboardClient({
           
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-right hidden md:block">
-              <span className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Follower Network</span>
-              <p className="text-lg font-black text-white leading-tight">{creator.follower_count || 0}</p>
+              <span className="text-[9px] font-black uppercase text-zinc-700 tracking-wider">Follower Network</span>
+              <p className="text-lg font-black text-zinc-900 leading-tight">{creator.follower_count || 0}</p>
             </div>
-            <div className="h-8 w-px bg-zinc-800 hidden md:block"></div>
-            <div className="px-4 py-2.5 bg-zinc-950/50 border border-zinc-850 rounded-2xl flex items-center gap-2">
+            <div className="h-8 w-px bg-zinc-200 hidden md:block"></div>
+            <div className="px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-500 animate-pulse animate-duration-1000" />
-              <span className="text-[10px] font-black text-zinc-300 uppercase tracking-wider">Dashboard Synced</span>
+              <span className="text-[10px] font-black text-zinc-700 uppercase tracking-wider">Dashboard Synced</span>
             </div>
           </div>
         </div>
@@ -435,22 +435,22 @@ export default function CreatorAnalyticsDashboardClient({
         {/* Dynamic Metric KPIs Section */}
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           {/* Card 1: Creator Power Score */}
-          <div className="col-span-2 bg-[#121215]/60 border border-zinc-800 p-6 rounded-3xl relative overflow-hidden group hover:border-zinc-700 transition-all duration-200 shadow-lg shadow-indigo-500/[0.01]">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 blur-2xl rounded-full pointer-events-none"></div>
-            <div className="flex items-center gap-2 text-zinc-500 font-black uppercase text-[9px] tracking-wider mb-4">
-              <Award className="w-4 h-4 text-indigo-400" />
+          <div className="col-span-2 bg-white border border-zinc-200 p-6 rounded-3xl relative overflow-hidden group hover:border-zinc-300 transition-all duration-200 shadow-lg shadow-indigo-500/[0.01]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 blur-2xl rounded-full pointer-events-none"></div>
+            <div className="flex items-center gap-2 text-zinc-700 font-black uppercase text-[9px] tracking-wider mb-4">
+              <Award className="w-4 h-4 text-indigo-700" />
               Creator Success Score
             </div>
             <div className="flex items-baseline gap-2.5">
-              <span className="text-5xl font-black text-white leading-none tracking-tight">
+              <span className="text-5xl font-black text-zinc-900 leading-none tracking-tight">
                 {Math.round(engagementScore).toLocaleString()}
               </span>
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-0.5">
+              <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-0.5">
                 <TrendingUp className="w-3.5 h-3.5 animate-bounce" />
                 +{avgEngagementRate}% impact
               </span>
             </div>
-            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-4 leading-normal">
+            <p className="text-[10px] text-zinc-700 font-bold uppercase tracking-wider mt-4 leading-normal">
               Weighted engagement index compiled across copies, saves, remixes, likes, and impressions.
             </p>
           </div>
@@ -460,19 +460,19 @@ export default function CreatorAnalyticsDashboardClient({
             onClick={() => setActiveMetric('views')}
             className={`cursor-pointer border p-5.5 rounded-3xl flex flex-col justify-between group transition-all duration-200 shadow-md ${
               activeMetric === 'views' 
-                ? 'bg-indigo-600/10 border-indigo-500 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
-                : 'bg-[#121215]/40 border-zinc-850 hover:border-zinc-800'
+                ? 'bg-indigo-50 border-indigo-400 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
+                : 'bg-white border-zinc-200 hover:border-zinc-200'
             }`}
           >
-            <div className="flex items-center justify-between text-zinc-500 font-black uppercase text-[9px] tracking-wider mb-5">
+            <div className="flex items-center justify-between text-zinc-700 font-black uppercase text-[9px] tracking-wider mb-5">
               Total Views
-              <MousePointerClick className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'views' ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-350'}`} />
+              <MousePointerClick className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'views' ? 'text-indigo-700' : 'text-zinc-700 group-hover:text-zinc-350'}`} />
             </div>
             <div>
-              <span className="text-3xl font-black text-white tracking-tight leading-none">
+              <span className="text-3xl font-black text-zinc-900 tracking-tight leading-none">
                 {activeStats.views.toLocaleString()}
               </span>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-2">Organic hits</p>
+              <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-wider mt-2">Organic hits</p>
             </div>
           </div>
 
@@ -481,19 +481,19 @@ export default function CreatorAnalyticsDashboardClient({
             onClick={() => setActiveMetric('copies')}
             className={`cursor-pointer border p-5.5 rounded-3xl flex flex-col justify-between group transition-all duration-200 shadow-md ${
               activeMetric === 'copies' 
-                ? 'bg-indigo-600/10 border-indigo-500 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
-                : 'bg-[#121215]/40 border-zinc-850 hover:border-zinc-800'
+                ? 'bg-indigo-50 border-indigo-400 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
+                : 'bg-white border-zinc-200 hover:border-zinc-200'
             }`}
           >
-            <div className="flex items-center justify-between text-zinc-500 font-black uppercase text-[9px] tracking-wider mb-5">
+            <div className="flex items-center justify-between text-zinc-700 font-black uppercase text-[9px] tracking-wider mb-5">
               Prompt Copies
-              <Copy className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'copies' ? 'text-cyan-400' : 'text-zinc-500 group-hover:text-zinc-350'}`} />
+              <Copy className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'copies' ? 'text-cyan-400' : 'text-zinc-700 group-hover:text-zinc-350'}`} />
             </div>
             <div>
-              <span className="text-3xl font-black text-white tracking-tight leading-none">
+              <span className="text-3xl font-black text-zinc-900 tracking-tight leading-none">
                 {activeStats.copies.toLocaleString()}
               </span>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-2">Niche templates</p>
+              <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-wider mt-2">Niche templates</p>
             </div>
           </div>
 
@@ -502,33 +502,33 @@ export default function CreatorAnalyticsDashboardClient({
             onClick={() => setActiveMetric('likes')}
             className={`cursor-pointer border p-5.5 rounded-3xl flex flex-col justify-between group transition-all duration-200 shadow-md ${
               activeMetric === 'likes' 
-                ? 'bg-indigo-600/10 border-indigo-500 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
-                : 'bg-[#121215]/40 border-zinc-850 hover:border-zinc-800'
+                ? 'bg-indigo-50 border-indigo-400 hover:border-indigo-400 shadow-indigo-500/[0.05]' 
+                : 'bg-white border-zinc-200 hover:border-zinc-200'
             }`}
           >
-            <div className="flex items-center justify-between text-zinc-500 font-black uppercase text-[9px] tracking-wider mb-5">
+            <div className="flex items-center justify-between text-zinc-700 font-black uppercase text-[9px] tracking-wider mb-5">
               Total Likes
-              <Heart className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'likes' ? 'text-rose-500' : 'text-zinc-500 group-hover:text-zinc-350'}`} />
+              <Heart className={`w-4 h-4 shrink-0 transition-colors ${activeMetric === 'likes' ? 'text-rose-500' : 'text-zinc-700 group-hover:text-zinc-350'}`} />
             </div>
             <div>
-              <span className="text-3xl font-black text-white tracking-tight leading-none">
+              <span className="text-3xl font-black text-zinc-900 tracking-tight leading-none">
                 {activeStats.likes.toLocaleString()}
               </span>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-2">Appreciation ticks</p>
+              <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-wider mt-2">Appreciation ticks</p>
             </div>
           </div>
 
           {/* Card 5: Saves */}
-          <div className="bg-[#121215]/40 border border-zinc-850 p-5.5 rounded-3xl flex flex-col justify-between group hover:border-zinc-800 transition-all duration-200">
-            <div className="flex items-center justify-between text-zinc-500 font-black uppercase text-[9px] tracking-wider mb-5">
+          <div className="bg-white border border-zinc-200 p-5.5 rounded-3xl flex flex-col justify-between group hover:border-zinc-200 transition-all duration-200">
+            <div className="flex items-center justify-between text-zinc-700 font-black uppercase text-[9px] tracking-wider mb-5">
               Saved Collections
-              <Bookmark className="w-4 h-4 text-emerald-400 shrink-0" />
+              <Bookmark className="w-4 h-4 text-emerald-700 shrink-0" />
             </div>
             <div>
-              <span className="text-3xl font-black text-white tracking-tight leading-none">
+              <span className="text-3xl font-black text-zinc-900 tracking-tight leading-none">
                 {activeStats.saves.toLocaleString()}
               </span>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-2">Saved recipes</p>
+              <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-wider mt-2">Saved recipes</p>
             </div>
           </div>
         </div>
@@ -537,28 +537,28 @@ export default function CreatorAnalyticsDashboardClient({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
           
           {/* Main SVG Graph Column */}
-          <div className="lg:col-span-8 bg-[#121215]/60 border border-zinc-800 p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-zinc-750 transition-all duration-200">
+          <div className="lg:col-span-8 bg-white border border-zinc-200 p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-zinc-300 transition-all duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
                   <Activity className="w-4.5 h-4.5 text-indigo-500 animate-pulse" />
                   Growth Performance Waveform
                 </h3>
-                <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest mt-1">
                   Active telemetry curve showing historical {activeMetric} expansion
                 </p>
               </div>
 
               {/* Time Range Filter Buttons */}
-              <div className="flex bg-zinc-950/80 p-1 border border-zinc-850 rounded-xl shrink-0 self-start sm:self-center">
+              <div className="flex bg-zinc-100 p-1 border border-zinc-200 rounded-xl shrink-0 self-start sm:self-center">
                 {(['7d', '30d', '90d', 'all'] as const).map(t => (
                   <button
                     key={t}
                     onClick={() => setTimeframe(t)}
                     className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all duration-200 ${
                       timeframe === t 
-                        ? 'bg-indigo-600 text-white shadow-md' 
-                        : 'text-zinc-500 hover:text-zinc-200'
+                        ? 'bg-indigo-600 text-zinc-900 shadow-md' 
+                        : 'text-zinc-700 hover:text-zinc-800'
                     }`}
                   >
                     {t === 'all' ? 'All Time' : `${t.substring(0, t.length - 1)} Days`}
@@ -568,7 +568,7 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
 
             {/* Custom Interactive SVG Graph Rendering */}
-            <div className="h-60 w-full relative pt-4 bg-zinc-950/30 border border-zinc-850/80 rounded-2xl p-4 overflow-hidden flex items-end">
+            <div className="h-60 w-full relative pt-4 bg-zinc-50 border border-zinc-200 rounded-2xl p-4 overflow-hidden flex items-end">
               <svg viewBox="0 0 800 180" className="w-full h-full overflow-visible">
                 <defs>
                   {/* Neon Glow filters */}
@@ -627,7 +627,7 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
             
             {/* Dynamic Graph bottom labels */}
-            <div className="flex justify-between items-center mt-4 text-[9px] font-black uppercase text-zinc-550 tracking-wider">
+            <div className="flex justify-between items-center mt-4 text-[9px] font-black uppercase text-zinc-650 tracking-wider">
               {graphLabels.map((lbl, idx) => (
                 <span key={idx}>{lbl}</span>
               ))}
@@ -635,50 +635,50 @@ export default function CreatorAnalyticsDashboardClient({
           </div>
 
           {/* Right sidebar: Studio Metrics Breakdown */}
-          <div className="lg:col-span-4 bg-[#121215]/40 border border-zinc-850 p-6 rounded-[2.5rem] flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-white border border-zinc-200 p-6 rounded-[2.5rem] flex flex-col justify-between">
             <div>
-              <h3 className="text-xs font-black text-white uppercase tracking-wider mb-6 flex items-center gap-1.5">
+              <h3 className="text-xs font-black text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-1.5">
                 <Flame className="w-4 h-4 text-purple-400 shrink-0" />
                 Audience Metrics
               </h3>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
-                    <MousePointerClick className="w-4 h-4 text-zinc-500" />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Created Prompts</span>
+                    <MousePointerClick className="w-4 h-4 text-zinc-700" />
+                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Total Created Prompts</span>
                   </div>
-                  <span className="text-xs font-black text-white">{promptCount}</span>
+                  <span className="text-xs font-black text-zinc-900">{promptCount}</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-zinc-500" />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Follower Engagement Ratio</span>
+                    <Users className="w-4 h-4 text-zinc-700" />
+                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Follower Engagement Ratio</span>
                   </div>
-                  <span className="text-xs font-black text-white">
+                  <span className="text-xs font-black text-zinc-900">
                     {creator.follower_count > 0 ? (activeStats.likes / creator.follower_count).toFixed(1) : 0.0}x
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
-                    <Bookmark className="w-4 h-4 text-zinc-500" />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Saves Conversion</span>
+                    <Bookmark className="w-4 h-4 text-zinc-700" />
+                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Saves Conversion</span>
                   </div>
-                  <span className="text-xs font-black text-white">
+                  <span className="text-xs font-black text-zinc-900">
                     {activeStats.copies > 0 ? Math.round((activeStats.saves / activeStats.copies) * 100) : 0}%
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-zinc-500" />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Remixes</span>
+                    <Zap className="w-4 h-4 text-zinc-700" />
+                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Total Remixes</span>
                   </div>
-                  <span className="text-xs font-black text-white">{activeStats.remixes}</span>
+                  <span className="text-xs font-black text-zinc-900">{activeStats.remixes}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 p-4.5 bg-zinc-950/40 border border-zinc-900 rounded-2xl text-[10px] font-bold text-zinc-500 uppercase tracking-wider leading-relaxed shadow-inner">
+            <div className="mt-8 p-4.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-[10px] font-bold text-zinc-700 uppercase tracking-wider leading-relaxed shadow-inner">
               Studio insights sync on-demand. Provide high-fidelity prompt screenshots to boost impressions and drive community remixes.
             </div>
           </div>
@@ -690,21 +690,21 @@ export default function CreatorAnalyticsDashboardClient({
           {/* Column: Top Performing Prompts */}
           <div className="lg:col-span-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-4.5 h-4.5 text-indigo-400" />
+              <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4.5 h-4.5 text-indigo-700" />
                 Top Performing Creator Prompts
               </h3>
 
               {/* Sort by selector */}
-              <div className="flex items-center gap-2 bg-zinc-950 p-1 border border-zinc-850 rounded-xl text-[9px] font-black uppercase tracking-wider">
+              <div className="flex items-center gap-2 bg-zinc-100 p-1 border border-zinc-200 rounded-xl text-[9px] font-black uppercase tracking-wider">
                 {(['views', 'copies', 'saves', 'remixes'] as const).map(key => (
                   <button
                     key={key}
                     onClick={() => setTopSortKey(key)}
                     className={`px-2.5 py-1.5 rounded-lg transition-colors ${
                       topSortKey === key 
-                        ? 'bg-zinc-800 text-indigo-400' 
-                        : 'text-zinc-500 hover:text-zinc-350'
+                        ? 'bg-zinc-200 text-indigo-700' 
+                        : 'text-zinc-700 hover:text-zinc-350'
                     }`}
                   >
                     {key}
@@ -714,11 +714,11 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
 
             {topPrompts.length === 0 ? (
-              <div className="p-12 text-center text-zinc-650 border border-dashed border-zinc-850 rounded-[2rem] font-bold text-xs uppercase bg-zinc-950/20">
+              <div className="p-12 text-center text-zinc-650 border border-dashed border-zinc-200 rounded-[2rem] font-bold text-xs uppercase bg-zinc-50">
                 Create prompts to populate top performers.
               </div>
             ) : (
-              <div className="bg-[#121215]/50 border border-zinc-850 rounded-[2rem] overflow-hidden">
+              <div className="bg-white border border-zinc-200 rounded-[2rem] overflow-hidden">
                 <div className="divide-y divide-zinc-900">
                   {topPrompts.map((p, idx) => {
                     // Calculate visual bar percentage based on sort key
@@ -734,20 +734,20 @@ export default function CreatorAnalyticsDashboardClient({
                     const percent = Math.max(5, Math.round((curVal / maxPossible) * 100));
 
                     return (
-                      <div key={p.id} className="p-4 flex items-center justify-between gap-4 hover:bg-zinc-900/30 transition-all group">
+                      <div key={p.id} className="p-4 flex items-center justify-between gap-4 hover:bg-zinc-100/30 transition-all group">
                         <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                          <span className="text-[11px] font-black text-zinc-500 w-5 shrink-0">#{idx + 1}</span>
+                          <span className="text-[11px] font-black text-zinc-700 w-5 shrink-0">#{idx + 1}</span>
                           <img 
                             src={p.image_url} 
                             alt={p.title} 
-                            className="w-12 h-12 object-cover rounded-xl border border-zinc-850 bg-zinc-950 shrink-0"
+                            className="w-12 h-12 object-cover rounded-xl border border-zinc-200 bg-zinc-100 shrink-0"
                           />
                           <div className="min-w-0 flex-1">
-                            <h4 className="font-extrabold text-white text-xs leading-normal truncate group-hover:text-indigo-400 transition-colors">
+                            <h4 className="font-extrabold text-zinc-900 text-xs leading-normal truncate group-hover:text-indigo-700 transition-colors">
                               {p.title}
                             </h4>
                             {/* Visual Progress bar inside table */}
-                            <div className="w-full max-w-xs bg-zinc-950 h-1.5 rounded-full overflow-hidden mt-1.5">
+                            <div className="w-full max-w-xs bg-zinc-100 h-1.5 rounded-full overflow-hidden mt-1.5">
                               <div 
                                 style={{ width: `${percent}%` }}
                                 className="bg-gradient-to-r from-indigo-500 to-cyan-500 h-full rounded-full transition-all duration-500" 
@@ -758,16 +758,16 @@ export default function CreatorAnalyticsDashboardClient({
 
                         <div className="flex items-center gap-6 text-right shrink-0">
                           <div>
-                            <p className="text-[11px] font-black text-white tracking-tight">
+                            <p className="text-[11px] font-black text-zinc-900 tracking-tight">
                               {curVal.toLocaleString()}
                             </p>
-                            <span className="text-[8px] font-black uppercase text-zinc-550 tracking-wider">
+                            <span className="text-[8px] font-black uppercase text-zinc-650 tracking-wider">
                               {topSortKey}
                             </span>
                           </div>
                           <Link 
                             href={`/prompt/${p.id}`}
-                            className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-850 hover:border-zinc-750 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                            className="w-8 h-8 rounded-xl bg-zinc-100 border border-zinc-200 hover:border-zinc-300 flex items-center justify-center text-zinc-650 hover:text-zinc-950 transition-colors"
                           >
                             <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                           </Link>
@@ -783,27 +783,27 @@ export default function CreatorAnalyticsDashboardClient({
           {/* Column: Audience Insights */}
           <div className="lg:col-span-4 space-y-8">
             <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-6 flex items-center gap-1.5">
-                <Users className="w-4.5 h-4.5 text-emerald-400" />
+              <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-1.5">
+                <Users className="w-4.5 h-4.5 text-emerald-700" />
                 Audience Insights
               </h3>
 
-              <div className="bg-[#121215]/50 border border-zinc-850 rounded-[2.5rem] p-6 space-y-6">
+              <div className="bg-white border border-zinc-200 rounded-[2.5rem] p-6 space-y-6">
                 
                 {/* Category distributions */}
                 <div>
-                  <span className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Niche Prompt Distribution</span>
+                  <span className="text-[9px] font-black uppercase text-zinc-700 tracking-wider">Niche Prompt Distribution</span>
                   {audienceInsights.distribution.length === 0 ? (
                     <p className="text-[10px] font-black text-zinc-650 uppercase mt-2">No category metrics.</p>
                   ) : (
                     <div className="space-y-3 mt-3">
                       {audienceInsights.distribution.map((d, idx) => (
                         <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-zinc-700 uppercase tracking-wider">
                             <span>{d.category}</span>
-                            <span className="font-black text-white">{d.percentage}%</span>
+                            <span className="font-black text-zinc-900">{d.percentage}%</span>
                           </div>
-                          <div className="w-full bg-zinc-950 h-1 rounded-full overflow-hidden">
+                          <div className="w-full bg-zinc-100 h-1 rounded-full overflow-hidden">
                             <div 
                               style={{ width: `${d.percentage}%` }}
                               className="bg-indigo-500 h-full rounded-full"
@@ -815,21 +815,21 @@ export default function CreatorAnalyticsDashboardClient({
                   )}
                 </div>
 
-                <div className="h-px bg-zinc-900" />
+                <div className="h-px bg-zinc-100" />
 
                 {/* Best executing categories */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-zinc-950/40 border border-zinc-900 rounded-2xl">
-                    <span className="text-[8px] font-black uppercase text-zinc-500 tracking-wider">Top Copied Category</span>
-                    <p className="font-extrabold text-xs text-white uppercase tracking-wide mt-1 truncate">{audienceInsights.mostCopied}</p>
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl">
+                    <span className="text-[8px] font-black uppercase text-zinc-700 tracking-wider">Top Copied Category</span>
+                    <p className="font-extrabold text-xs text-zinc-900 uppercase tracking-wide mt-1 truncate">{audienceInsights.mostCopied}</p>
                   </div>
-                  <div className="p-3 bg-zinc-950/40 border border-zinc-900 rounded-2xl">
-                    <span className="text-[8px] font-black uppercase text-zinc-500 tracking-wider">Top Liked Category</span>
-                    <p className="font-extrabold text-xs text-white uppercase tracking-wide mt-1 truncate">{audienceInsights.mostLiked}</p>
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl">
+                    <span className="text-[8px] font-black uppercase text-zinc-700 tracking-wider">Top Liked Category</span>
+                    <p className="font-extrabold text-xs text-zinc-900 uppercase tracking-wide mt-1 truncate">{audienceInsights.mostLiked}</p>
                   </div>
-                  <div className="p-3 bg-zinc-950/40 border border-zinc-900 rounded-2xl col-span-2">
-                    <span className="text-[8px] font-black uppercase text-zinc-500 tracking-wider">Top Collection Category</span>
-                    <p className="font-extrabold text-xs text-white uppercase tracking-wide mt-1 truncate">{audienceInsights.mostSaved}</p>
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl col-span-2">
+                    <span className="text-[8px] font-black uppercase text-zinc-700 tracking-wider">Top Collection Category</span>
+                    <p className="font-extrabold text-xs text-zinc-900 uppercase tracking-wide mt-1 truncate">{audienceInsights.mostSaved}</p>
                   </div>
                 </div>
 
@@ -837,25 +837,25 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
 
             <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-6 flex items-center gap-1.5">
-                <Sparkles className="w-4.5 h-4.5 text-indigo-400" />
+              <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-1.5">
+                <Sparkles className="w-4.5 h-4.5 text-indigo-700" />
                 Top Aspect Ratios
               </h3>
 
-              <div className="bg-[#121215]/50 border border-zinc-850 rounded-[2.5rem] p-6 space-y-6">
+              <div className="bg-white border border-zinc-200 rounded-[2.5rem] p-6 space-y-6">
                 <div>
-                  <span className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Aspect Ratio Usage</span>
+                  <span className="text-[9px] font-black uppercase text-zinc-700 tracking-wider">Aspect Ratio Usage</span>
                   {aspectRatioInsights.length === 0 ? (
                     <p className="text-[10px] font-black text-zinc-650 uppercase mt-2">No aspect ratio data.</p>
                   ) : (
                     <div className="space-y-3 mt-3">
                       {aspectRatioInsights.map((d, idx) => (
                         <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-zinc-700 uppercase tracking-wider">
                             <span className="font-mono">{d.ratio}</span>
-                            <span className="font-black text-white">{d.percentage}% ({d.count})</span>
+                            <span className="font-black text-zinc-900">{d.percentage}% ({d.count})</span>
                           </div>
-                          <div className="w-full bg-zinc-950 h-1 rounded-full overflow-hidden">
+                          <div className="w-full bg-zinc-100 h-1 rounded-full overflow-hidden">
                             <div 
                               style={{ width: `${d.percentage}%` }}
                               className="bg-indigo-500 h-full rounded-full"
@@ -873,7 +873,7 @@ export default function CreatorAnalyticsDashboardClient({
 
         {/* Milestone Achievements Section */}
         <div>
-          <h3 className="text-sm font-black text-white uppercase tracking-wider mb-6 flex items-center gap-1.5">
+          <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-1.5">
             <Award className="w-4.5 h-4.5 text-purple-400" />
             Creator Milestone & Badges
           </h3>
@@ -884,15 +884,15 @@ export default function CreatorAnalyticsDashboardClient({
                 key={ach.id} 
                 className={`border p-5 rounded-3xl flex flex-col justify-between gap-4 transition-all duration-300 relative overflow-hidden group shadow-md ${
                   ach.unlocked 
-                    ? `bg-[#121215]/60 hover:border-zinc-700 ${ach.badgeTheme}` 
-                    : 'bg-zinc-950/10 border-zinc-900/60 opacity-40 hover:opacity-50 grayscale'
+                    ? `bg-white hover:border-zinc-300 ${ach.badgeTheme}` 
+                    : 'bg-zinc-100 border-zinc-200 opacity-40 hover:opacity-50 grayscale'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className={`p-2.5 rounded-xl border flex items-center justify-center shrink-0 ${
                     ach.unlocked 
-                      ? 'bg-zinc-950/40 border-current' 
-                      : 'bg-zinc-950 border-zinc-800 text-zinc-600'
+                      ? 'bg-zinc-50 border-current' 
+                      : 'bg-zinc-100 border-zinc-200 text-zinc-700'
                   }`}>
                     {ach.id === 'verified' ? (
                       <ShieldCheck className="w-5 h-5" />
@@ -903,38 +903,38 @@ export default function CreatorAnalyticsDashboardClient({
 
                   {/* Lock Indicator for locked achievements */}
                   {!ach.unlocked ? (
-                    <span className="p-1 border border-zinc-850 bg-zinc-950/80 rounded-md text-zinc-650 flex items-center justify-center shadow-inner">
+                    <span className="p-1 border border-zinc-200 bg-zinc-100 rounded-md text-zinc-650 flex items-center justify-center shadow-inner">
                       <Lock className="w-3.5 h-3.5" />
                     </span>
                   ) : (
-                    <span className="p-1 border border-emerald-950/40 bg-emerald-950/20 text-emerald-400 rounded-md flex items-center justify-center">
+                    <span className="p-1 border border-emerald-200 bg-emerald-50 text-emerald-700 rounded-md flex items-center justify-center">
                       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     </span>
                   )}
                 </div>
 
                 <div>
-                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-white">
+                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-zinc-900">
                     {ach.title}
                   </h4>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-1 leading-normal">
+                  <p className="text-[10px] text-zinc-700 font-bold uppercase tracking-wider mt-1 leading-normal">
                     {ach.description}
                   </p>
                 </div>
 
                 {/* Progress Indicators */}
-                <div className="pt-2 border-t border-zinc-900/60">
-                  <div className="flex justify-between items-center text-[8px] font-black uppercase text-zinc-550 tracking-wider">
+                <div className="pt-2 border-t border-zinc-200">
+                  <div className="flex justify-between items-center text-[8px] font-black uppercase text-zinc-650 tracking-wider">
                     <span>Progress</span>
                     <span>
                       {ach.current.toLocaleString()} / {ach.target.toLocaleString()}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-950 h-1 rounded-full overflow-hidden mt-1.5">
+                  <div className="w-full bg-zinc-100 h-1 rounded-full overflow-hidden mt-1.5">
                     <div 
                       style={{ width: `${Math.min(100, Math.round((ach.current / ach.target) * 100))}%` }}
                       className={`h-full rounded-full transition-all duration-700 ${
-                        ach.unlocked ? 'bg-current' : 'bg-zinc-800'
+                        ach.unlocked ? 'bg-current' : 'bg-zinc-200'
                       }`}
                     />
                   </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Sparkles, Image as ImageIcon, Zap, AlignLeft, BadgeCheck, ShieldAlert, GitFork } from 'lucide-react';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
@@ -324,7 +325,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="min-h-screen pb-6 md:pb-24 pt-8 bg-[#fcfcfc] relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[var(--color-electric-blue)]/5 via-[var(--color-neon-purple)]/5 to-transparent rounded-full blur-[100px] pointer-events-none -z-10"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[var(--color-electric-blue)]/[0.01] via-[var(--color-neon-purple)]/[0.01] to-transparent rounded-full blur-[100px] pointer-events-none -z-10"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
@@ -344,12 +345,13 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             >
               <div className="rounded-[2rem] overflow-hidden relative bg-zinc-100/50 w-full h-full">
                 {prompt.image_url ? (
-                  <img 
+                  <Image 
                     src={getOptimizedImageUrl(prompt.image_url, 'detail')} 
                     alt={prompt.title} 
-                    className="w-full h-full object-cover rounded-[2rem]"
-                    fetchPriority="high"
-                    loading="eager"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    className="object-cover rounded-[2rem]"
                   />
                 ) : (
                   <div className="w-full aspect-square bg-gradient-to-br from-purple-600/[0.08] to-blue-600/[0.04] flex flex-col justify-between p-10 relative select-none min-h-[400px]">
@@ -616,11 +618,12 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   {/* Thumbnail */}
                   <Link href={`/prompt/${remix.id}`} className="aspect-square w-full rounded-2xl overflow-hidden bg-zinc-100 relative block mb-3 border border-zinc-100">
                     {remix.image_url ? (
-                      <img 
+                      <Image 
                         src={getOptimizedImageUrl(remix.image_url, 'card')} 
                         alt={remix.title} 
-                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300" 
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover group-hover:scale-103 transition-transform duration-300" 
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50/50 flex flex-col items-center justify-center p-4 text-center">

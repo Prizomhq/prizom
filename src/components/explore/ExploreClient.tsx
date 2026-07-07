@@ -16,10 +16,12 @@ import MasonryGrid from '@/components/ui/MasonryGrid';
 import SkeletonCard from '@/components/ui/SkeletonCard';
 import { fetchRecommendedPrompts } from '@/app/actions/recommendations';
 import { getUserInterests, trackUserActivity } from '@/lib/recommendations-client';
+import Image from 'next/image';
+import { Category, AITool, DBPrompt } from '@/types';
 
 interface ExploreClientProps {
-  categories: any[];
-  aiTools: any[];
+  categories: Category[];
+  aiTools: AITool[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
   currentUserId?: string;
@@ -60,7 +62,7 @@ export default function ExploreClient({
   const [activeAspectRatio, setActiveAspectRatio] = useState(activeFilters.aspectRatio || '');
 
   // Feed states
-  const [prompts, setPrompts] = useState<any[]>([]);
+  const [prompts, setPrompts] = useState<DBPrompt[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -220,7 +222,7 @@ export default function ExploreClient({
     }
   };
 
-  const getCategoryCoverImage = (cat: any) => {
+  const getCategoryCoverImage = (cat: Category) => {
     if (cat.cover_image) return cat.cover_image;
     const defaults: Record<string, string> = {
       cinematic: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop',
@@ -269,7 +271,7 @@ export default function ExploreClient({
         <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-2 leading-none">
           Discover Prompt Universe
         </h1>
-        <p className="text-zinc-500 font-semibold text-sm max-w-lg mb-8">
+        <p className="text-zinc-650 font-semibold text-sm max-w-lg mb-8">
           Personalized discovery feed. Search templates or select categories below.
         </p>
 
@@ -367,10 +369,12 @@ export default function ExploreClient({
                 `}
               >
                 {/* Background Cover Image */}
-                <img 
+                <Image 
                   src={coverImg} 
                   alt={cat.name} 
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  fill
+                  sizes="192px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 {/* Visual Gradient Overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-t transition-opacity duration-300
@@ -428,7 +432,7 @@ export default function ExploreClient({
                     className="block w-full py-2.5 px-3 border border-zinc-200 rounded-xl bg-white text-zinc-800 text-xs font-bold focus:outline-none focus:border-indigo-500"
                   >
                     <option value="">All AI Tools</option>
-                    {aiTools.map((t: any) => (
+                    {aiTools.map((t: AITool) => (
                       <option key={t.id} value={t.name}>{t.name}</option>
                     ))}
                   </select>
@@ -484,7 +488,7 @@ export default function ExploreClient({
           <h2 className="text-xl font-black text-zinc-900 uppercase tracking-wide flex items-center gap-2">
             <Grid className="w-5 h-5 text-indigo-500" />
             {activeCategory ? `${activeCategory} Prompts` : 'All Prompt Discoveries'}
-            {prompts.length > 0 && <span className="text-zinc-500 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
+            {prompts.length > 0 && <span className="text-zinc-650 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
           </h2>
         </div>
 
@@ -502,7 +506,7 @@ export default function ExploreClient({
               </div>
             </div>
             <h3 className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">No results found</h3>
-            <p className="text-zinc-500 font-medium text-sm leading-relaxed mb-2">
+            <p className="text-zinc-650 font-medium text-sm leading-relaxed mb-2">
               {searchVal
                 ? <>No prompts match <strong className="text-zinc-800">&quot;{searchVal}&quot;</strong>. Try different keywords or clear your filters.</>
                 : "No prompts match your active filters. Try a different combination."}
@@ -518,7 +522,7 @@ export default function ExploreClient({
             </div>
             {visibleCategories.length > 0 && (
               <div className="w-full">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Try browsing a category</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-650 mb-3">Try browsing a category</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {visibleCategories.slice(0, 6).map((cat) => (
                     <button
@@ -578,7 +582,7 @@ export default function ExploreClient({
             )}
 
             {!hasMore && prompts.length > 0 && (
-              <div className="flex justify-center items-center py-16 text-center text-zinc-500 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
+              <div className="flex justify-center items-center py-16 text-center text-zinc-650 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
                 ✨ End of Discover ✨
               </div>
             )}

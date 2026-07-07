@@ -44,7 +44,7 @@ export default function Footer() {
   return (
     <footer className="relative w-full overflow-hidden border-t border-zinc-200/50 bg-[#fcfcfc]/80 backdrop-blur-md z-30 py-16 px-6 sm:px-8 lg:px-12">
       {/* Background radial soft light for premium depth */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[150px] rounded-full bg-indigo-500/5 blur-[80px] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[150px] rounded-full bg-indigo-500/[0.01] blur-[80px] pointer-events-none -z-10" />
 
       <div className="max-w-[1600px] mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-12 gap-10 md:gap-8 pb-12 border-b border-zinc-200/30">

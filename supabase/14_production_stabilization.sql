@@ -84,28 +84,27 @@ CREATE POLICY "Anyone can read trending cache" ON public.trending_prompts_cache 
 CREATE OR REPLACE FUNCTION public.refresh_trending_prompts_cache()
 RETURNS VOID AS $$
 BEGIN
-  -- Clear existing cache
-  TRUNCATE TABLE public.trending_prompts_cache;
-
-  -- 1. Cache 'Today'
-  INSERT INTO public.trending_prompts_cache (timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score)
-  SELECT 'Today', prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
-  FROM public.get_trending_prompts(NOW() - INTERVAL '24 hours');
-
-  -- 2. Cache 'This Week'
-  INSERT INTO public.trending_prompts_cache (timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score)
-  SELECT 'This Week', prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
-  FROM public.get_trending_prompts(NOW() - INTERVAL '7 days');
-
-  -- 3. Cache 'This Month'
-  INSERT INTO public.trending_prompts_cache (timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score)
-  SELECT 'This Month', prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
-  FROM public.get_trending_prompts(NOW() - INTERVAL '30 days');
-
-  -- 4. Cache 'All Time'
-  INSERT INTO public.trending_prompts_cache (timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score)
-  SELECT 'All Time', prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
+  -- Create staging temp table
+  CREATE TEMP TABLE temp_trending_cache ON COMMIT DROP AS 
+  SELECT 'Today'::text AS timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
+  FROM public.get_trending_prompts(NOW() - INTERVAL '24 hours')
+  UNION ALL
+  SELECT 'This Week'::text AS timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
+  FROM public.get_trending_prompts(NOW() - INTERVAL '7 days')
+  UNION ALL
+  SELECT 'This Month'::text AS timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
+  FROM public.get_trending_prompts(NOW() - INTERVAL '30 days')
+  UNION ALL
+  SELECT 'All Time'::text AS timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
   FROM public.get_trending_prompts(TIMESTAMPTZ '1970-01-01 00:00:00+00');
+
+  -- Atomic swap pattern:
+  -- Since PL/pgSQL functions run within an implicit transaction block,
+  -- this Truncate and Insert is atomic and near-instantaneous.
+  TRUNCATE TABLE public.trending_prompts_cache;
+  INSERT INTO public.trending_prompts_cache (timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score)
+  SELECT timeframe, prompt_id, title, image_url, ai_tool, category, user_id, created_at, username, full_name, avatar_url, badges, likes_count_total, copies_count_total, remix_count_total, remix_of, trend_score
+  FROM temp_trending_cache;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

@@ -5,8 +5,24 @@ import PromptCard from '@/components/ui/PromptCard';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import CollectionHeaderClient from './CollectionHeaderClient';
+import { Metadata } from 'next';
 
 import { getEffectiveHiddenPromptIds } from '@/app/actions/hiddenActions';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const supabase = await createClient();
+  const { data: collection } = await supabase
+    .from('collections')
+    .select('name')
+    .eq('id', resolvedParams.id)
+    .single();
+
+  return {
+    title: `${collection?.name || 'Collection'} - Prizom Collection`,
+    description: `Explore prompt directions curated inside Prizom.`
+  };
+}
 
 export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

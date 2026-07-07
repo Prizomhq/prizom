@@ -258,7 +258,7 @@ function SettingsContent() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center bg-[#fcfcfc]">
         <Loader2 className="w-8 h-8 animate-spin text-[var(--color-neon-purple)] mb-4" />
-        <p className="text-zinc-550 font-black uppercase tracking-wider text-xs">Assembling Workspace...</p>
+        <p className="text-zinc-650 font-black uppercase tracking-wider text-xs">Assembling Workspace...</p>
       </div>
     );
   }
@@ -279,12 +279,12 @@ function SettingsContent() {
         {/* Breadcrumb Header */}
         <div className="mb-8 flex items-center justify-between border-b border-zinc-200/60 pb-5">
           <div className="flex items-center space-x-2">
-            <Link href="/" className="p-2 bg-zinc-50 border border-zinc-200/50 hover:bg-zinc-100 rounded-full transition-all text-zinc-500">
+            <Link href="/" className="p-2 bg-zinc-50 border border-zinc-200/50 hover:bg-zinc-100 rounded-full transition-all text-zinc-600">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
               <h1 className="text-2xl font-black text-zinc-900 tracking-tight leading-none">Settings Workspace</h1>
-              <p className="text-xs text-zinc-500 mt-1">Manage profile, review guides, read platform policies, and contact support.</p>
+              <p className="text-xs text-zinc-600 mt-1">Manage profile, review guides, read platform policies, and contact support.</p>
             </div>
           </div>
         </div>
@@ -310,11 +310,11 @@ function SettingsContent() {
                       className={`px-4 py-2.5 lg:px-5 lg:py-3.5 rounded-xl lg:rounded-2xl text-left text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 lg:gap-3 border whitespace-nowrap shrink-0
                         ${isActive 
                           ? 'bg-gradient-to-r from-[var(--color-electric-blue)]/5 to-[var(--color-neon-purple)]/5 border-purple-200 text-[var(--color-neon-purple)] shadow-sm' 
-                          : 'bg-transparent border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                          : 'bg-transparent border-transparent text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
                         }
                       `}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--color-neon-purple)]' : 'text-zinc-400'}`} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--color-neon-purple)]' : 'text-zinc-600'}`} />
                       {item.label}
                     </button>
                   );

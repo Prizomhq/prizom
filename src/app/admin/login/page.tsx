@@ -67,53 +67,53 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative w-full max-w-full flex items-center justify-center p-4 bg-[#0a0a0c] overflow-hidden text-zinc-100">
-      {/* Sleek Dark Tech Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-50" />
+    <div className="min-h-screen relative w-full max-w-full flex items-center justify-center p-4 bg-[#fcfcfc] overflow-hidden text-zinc-800">
+      {/* Sleek Light Tech Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-50" />
       
       {/* Neon glowing ambient circles */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-purple-900/10 via-indigo-950/15 to-blue-900/10 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-purple-500/5 via-indigo-500/5 to-blue-500/5 rounded-full blur-[140px] pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10 py-8">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2.5 group mb-6 hover:scale-105 transition-transform">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] flex items-center justify-center text-white shadow-[0_4px_15px_rgba(99,102,241,0.4)]">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] flex items-center justify-center text-white shadow-md">
               <Sparkles className="h-5 w-5 animate-pulse" />
             </div>
-            <span className="font-black text-3xl tracking-tight text-white">
-              Prizom <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md uppercase tracking-wider font-extrabold ml-1">Admin</span>
+            <span className="font-black text-3xl tracking-tight text-zinc-900">
+              Prizom <span className="text-xs bg-indigo-50 text-indigo-750 px-2 py-0.5 rounded-md uppercase tracking-wider font-extrabold ml-1">Admin</span>
             </span>
           </Link>
-          <h1 className="text-xl font-bold text-zinc-100 mb-1">Administrative Node</h1>
-          <p className="text-zinc-500 text-xs font-semibold">Secure Authorization Endpoint</p>
+          <h1 className="text-xl font-bold text-zinc-900 mb-1">Administrative Node</h1>
+          <p className="text-zinc-650 text-xs font-semibold">Secure Authorization Endpoint</p>
         </div>
 
-        <div className="bg-[#121215]/85 border border-zinc-800/80 p-8 rounded-3xl shadow-2xl backdrop-blur-2xl">
+        <div className="bg-white border border-zinc-200 p-8 rounded-3xl shadow-2xl backdrop-blur-2xl">
           
-          <div className="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 text-[11px] text-zinc-400 font-bold leading-normal">
+          <div className="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-600 font-bold leading-normal">
             <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0" />
             <span>Authorized credentials only. Unauthorized access attempts are monitored and recorded.</span>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-950/30 border border-red-900/50 text-red-400 text-xs font-bold leading-relaxed animate-in fade-in zoom-in-95">
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-650 text-xs font-bold leading-relaxed animate-in fade-in zoom-in-95">
               {error}
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">Admin Email</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-600 mb-2">Admin Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-zinc-600" />
+                  <Mail className="h-5 w-5 text-zinc-400" />
                 </div>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 border border-zinc-800 rounded-2xl bg-zinc-950/30 text-white placeholder-zinc-600 focus:outline-none focus:bg-[#0c0c0e] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-xs font-bold shadow-inner"
+                  className="block w-full pl-12 pr-4 py-3.5 border border-zinc-200 rounded-2xl bg-zinc-50 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-xs font-bold shadow-inner"
                   placeholder="name@prizom.com"
                 />
               </div>
@@ -121,24 +121,24 @@ export default function AdminLoginPage() {
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-black uppercase tracking-wider text-zinc-400">Secret Token</label>
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-600">Secret Token</label>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-zinc-600" />
+                  <Lock className="h-5 w-5 text-zinc-400" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-12 py-3.5 border border-zinc-800 rounded-2xl bg-zinc-950/30 text-white placeholder-zinc-600 focus:outline-none focus:bg-[#0c0c0e] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-xs font-bold shadow-inner"
+                  className="block w-full pl-12 pr-12 py-3.5 border border-zinc-200 rounded-2xl bg-zinc-50 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-xs font-bold shadow-inner"
                   placeholder="••••••••"
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-600 hover:text-zinc-400 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-400 hover:text-zinc-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -155,7 +155,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+          <p className="mt-8 text-center text-[10px] text-zinc-550 font-bold uppercase tracking-widest">
             Protected by Cloud Node Security
           </p>
         </div>

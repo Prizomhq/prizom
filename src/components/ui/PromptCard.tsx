@@ -12,7 +12,7 @@ import SaveModal from '@/components/ui/SaveModal';
 import UnsaveModal from '@/components/ui/UnsaveModal';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
-import { getAspectRatioStyle, getTrueAspectRatioStyle } from '@/lib/cloudinary-client';
+import { getTrueAspectRatioStyle } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
 import Avatar from '@/components/ui/Avatar';
 
@@ -51,12 +51,9 @@ function formatStatsNumber(num: number): string {
   return num.toString();
 }
 
-export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, description, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight }: PromptCardProps) {
+export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight }: PromptCardProps) {
   const router = useRouter();
   const supabase = createClient();
-  
-  const [isHovered, setIsHovered] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
   
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(initialSaves > 0 ? true : false);
@@ -263,11 +260,6 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
     }
   };
 
-  const handleToolClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/discover?tool=${tool}`);
-  };
 
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -401,10 +393,6 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
       <div 
         onClick={handleCardClick}
         className={`block w-full mb-4 sm:mb-6 break-inside-avoid bg-white rounded-3xl relative group cursor-pointer border border-black/5 hover:border-[var(--color-neon-purple)]/30 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 animate-in fade-in duration-300 overflow-hidden ${menuOpen ? 'z-40' : 'z-0 hover:z-30'}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => {
-          setIsHovered(false);
-        }}
       >
         <div 
           className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden z-0 transition-all duration-300"
@@ -458,7 +446,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               </div>
 
               {/* Bottom: Registry label */}
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-650 uppercase tracking-wider">
                 <span>Collaborative Prompt Registry</span>
               </div>
             </div>
@@ -532,7 +520,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
                     <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10 shrink-0" />
                   )}
                 </span>
-                <span className="text-[9px] text-zinc-500 font-medium truncate max-w-[100px] sm:max-w-[120px] leading-tight">
+                <span className="text-[9px] text-zinc-600 font-medium truncate max-w-[100px] sm:max-w-[120px] leading-tight">
                   @{creator?.username || 'unknown'}
                 </span>
               </div>
@@ -540,11 +528,11 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
 
             <button
               onClick={handleLike}
-              className="flex items-center gap-1.5 py-1 px-2 rounded-full hover:bg-zinc-50 transition-colors text-zinc-500 hover:text-red-500 group/like shrink-0 cursor-pointer"
+              className="flex items-center gap-1.5 py-1 px-2 rounded-full hover:bg-zinc-50 transition-colors text-zinc-600 hover:text-red-500 group/like shrink-0 cursor-pointer"
               aria-label={isLiked ? 'Unlike prompt' : 'Like prompt'}
             >
               <Heart className={`w-3.5 h-3.5 transition-transform duration-300 group-hover/like:scale-110 ${isLiked ? 'text-red-500 fill-red-500' : ''}`} />
-              <span className={`text-[11px] font-bold ${isLiked ? 'text-red-500' : 'text-zinc-500'}`}>
+              <span className={`text-[11px] font-bold ${isLiked ? 'text-red-500' : 'text-zinc-600'}`}>
                 {formatStatsNumber(likes)}
               </span>
             </button>

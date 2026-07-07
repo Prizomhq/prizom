@@ -313,9 +313,9 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
       <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full min-h-[80vh] flex flex-col justify-center overflow-hidden">
         {/* Premium Depth & Animated Ambient Glows */}
         <div className="absolute inset-0 overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[var(--color-electric-blue)]/10 blur-[130px] animate-blob" />
-          <div className="absolute top-[15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[var(--color-neon-purple)]/10 blur-[140px] animate-blob [animation-delay:4s]" />
-          <div className="absolute bottom-[20%] left-[10%] w-[400px] h-[400px] rounded-full bg-pink-500/5 blur-[120px] animate-blob [animation-delay:8s]" />
+          <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[var(--color-electric-blue)]/[0.03] blur-[130px] animate-blob" />
+          <div className="absolute top-[15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[var(--color-neon-purple)]/[0.03] blur-[140px] animate-blob [animation-delay:4s]" />
+          <div className="absolute bottom-[20%] left-[10%] w-[400px] h-[400px] rounded-full bg-pink-500/[0.01] blur-[120px] animate-blob [animation-delay:8s]" />
           
           {/* Tech Grid Mask Accent */}
           <div className="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
@@ -628,7 +628,7 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
 
       {/* SECTION 7: Login/Signup CTA */}
       <section className="bg-zinc-900 text-white py-28 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden w-full border-t border-zinc-800">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 rounded-full blur-[140px] pointer-events-none -z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-[var(--color-neon-purple)]/[0.02] to-[var(--color-electric-blue)]/[0.02] rounded-full blur-[140px] pointer-events-none -z-0" />
 
         <div className="max-w-3xl mx-auto space-y-8 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-none uppercase">

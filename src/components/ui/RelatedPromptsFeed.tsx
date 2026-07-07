@@ -7,6 +7,8 @@ import { fetchRelatedPrompts } from '@/app/actions/recommendations';
 import { getUserInterests, trackUserActivity } from '@/lib/recommendations-client';
 import { Loader2 } from 'lucide-react';
 
+import { DBPrompt } from '@/types';
+
 interface RelatedPromptsFeedProps {
   promptId: string;
   category: string;
@@ -24,7 +26,7 @@ export default function RelatedPromptsFeed({
   tags = [],
   creatorUsername
 }: RelatedPromptsFeedProps) {
-  const [prompts, setPrompts] = useState<any[]>([]);
+  const [prompts, setPrompts] = useState<DBPrompt[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
