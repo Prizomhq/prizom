@@ -10,7 +10,6 @@ import {
   ShieldAlert, 
   TrendingUp, 
   Clock, 
-  Sparkles, 
   ArrowUpRight, 
   Bookmark, 
   Loader2,

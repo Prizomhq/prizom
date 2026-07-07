@@ -13,7 +13,6 @@ import {
   UserMinus, 
   UserCheck, 
   Award,
-  Sparkles,
   X,
   Calendar,
   Bookmark,
@@ -287,7 +286,7 @@ export default function AdminUsersPage() {
                           className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl border border-indigo-500/30 text-xs font-black uppercase tracking-wider transition-all shadow-md"
                           title="Review Creator Eligibility & Stats"
                         >
-                          <Sparkles className="w-4 h-4 shrink-0" />
+                          <ShieldCheck className="w-4 h-4 shrink-0" />
                         </button>
 
                         {/* Ban/Unban Trigger */}
@@ -342,7 +341,7 @@ export default function AdminUsersPage() {
               {/* Drawer Close Button & Title */}
               <div className="flex items-center justify-between border-b border-zinc-850 pb-5 mb-6">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-indigo-500 animate-pulse" />
+                  <ShieldCheck className="w-5 h-5 text-indigo-500" />
                   <h2 className="text-sm font-black uppercase text-white tracking-widest">Creator Studio Inspector</h2>
                 </div>
                 <button 

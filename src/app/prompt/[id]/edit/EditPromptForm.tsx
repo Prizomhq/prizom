@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { UploadCloud, Sparkles, X, Plus, Image as ImageIcon, Loader2, ArrowLeft, ChevronDown, Check, Eye, EyeOff } from 'lucide-react';
+import { UploadCloud, Wand2, X, Plus, Image as ImageIcon, Loader2, ArrowLeft, ChevronDown, Check, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { getPlatformCategoriesAndTools, suggestCategoryOrToolAction } from '@/app/actions/adminActions';
 import { updatePromptAction, getPopularTags } from '@/app/actions/prompts';
@@ -402,7 +402,7 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
           Cancel and Back to Prompt
         </Link>
         <h1 className="text-3xl font-bold flex items-center text-zinc-900 tracking-tight">
-          <Sparkles className="w-8 h-8 mr-3 text-[var(--color-neon-purple)] animate-pulse" />
+          <Wand2 className="w-8 h-8 mr-3 text-[var(--color-neon-purple)]" />
           Edit Prompt
         </h1>
         <p className="text-zinc-500 mt-2">

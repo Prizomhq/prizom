@@ -11,7 +11,6 @@ import {
   ShieldAlert, 
   GitFork, 
   Loader2,
-  Sparkles,
   ArrowUpRight,
   ListPlus
 } from 'lucide-react';

@@ -11,7 +11,6 @@ import {
   EyeOff, 
   UserMinus,
   MessageSquare,
-  Sparkles,
   Search,
   ArrowLeft,
   ChevronRight,
@@ -319,7 +318,7 @@ export default function AdminReportsPage() {
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <ShieldCheck className="w-3.5 h-3.5" />
                 Prompt Appeals ({pendingPromptAppealsCount})
               </button>
             </div>
@@ -534,7 +533,7 @@ export default function AdminReportsPage() {
                 <div className="bg-zinc-950/50 border border-zinc-850/80 rounded-2.5xl p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-900/60 pb-3">
                     <h4 className="text-[10px] font-black uppercase tracking-wider text-indigo-400 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
+                      <FileText className="w-4 h-4" />
                       Auditable Content Evidence
                     </h4>
                     {selectedReport.type.includes('prompt') && (

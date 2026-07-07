@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   Bell, 
   Send, 
-  Sparkles, 
+  Trophy, 
   Users, 
   User, 
   CheckCircle2, 
@@ -196,7 +196,7 @@ export default function AdminNotificationsPage() {
               <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400">Notification Badge Style</label>
               <div className="flex bg-zinc-950 p-2 rounded-2xl border border-zinc-900 w-fit">
                 <span className="flex items-center gap-2 px-4 py-2 bg-indigo-650/25 border border-indigo-500/40 text-indigo-400 text-xs font-black uppercase tracking-wider rounded-xl">
-                  <Sparkles className="w-4 h-4 animate-pulse" />
+                  <Trophy className="w-4 h-4" />
                   Achievement / Milestone Alert
                 </span>
               </div>

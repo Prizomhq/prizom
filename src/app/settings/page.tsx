@@ -17,7 +17,8 @@ import {
   ChevronDown,
   Mail,
   Globe,
-  Sparkles,
+  Award,
+  ShieldCheck,
   Scale
 } from 'lucide-react';
 import Link from 'next/link';
@@ -266,7 +267,7 @@ function SettingsContent() {
   const sidebarItems = [
     { id: 'account', label: 'Account Settings', icon: UserIcon },
     { id: 'help', label: 'Help Center', icon: HelpCircle },
-    { id: 'verification-program', label: 'Verification Program', icon: Sparkles },
+    { id: 'verification-program', label: 'Verification Program', icon: ShieldCheck },
     { id: 'legal', label: 'Legal & Policies', icon: Scale },
     { id: 'about', label: 'About Prizom', icon: Info },
     { id: 'contact-support', label: 'Contact Support', icon: Mail },
@@ -655,7 +656,7 @@ function SettingsContent() {
                   <div className="text-sm text-zinc-500 font-semibold leading-relaxed space-y-6">
                     <p>The Prizom verified badge indicates that a creator is an active, trusted contributor to our open prompt ecosystem. Verification is evaluated automatically based on five metrics:</p>
                     <div className="p-6 bg-purple-50/30 border border-purple-100/50 rounded-2xl flex items-start gap-4">
-                      <Sparkles className="w-5 h-5 text-[var(--color-neon-purple)] shrink-0 mt-0.5" />
+                      <ShieldCheck className="w-5 h-5 text-[var(--color-neon-purple)] shrink-0 mt-0.5" />
                       <div>
                         <h4 className="font-extrabold text-xs text-zinc-900 uppercase tracking-wider">Verification Criteria Checklist</h4>
                         <ul className="list-disc pl-4 mt-3 space-y-2 text-xs font-semibold text-zinc-600">
@@ -751,7 +752,7 @@ function SettingsContent() {
                       {/* Platform Mission */}
                       <div>
                         <h3 className="text-xs font-black text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-purple-500" />
+                          <Award className="w-4 h-4 text-purple-500" />
                           Platform Mission
                         </h3>
                         <p className="bg-gradient-to-r from-purple-500/[0.03] to-blue-500/[0.03] p-5 rounded-2xl border border-purple-100/30 font-bold text-zinc-700">
@@ -813,7 +814,7 @@ function SettingsContent() {
                       {/* Core Values */}
                       <div>
                         <h3 className="text-xs font-black text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-emerald-500" />
+                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
                           Core Values
                         </h3>
                         <ul className="list-disc pl-5 space-y-1.5 text-zinc-600">

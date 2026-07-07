@@ -6,7 +6,6 @@ import {
   Search, 
   SlidersHorizontal, 
   X, 
-  Sparkles, 
   Loader2, 
   Settings,
   Grid
@@ -36,9 +35,7 @@ interface ExploreClientProps {
 export default function ExploreClient({
   categories = [],
   aiTools = [],
-  isLoggedIn,
   isAdmin = false,
-  currentUserId,
   activeFilters
 }: ExploreClientProps) {
   const router = useRouter();
@@ -154,7 +151,7 @@ export default function ExploreClient({
     const saved = localStorage.getItem('prizom_recent_searches');
     let recents: string[] = [];
     if (saved) {
-      try { recents = JSON.parse(saved); } catch (e) {}
+      try { recents = JSON.parse(saved); } catch {}
     }
     const updated = [cleanTerm, ...recents.filter(s => s !== cleanTerm)].slice(0, 5);
     localStorage.setItem('prizom_recent_searches', JSON.stringify(updated));
@@ -286,7 +283,7 @@ export default function ExploreClient({
               placeholder="Search prompts by title, description, creator..."
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
-              onClick={(e) => {
+              onClick={() => {
                 if (window.innerWidth < 768) {
                   window.dispatchEvent(new Event('open-prizom-search'));
                 }

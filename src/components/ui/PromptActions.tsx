@@ -27,7 +27,6 @@ export default function PromptActions({
   promptId, 
   promptTitle,
   initialLikes, 
-  initialSaves, 
   initialIsLiked, 
   initialIsSaved,
   isLoggedIn,

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Grid, Bookmark, Image as ImageIcon, Sparkles, FolderPlus, Repeat, AlertTriangle, X } from 'lucide-react';
+import { Grid, Bookmark, Image as ImageIcon, Layers, FolderPlus, Repeat, AlertTriangle, X } from 'lucide-react';
 import MasonryGrid from '@/components/ui/MasonryGrid';
 import PromptCard from '@/components/ui/PromptCard';
 import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
@@ -120,7 +120,7 @@ export default function CreatorTabs({
               {isOwnProfile ? (
                 <>
                   <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 bg-gradient-to-br from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 border border-[var(--color-neon-purple)]/20 shadow-inner">
-                    <Sparkles className="w-10 h-10 text-[var(--color-neon-purple)]" />
+                    <Layers className="w-10 h-10 text-[var(--color-neon-purple)]" />
                   </div>
                   <h3 className="text-2xl font-black mb-3 text-zinc-900 tracking-tight">Share your first prompt</h3>
                   <p className="text-zinc-500 font-medium leading-relaxed max-w-sm mx-auto">
@@ -136,7 +136,7 @@ export default function CreatorTabs({
               ) : (
                 <>
                   <div className="w-24 h-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-zinc-100 shadow-inner">
-                    <Sparkles className="w-10 h-10 text-zinc-300" />
+                    <Layers className="w-10 h-10 text-zinc-300" />
                   </div>
                   <h3 className="text-2xl font-black mb-3 text-zinc-900 tracking-tight">No prompts yet</h3>
                   <p className="text-zinc-500 font-medium leading-relaxed max-w-sm mx-auto">

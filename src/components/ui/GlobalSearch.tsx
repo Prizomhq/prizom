@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { Search, X, Loader2, Sparkles, User, History, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
+import { Search, X, Loader2, Compass, History, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Avatar from '@/components/ui/Avatar';
@@ -262,7 +262,7 @@ export default function GlobalSearch() {
 
           <div>
             <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider flex items-center mb-3 px-1">
-              <Sparkles className="w-3.5 h-3.5 mr-1 text-neon-purple" />
+              <Compass className="w-3.5 h-3.5 mr-1 text-neon-purple" />
               Trending Searches
             </span>
             <div className="flex flex-wrap gap-2 px-1">

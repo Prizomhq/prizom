@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles, Image as ImageIcon, Zap, AlignLeft, BadgeCheck, ShieldAlert, GitFork } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, AlignLeft, BadgeCheck, ShieldAlert, GitFork, Wand2, Compass } from 'lucide-react';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import PromptActions from '@/components/ui/PromptActions';
@@ -362,7 +362,6 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                       <span className="px-3 py-1.5 rounded-full bg-zinc-900/5 text-xs font-black uppercase tracking-wider text-zinc-650 border border-zinc-900/5 backdrop-blur-xs">
                         {prompt.ai_tool}
                       </span>
-                      <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
                     </div>
                     
                     {/* Middle: Title & Category */}
@@ -476,8 +475,8 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             {/* Remix Notes Card */}
             {prompt.remix_notes && (
               <div className="bg-gradient-to-r from-purple-50/[0.3] to-blue-50/[0.3] border border-purple-100 rounded-[2rem] p-6 shadow-sm">
-                <h4 className="text-sm font-black text-[var(--color-neon-purple)] uppercase tracking-widest mb-2 flex items-center">
-                  <Zap className="w-4 h-4 mr-1.5 text-[var(--color-neon-purple)] animate-pulse" />
+                <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3.5 flex items-center">
+                  <GitFork className="w-4 h-4 mr-1.5 text-[var(--color-neon-purple)]" />
                   Remix Notes
                 </h4>
                 <p className="text-zinc-700 text-sm leading-relaxed font-semibold">&quot;{prompt.remix_notes}&quot;</p>
@@ -488,7 +487,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 relative group border border-zinc-200/60 shadow-xl shadow-zinc-200/20">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <h3 className="text-xl sm:text-2xl font-black flex items-center text-zinc-900">
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[var(--color-neon-purple)] shrink-0" />
+                  <Wand2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[var(--color-neon-purple)] shrink-0" />
                   The Prompt
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -606,7 +605,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           <div className="mt-16 pt-12 border-t border-zinc-200/60">
             <div className="mb-8">
               <h3 className="text-3xl font-black text-zinc-900 tracking-tight flex items-center">
-                <Zap className="w-7 h-7 mr-2 text-[var(--color-neon-purple)] animate-pulse" />
+                <GitFork className="w-7 h-7 mr-2 text-[var(--color-neon-purple)]" />
                 Remix Tree ({remixes.length})
               </h3>
               <p className="text-zinc-500 mt-1">Discover custom prompt remixes crafted by the community.</p>
@@ -627,8 +626,8 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-50 to-indigo-50/50 flex flex-col items-center justify-center p-4 text-center">
-                        <Sparkles className="w-6 h-6 text-purple-300 mb-1" />
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Text Prompt</span>
+                        <Wand2 className="w-6 h-6 text-purple-300 mb-1" />
+                        <span className="text-[10px] font-black text-zinc-450 uppercase tracking-wider">Text Prompt</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -668,7 +667,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
         <div className="mt-16 pt-12 border-t border-zinc-200/60">
           <div className="mb-8">
             <h3 className="text-3xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-              <Sparkles className="w-7 h-7 text-[var(--color-neon-purple)] animate-pulse" />
+              <Compass className="w-7 h-7 text-[var(--color-neon-purple)]" />
               More Like This
             </h3>
             <p className="text-zinc-500 mt-1">Personalized recommendations based on tags, creators, and visual styles.</p>

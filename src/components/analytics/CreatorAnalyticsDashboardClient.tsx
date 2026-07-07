@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, 
-  Sparkles, 
   Activity, 
   Heart, 
   Copy, 
@@ -18,7 +17,8 @@ import {
   ShieldCheck,
   Calendar,
   CheckCircle2,
-  Lock
+  Lock,
+  Grid
 } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 
@@ -691,7 +691,7 @@ export default function CreatorAnalyticsDashboardClient({
           <div className="lg:col-span-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-4.5 h-4.5 text-indigo-700" />
+                <TrendingUp className="w-4.5 h-4.5 text-indigo-700" />
                 Top Performing Creator Prompts
               </h3>
 
@@ -838,7 +838,7 @@ export default function CreatorAnalyticsDashboardClient({
 
             <div>
               <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-1.5">
-                <Sparkles className="w-4.5 h-4.5 text-indigo-700" />
+                <Grid className="w-4.5 h-4.5 text-indigo-700" />
                 Top Aspect Ratios
               </h3>
 

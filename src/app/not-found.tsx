@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
+import { ArrowLeft, HelpCircle } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -40,7 +40,6 @@ export default function NotFound() {
             href="/discover"
             className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 text-zinc-700 rounded-full text-xs font-black uppercase tracking-wider transition-all transform active:scale-98"
           >
-            <Sparkles className="w-4 h-4 text-[var(--color-neon-purple)]" />
             Discover Prompts
           </Link>
         </div>

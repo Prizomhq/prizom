@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MoreHorizontal, AlertTriangle, Slash, CheckCircle, Link2, EyeOff, Activity } from 'lucide-react';
+import { MoreHorizontal, AlertTriangle, Slash, Link2, EyeOff, Activity } from 'lucide-react';
 import FollowButton from '@/components/ui/FollowButton';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';

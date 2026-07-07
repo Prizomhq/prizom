@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { 
   ArrowLeft, 
-  Sparkles, 
   Lock, 
   ShieldAlert, 
   CheckCircle2, 
@@ -126,7 +125,7 @@ export default async function CreatorAnalyticsPage({ params }: { params: Promise
                 Studio Mode
               </span>
               <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-neon-purple)] flex items-center gap-1">
-                <Sparkles className="w-3 h-3 shrink-0 animate-pulse" />
+                <Activity className="w-3 h-3 shrink-0" />
                 Verification in Progress
               </span>
             </div>
@@ -280,7 +279,7 @@ export default async function CreatorAnalyticsPage({ params }: { params: Promise
               {/* Perks List */}
               <div className="p-6 bg-zinc-50 border border-zinc-150/40 rounded-[2rem] space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                  <Sparkles className="w-4.5 h-4.5 text-[var(--color-neon-purple)] animate-pulse" />
+                  <Award className="w-4.5 h-4.5 text-[var(--color-neon-purple)]" />
                   What Verified Creators Unlock:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-700 font-bold uppercase tracking-wider">

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { UploadCloud, Sparkles, X, Plus, Image as ImageIcon, Loader2, Lock, ArrowRight, ChevronDown, Check } from 'lucide-react';
+import { UploadCloud, Wand2, X, Plus, Image as ImageIcon, Loader2, Lock, ArrowRight, ChevronDown, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { checkBlockStatus } from '@/app/actions/moderation';
@@ -523,7 +523,7 @@ function CreateContent() {
         
         <div className="mb-8">
           <h1 className="text-3xl font-bold flex items-center text-zinc-900 tracking-tight">
-            <Sparkles className="w-8 h-8 mr-3 text-[var(--color-neon-purple)] animate-pulse" />
+            <Wand2 className="w-8 h-8 mr-3 text-[var(--color-neon-purple)]" />
             {parentPrompt ? 'Collaborative Remix Workspace' : 'Create Prompt'}
           </h1>
           <p className="text-zinc-500 mt-2">

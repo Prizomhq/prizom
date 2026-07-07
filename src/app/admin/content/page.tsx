@@ -14,7 +14,7 @@ import {
   Plus, 
   X, 
   ShieldAlert,
-  Sparkles,
+  Compass,
   Activity,
   Tags,
   Check,
@@ -900,7 +900,7 @@ function AdminContentPageInner() {
             activeTab === 'explore' ? 'border-indigo-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'
           }`}
         >
-          <Sparkles className="w-4.5 h-4.5" />
+          <Compass className="w-4.5 h-4.5" />
           Explore Manager
         </button>
         <button
@@ -922,7 +922,7 @@ function AdminContentPageInner() {
           <form onSubmit={handleSaveHomepage} className="space-y-10">
             <div>
               <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-                <Sparkles className="w-4.5 h-4.5 text-indigo-500" />
+                <Home className="w-4.5 h-4.5 text-indigo-500" />
                 Homepage Hero Section
               </h3>
               <p className="text-zinc-550 text-[10px] font-bold uppercase tracking-widest mt-1">Configure layout, titles, calls-to-action, and primary/secondary images</p>
@@ -1713,7 +1713,7 @@ function AdminContentPageInner() {
             {/* Section 1: Pending Suggestions */}
             <div>
               <h3 className="text-xs font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />
+                <Clock className="w-4 h-4 text-purple-400 shrink-0" />
                 Pending Creator Suggestions
               </h3>
               
@@ -2184,7 +2184,7 @@ function AdminContentPageInner() {
             <div className="border-t border-zinc-800/80 pt-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />
+                  <Tags className="w-4 h-4 text-purple-400 shrink-0" />
                   AI Model / Tool Directory
                 </h3>
               </div>
@@ -2380,7 +2380,7 @@ function AdminContentPageInner() {
             
             {/* Header / Info */}
             <div className="flex items-center gap-3 p-5 rounded-3xl bg-zinc-950/40 border border-zinc-800/40 text-xs text-zinc-400 font-bold leading-normal">
-              <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 animate-pulse" />
+              <Compass className="w-5 h-5 text-indigo-400 shrink-0" />
               <span>
                 Redesign Explore page layout. Manage sections, reorder sections (which sets layout order), control section visibility/feature tags, and assign curation algorithms.
               </span>
@@ -2390,7 +2390,7 @@ function AdminContentPageInner() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <Compass className="w-4 h-4 text-indigo-400 shrink-0" />
                   Explore Page Sections Manager
                 </h3>
               </div>

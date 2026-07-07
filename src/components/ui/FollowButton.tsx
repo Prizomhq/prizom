@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { toggleFollow, checkIsFollowing } from '@/app/actions/follows';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
@@ -13,7 +12,6 @@ interface FollowButtonProps {
 }
 
 export default function FollowButton({ targetId, initialIsFollowing, isLoggedIn }: FollowButtonProps) {
-  const router = useRouter();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing ?? false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginRequiredOpen, setIsLoginRequiredOpen] = useState(false);

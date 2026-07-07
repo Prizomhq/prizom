@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Check, ChevronRight, ChevronLeft, Loader2, ArrowRight, Palette, Compass, Theater, Camera, Trophy, Image as ImageIcon, Film, Cpu, Lightbulb } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Loader2, ArrowRight, Palette, Compass, Theater, Camera, Trophy, Image as ImageIcon, Film, Cpu, Lightbulb, Wand2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import DynamicDialog from '@/components/ui/DynamicDialog';
 import {
@@ -24,7 +24,7 @@ const TOOL_COLORS = [
 
 // Category Lucide icons palette — applied in order to DB-fetched categories
 const CATEGORY_ICONS = [
-  Sparkles,
+  Wand2,
   Palette,
   Compass,
   Theater,
@@ -43,7 +43,6 @@ export default function OnboardingWizard() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingOptions, setFetchingOptions] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
     isOpen: false,
     message: ''
@@ -60,8 +59,6 @@ export default function OnboardingWizard() {
       const currentUser = session?.user;
 
       if (!currentUser) return;
-
-      setUser(currentUser);
 
       // Check if user has already completed onboarding
       const { data: profile } = await supabase
@@ -171,7 +168,7 @@ export default function OnboardingWizard() {
         <div className="p-8 pb-4 shrink-0 flex items-center justify-between border-b border-zinc-150 bg-zinc-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] flex items-center justify-center shadow-md shadow-[var(--color-neon-purple)]/20">
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
+              <Lightbulb className="w-5 h-5 text-white animate-pulse" />
             </div>
             <div>
               <h2 className="text-xl font-black text-zinc-900 tracking-tight">Personalize Prizom</h2>

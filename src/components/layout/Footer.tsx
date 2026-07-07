@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Globe, MessageSquare } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import SocialIcon from '@/components/ui/SocialIcon';
 import { useState, useEffect } from 'react';
 import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
 
@@ -68,11 +68,7 @@ export default function Footer() {
                   className="p-2 rounded-xl bg-white border border-zinc-200/60 text-zinc-500 hover:text-pink-600 hover:border-pink-200 hover:shadow-[0_4px_15px_rgba(236,72,153,0.1)] transition-all duration-250 flex items-center justify-center"
                   aria-label="Instagram"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
+                  <SocialIcon platform="instagram" className="w-4 h-4" />
                 </a>
               )}
 
@@ -85,9 +81,7 @@ export default function Footer() {
                   className="p-2 rounded-xl bg-white border border-zinc-200/60 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 hover:shadow-[0_4px_15px_rgba(0,0,0,0.06)] transition-all duration-250 flex items-center justify-center"
                   aria-label="Twitter"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                  </svg>
+                  <SocialIcon platform="twitter" className="w-4 h-4" />
                 </a>
               )}
 
@@ -100,10 +94,7 @@ export default function Footer() {
                   className="p-2 rounded-xl bg-white border border-zinc-200/60 text-zinc-500 hover:text-red-600 hover:border-red-200 hover:shadow-[0_4px_15px_rgba(239,68,68,0.1)] transition-all duration-250 flex items-center justify-center"
                   aria-label="YouTube"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"></path>
-                    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"></polygon>
-                  </svg>
+                  <SocialIcon platform="youtube" className="w-4 h-4" />
                 </a>
               )}
             </div>

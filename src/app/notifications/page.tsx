@@ -14,7 +14,6 @@ import {
   ShieldAlert, 
   BadgeCheck, 
   AlertTriangle, 
-  Sparkles, 
   ArrowLeft,
   Loader2
 } from 'lucide-react';
@@ -281,7 +280,7 @@ export default function NotificationsPage() {
                 href="/trending"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] text-white text-xs font-black uppercase tracking-wider rounded-full shadow-sm hover:shadow-[0_8px_20px_rgba(168,85,247,0.35)] transition-all"
               >
-                <Sparkles className="w-4 h-4" />
+                <Bell className="w-4 h-4" />
                 Discover Trending Prompts
               </Link>
             </div>

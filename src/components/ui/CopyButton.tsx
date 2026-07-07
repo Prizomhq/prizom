@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, CheckCircle2, Lock, X, Sparkles } from 'lucide-react';
+import { Copy, CheckCircle2, Lock, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { incrementPromptCopyCount } from '@/app/actions/interactions';
 import { useRouter } from 'next/navigation';
@@ -170,7 +170,6 @@ export default function CopyButton({
             </div>
 
             <div className="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1 mb-4 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
               <span className="text-[9px] font-black text-indigo-950 uppercase tracking-widest">Free Account Limit Reached</span>
             </div>
 
@@ -188,7 +187,6 @@ export default function CopyButton({
                 }}
                 className="w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] hover:shadow-[0_8px_25px_rgba(168,85,247,0.4)] transition-all hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-1.5"
               >
-                <Sparkles className="w-4 h-4 text-white" />
                 Create Free Account
               </button>
               <button 
