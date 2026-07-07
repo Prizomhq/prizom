@@ -4,18 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Sparkles, 
   ArrowRight, 
   ChevronRight,
   Megaphone,
   Search,
-  Zap,
   Layers,
   CheckCircle,
   Image as ImageIcon,
   Copy,
   GitFork,
-  Heart
+  Heart,
+  Send
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
@@ -416,7 +415,7 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
               { icon: GitFork,     label: 'Remix',             sub: 'Remix & adapt visual styles' },
               { icon: Heart,       label: 'Follow Creators',   sub: 'Build your network' },
               { icon: Layers,      label: 'Build Reputation',  sub: 'Creative portfolio' },
-              { icon: Sparkles,    label: 'Publish',           sub: 'Share image creation formulas' },
+              { icon: Send,        label: 'Publish',           sub: 'Share image creation formulas' },
             ].map(({ icon: Icon, label, sub }) => (
               <div
                 key={label}
@@ -542,7 +541,7 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
                       <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[var(--color-neon-purple)]">
                         {step.step_number === '01' && <Search className="w-5 h-5 shrink-0" />}
                         {step.step_number === '02' && <Copy className="w-5 h-5 shrink-0" />}
-                        {step.step_number === '03' && <Sparkles className="w-5 h-5 shrink-0" />}
+                        {step.step_number === '03' && <Send className="w-5 h-5 shrink-0" />}
                       </div>
                       <span className="text-6xl font-black text-zinc-100 group-hover:text-purple-200 transition-colors duration-300 tracking-tighter leading-none select-none">
                         {step.step_number}

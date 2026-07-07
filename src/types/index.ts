@@ -34,8 +34,14 @@ export interface AITool {
 export interface Category {
   id: string;
   name: string;
+  slug?: string;
   description?: string | null;
   cover_image?: string | null;
+  order?: number;
+  is_featured?: boolean;
+  show_on_explore?: boolean;
+  approved?: boolean;
+  suggested_by?: string | null;
 }
 
 export interface FollowUser {

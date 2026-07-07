@@ -7,7 +7,7 @@ import MasonryGrid from '@/components/ui/MasonryGrid';
 import SkeletonCard from '@/components/ui/SkeletonCard';
 import { fetchRecommendedPrompts } from '@/app/actions/recommendations';
 import { getUserInterests } from '@/lib/recommendations-client';
-import { Loader2, Sparkles, Compass, TrendingUp } from 'lucide-react';
+import { Loader2, Compass, TrendingUp } from 'lucide-react';
 
 export default function HomeFeed() {
   const [prompts, setPrompts] = useState<any[]>([]);
@@ -106,10 +106,7 @@ export default function HomeFeed() {
       <div className="flex flex-col items-center justify-center py-24 text-center max-w-xl mx-auto px-6">
         <div className="relative mb-8">
           <div className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 flex items-center justify-center border border-[var(--color-neon-purple)]/20">
-            <Sparkles className="w-12 h-12 text-[var(--color-neon-purple)]" />
-          </div>
-          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm shadow-lg">
-            ✨
+            <Compass className="w-12 h-12 text-zinc-400" />
           </div>
         </div>
         <h3 className="text-2xl font-black text-zinc-900 mb-3 tracking-tight">Your feed is warming up</h3>
@@ -176,7 +173,7 @@ export default function HomeFeed() {
 
       {!hasMore && prompts.length > 0 && (
         <div className="flex justify-center items-center py-16 text-center text-zinc-400 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
-          ✨ You&apos;ve discovered all current prompt masterpieces! ✨
+          You&apos;ve discovered all current prompt masterpieces!
         </div>
       )}
     </div>

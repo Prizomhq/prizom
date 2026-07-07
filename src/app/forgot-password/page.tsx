@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Mail, ArrowRight, Loader2, ArrowLeft, Lock } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, ArrowLeft, Lock } from 'lucide-react';
 import { sendPasswordResetEmail } from '@/app/actions/auth';
 
 export default function ForgotPasswordPage() {

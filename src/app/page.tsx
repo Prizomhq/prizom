@@ -1,6 +1,5 @@
 import HomeFeed from '@/components/ui/HomeFeed';
 import LandingPage from '@/components/layout/LandingPage';
-import { Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getPublicCMS } from '@/app/actions/adminActions';
 
@@ -34,7 +33,6 @@ export default async function Home() {
         {/* Dynamic header / title to give users context on first load, minimal and clean */}
         <div className="mb-8 mt-4">
           <h1 className="text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[var(--color-neon-purple)] animate-pulse" />
             Personalized Feed
           </h1>
           <p className="text-xs text-zinc-500 font-semibold mt-1">Based on your liked categories, saved tags, creator actions, and tools.</p>

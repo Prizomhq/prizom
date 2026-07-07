@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Bookmark, MoreHorizontal, Link2, EyeOff, AlertTriangle, BadgeCheck, Zap, Sparkles, GitFork } from 'lucide-react';
+import { Heart, Bookmark, MoreHorizontal, Link2, EyeOff, AlertTriangle, BadgeCheck, GitFork } from 'lucide-react';
 import { toggleLike, removePromptFromAllCollections, checkInteractionStatus } from '@/app/actions/interactions';
 import { createClient } from '@/lib/supabase/client';
 import { hidePromptUser } from '@/app/actions/hiddenActions';
@@ -19,23 +19,23 @@ import Avatar from '@/components/ui/Avatar';
 interface PromptCardProps {
   id: string;
   title: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   tool: string;
   creator: {
     username: string;
-    displayName?: string;
-    avatarUrl?: string;
-    badges?: string[];
+    displayName?: string | null;
+    avatarUrl?: string | null;
+    badges?: string[] | null;
   };
   likes: number;
   saves: number;
-  description?: string;
-  tags?: string[];
+  description?: string | null;
+  tags?: string[] | null;
   promptText?: string; // Kept for backwards compatibility but not used
   remixOf?: string | null;
-  remixCount?: number;
-  aspectRatio?: string;
-  category?: string;
+  remixCount?: number | null;
+  aspectRatio?: string | null;
+  category?: string | null;
   imageWidth?: number | null;
   imageHeight?: number | null;
 }
@@ -406,7 +406,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
                   ? 'bg-gradient-to-r from-purple-500 to-indigo-500 border border-purple-400/20' 
                   : 'bg-black/60 border border-white/10'
               }`}>
-                {likes > 10 ? '🔥 Popular Remix' : '⚡ Remix'}
+                {likes > 10 ? 'Popular Remix' : 'Remix'}
               </span>
             </div>
           )}
@@ -434,7 +434,6 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
                 <span className="px-2.5 py-1 rounded-full bg-zinc-900/5 text-[9px] font-black uppercase tracking-wider text-zinc-650 border border-zinc-900/5 backdrop-blur-xs">
                   {tool}
                 </span>
-                <Sparkles className="w-4 h-4 text-purple-400" />
               </div>
               
               {/* Middle: Title */}
@@ -574,7 +573,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
             }}
             className="w-full px-4 py-3.5 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2 border-t border-zinc-100/50 cursor-pointer"
           >
-            <Zap className="w-3.5 h-3.5 text-[var(--color-neon-purple)]" />
+            <GitFork className="w-3.5 h-3.5 text-indigo-500" />
             Remix Prompt
           </button>
           <button

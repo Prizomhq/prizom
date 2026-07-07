@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { hidePromptUser } from '@/app/actions/hiddenActions';
 import Link from 'next/link';
 import DynamicDialog from '@/components/ui/DynamicDialog';
@@ -52,8 +52,8 @@ export default function HiddenPromptGrid({ initialPrompts }: HiddenPromptGridPro
 
       {prompts.length === 0 ? (
         <div className="py-24 px-6 text-center bg-white border border-zinc-200/50 rounded-[2.5rem] shadow-sm max-w-2xl mx-auto flex flex-col items-center justify-center">
-          <div className="w-16 h-16 bg-emerald-50 rounded-[1.5rem] border border-emerald-100 flex items-center justify-center mb-6 text-emerald-500 shadow-sm animate-bounce">
-            <Sparkles className="w-8 h-8" />
+          <div className="w-16 h-16 bg-zinc-50 rounded-[1.5rem] border border-zinc-150 flex items-center justify-center mb-6 text-zinc-400 shadow-sm">
+            <Eye className="w-8 h-8" />
           </div>
           <h3 className="text-2xl font-black text-zinc-900 mb-2">All Content Restored</h3>
           <p className="text-zinc-500 font-semibold text-sm max-w-xs mb-8">

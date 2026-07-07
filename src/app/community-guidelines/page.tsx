@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Clock, ArrowLeft, ArrowUpRight, ShieldAlert, Sparkles, Scale, Info } from 'lucide-react';
+import { ShieldCheck, Clock, ArrowLeft, ArrowUpRight, ShieldAlert, Scale, Info } from 'lucide-react';
 
 export default function CommunityGuidelines() {
   const lastUpdated = 'June 26, 2026';
@@ -45,7 +45,6 @@ export default function CommunityGuidelines() {
             {/* Section 1 */}
             <section className="border-b border-zinc-200/60 pb-8">
               <h3 className="text-lg font-black text-zinc-900 mb-4 flex items-center">
-                <Sparkles className="w-4.5 h-4.5 mr-2 text-indigo-500" />
                 1. Respect Artistic Expression & Attribution
               </h3>
               <div className="text-xs sm:text-sm text-zinc-500 leading-relaxed font-semibold space-y-4">

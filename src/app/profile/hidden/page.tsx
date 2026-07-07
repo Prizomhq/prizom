@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Eye, Trash2, EyeOff, Sparkles, Inbox } from 'lucide-react';
+import { ArrowLeft, Eye, Trash2, EyeOff, Inbox } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import Avatar from '@/components/ui/Avatar';
 import HiddenPromptGrid from './HiddenPromptGrid';

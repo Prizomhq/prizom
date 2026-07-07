@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Bookmark, Zap, MoreHorizontal, Link2, EyeOff, AlertTriangle } from 'lucide-react';
+import { Heart, Bookmark, GitFork, MoreHorizontal, Link2, EyeOff, AlertTriangle } from 'lucide-react';
 import { toggleLike, removePromptFromAllCollections } from '@/app/actions/interactions';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -201,7 +201,7 @@ export default function PromptActions({
         <div className="bg-white/85 border border-zinc-200/50 rounded-[2.5rem] p-8 max-w-md w-full text-center shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-250 relative">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)]"></div>
           <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center mx-auto mb-6 text-zinc-400">
-            <svg className="w-8 h-8 text-zinc-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-zinc-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.228-2.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
             </svg>
           </div>
@@ -294,7 +294,7 @@ export default function PromptActions({
           }}
           className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-2xl bg-white border border-zinc-200 hover:border-[var(--color-neon-purple)] hover:text-[var(--color-neon-purple)] text-zinc-700 transition-all duration-300 font-bold text-xs shadow-sm hover:bg-purple-50/[0.2] flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
         >
-          <Zap className="w-3.5 h-3.5 text-[var(--color-neon-purple)] shrink-0 animate-pulse" />
+          <GitFork className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
           <span className="whitespace-nowrap truncate">Remix</span>
         </button>
 
@@ -304,7 +304,7 @@ export default function PromptActions({
             href={`/prompt/${promptId}/edit`}
             className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-2xl bg-white border border-zinc-200 hover:border-[var(--color-electric-blue)] hover:text-[var(--color-electric-blue)] text-zinc-700 transition-all duration-300 font-bold text-xs shadow-sm hover:bg-blue-50/[0.2] flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
           >
-            <svg className="w-3.5 h-3.5 text-[var(--color-electric-blue)] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 text-[var(--color-electric-blue)] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
             </svg>
             <span className="whitespace-nowrap truncate">Edit</span>

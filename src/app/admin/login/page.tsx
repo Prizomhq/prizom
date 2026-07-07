@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { authenticateAdmin, syncAdminRole } from '@/app/actions/adminActions';
+import PrizomLogo from '@/components/ui/PrizomLogo';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -76,10 +77,8 @@ export default function AdminLoginPage() {
 
       <div className="w-full max-w-md relative z-10 py-8">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2.5 group mb-6 hover:scale-105 transition-transform">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] flex items-center justify-center text-white shadow-md">
-              <Sparkles className="h-5 w-5 animate-pulse" />
-            </div>
+          <Link href="/" className="inline-flex items-center space-x-2 group mb-6 hover:scale-105 transition-transform">
+            <PrizomLogo size={40} />
             <span className="font-black text-3xl tracking-tight text-zinc-900">
               Prizom <span className="text-xs bg-indigo-50 text-indigo-750 px-2 py-0.5 rounded-md uppercase tracking-wider font-extrabold ml-1">Admin</span>
             </span>

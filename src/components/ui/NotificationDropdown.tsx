@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useTransition } from 'react';
-import { Bell, RefreshCw, CheckCheck, Inbox, Zap, Heart, Bookmark, UserPlus, Trophy, ShieldAlert, BadgeCheck, AlertTriangle, Sparkles } from 'lucide-react';
+import { Bell, RefreshCw, CheckCheck, Inbox, Zap, Heart, Bookmark, UserPlus, Trophy, ShieldAlert, BadgeCheck, AlertTriangle } from 'lucide-react';
 import { getNotifications, getUnreadNotificationCount, markAllNotificationsAsRead, markNotificationAsRead, NotificationItem } from '@/app/actions/notifications';
 import Avatar from '@/components/ui/Avatar';
 import Link from 'next/link';
@@ -299,7 +299,6 @@ export default function NotificationDropdown() {
                   onClick={() => setIsOpen(false)}
                   className="text-xs font-black text-[var(--color-neon-purple)] hover:underline flex items-center gap-1 transition-colors"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
                   Browse Trending Prompts
                 </Link>
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, Users, Zap, Flame, Award, Heart } from 'lucide-react';
+import { BookOpen, Users, GitFork, Flame, Award, Heart } from 'lucide-react';
 
 interface StatsCounterProps {
   stats: {
@@ -73,7 +73,7 @@ export default function StatsCounter({ stats }: StatsCounterProps) {
     {
       label: 'Remix Count',
       value: stats.remixCount,
-      icon: Zap,
+      icon: GitFork,
       color: 'text-amber-500',
       bgColor: 'bg-amber-50/50',
       glow: 'group-hover:shadow-amber-500/10'

@@ -261,7 +261,7 @@ export default function ExploreClient({
   // Render Category visual cards (Approved and visible)
   const visibleCategories = categories
     .filter(c => c.approved && c.show_on_explore)
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] pb-24 pt-10">

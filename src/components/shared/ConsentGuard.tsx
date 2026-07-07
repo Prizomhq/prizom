@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { ShieldCheck, Sparkles, Clock, Check, Loader2, X, Scale, Lock, GitFork, ShieldAlert, Eye, Database } from 'lucide-react';
+import { ShieldCheck, Clock, Check, Loader2, X, Scale, Lock, GitFork, ShieldAlert, Eye, Database } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function ConsentGuard() {
@@ -179,7 +179,6 @@ export default function ConsentGuard() {
             {/* Interactive Policy Links */}
             <div className="p-4 bg-zinc-50/80 border border-zinc-200/50 rounded-2xl space-y-3.5">
               <h4 className="text-[10px] font-black text-zinc-900 uppercase tracking-widest flex items-center">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />
                 Data & Cookie Usage Disclosure
               </h4>
               <p className="text-[10px] text-zinc-400 font-semibold leading-relaxed">

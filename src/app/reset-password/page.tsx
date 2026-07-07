@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Lock, ArrowRight, Loader2, Check, Eye, EyeOff } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, Check, Eye, EyeOff } from 'lucide-react';
 import { updateSecurePassword } from '@/app/actions/auth';
 
 export default function ResetPasswordPage() {
@@ -54,7 +54,6 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md relative z-10 py-8">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 group mb-6 hover:scale-105 transition-transform">
-            <Sparkles className="h-8 w-8 text-[var(--color-neon-purple)]" />
             <span className="font-bold text-3xl tracking-tight text-zinc-900">
               Prizom
             </span>
