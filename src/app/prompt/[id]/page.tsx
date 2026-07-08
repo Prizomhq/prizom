@@ -5,6 +5,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import PromptActions from '@/components/ui/PromptActions';
 import CopyButton from '@/components/ui/CopyButton';
+import AILauncher from '@/components/ui/AILauncher';
 import { checkInteractionStatus, recordPromptViewAction } from '@/app/actions/interactions';
 import FollowButton from '@/components/ui/FollowButton';
 import { checkIsFollowing } from '@/app/actions/follows';
@@ -490,16 +491,12 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                   <Wand2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[var(--color-neon-purple)] shrink-0" />
                   The Prompt
                 </h3>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  {prompt.negative_prompt && (
-                    <CopyButton 
-                      textToCopy={`[PROMPT]\n${prompt.prompt_text}\n\n[NEGATIVE PROMPT]\n${prompt.negative_prompt}`} 
-                      promptId={prompt.id}
-                      label="Copy Generation Pack"
-                      successLabel="Pack Copied!"
-                    />
-                  )}
-                  <CopyButton textToCopy={prompt.prompt_text} promptId={prompt.id} />
+                <div className="w-full sm:w-auto min-w-[260px]">
+                  <AILauncher 
+                    prompt={prompt} 
+                    isLoggedIn={isLoggedIn}
+                    isOwner={!!(user && user.id === prompt.user_id)}
+                  />
                 </div>
               </div>
               <div className="bg-zinc-50/80 rounded-2xl p-6 text-zinc-800 font-mono text-sm leading-relaxed border border-zinc-200/50 shadow-inner max-h-[400px] overflow-y-auto break-words whitespace-pre-wrap overflow-x-hidden">

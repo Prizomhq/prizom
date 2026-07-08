@@ -21,6 +21,10 @@ export async function createPromptAction(promptData: {
   remix_of?: string | null;
   remix_notes?: string | null;
   remix_parent_chain?: string[];
+  primary_ai_platform?: string;
+  supported_models?: string[];
+  launch_url?: string;
+  prompt_type?: string;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -109,7 +113,11 @@ export async function createPromptAction(promptData: {
           remix_notes: promptData.remix_notes || null,
           remix_parent_chain: promptData.remix_parent_chain || [],
           original_root_id: originalRootId,
-          parent_prompt_id: parentPromptId
+          parent_prompt_id: parentPromptId,
+          primary_ai_platform: promptData.primary_ai_platform || null,
+          supported_models: promptData.supported_models || [],
+          launch_url: promptData.launch_url || null,
+          prompt_type: promptData.prompt_type || 'text'
         }
       ])
       .select();
@@ -173,6 +181,10 @@ export async function updatePromptAction(
     image_height?: number | null;
     aspect_ratio: string;
     is_hidden: boolean;
+    primary_ai_platform?: string | null;
+    supported_models?: string[] | null;
+    launch_url?: string | null;
+    prompt_type?: string | null;
   }
 ) {
   const supabase = await createClient();
@@ -229,6 +241,10 @@ export async function updatePromptAction(
         image_height: promptData.image_height || null,
         aspect_ratio: promptData.aspect_ratio || '1:1',
         is_hidden: promptData.is_hidden,
+        primary_ai_platform: promptData.primary_ai_platform || null,
+        supported_models: promptData.supported_models || [],
+        launch_url: promptData.launch_url || null,
+        prompt_type: promptData.prompt_type || 'text',
         updated_at: new Date().toISOString()
       })
       .eq('id', promptId);

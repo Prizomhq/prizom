@@ -24,6 +24,13 @@ export interface DBPrompt {
   image_width?: number | null;
   image_height?: number | null;
   profiles?: CreatorProfile | null;
+  primary_ai_platform?: string | null;
+  supported_models?: string[] | null;
+  launch_url?: string | null;
+  prompt_type?: string | null;
+  prompt_text: string;
+  negative_prompt?: string | null;
+  generation_settings?: Record<string, any> | null;
 }
 
 export interface AITool {

@@ -167,6 +167,14 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
   const [aspectRatio, setAspectRatio] = useState(prompt.aspect_ratio || '1:1');
   const [isHidden, setIsHidden] = useState(prompt.is_hidden || false);
 
+  // AI Launcher Advanced States
+  const [primaryAiPlatform, setPrimaryAiPlatform] = useState(prompt.primary_ai_platform || '');
+  const [supportedModels, setSupportedModels] = useState<string[]>(prompt.supported_models || []);
+  const [modelInput, setModelInput] = useState('');
+  const [launchUrl, setLaunchUrl] = useState(prompt.launch_url || '');
+  const [promptType, setPromptType] = useState(prompt.prompt_type || 'text');
+  const [showAdvancedLauncher, setShowAdvancedLauncher] = useState(false);
+
   // Loading/Error states
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -371,7 +379,11 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
         image_width: finalImageWidth,
         image_height: finalImageHeight,
         aspect_ratio: aspectRatio,
-        is_hidden: isHidden
+        is_hidden: isHidden,
+        primary_ai_platform: primaryAiPlatform.trim() || null,
+        supported_models: supportedModels,
+        launch_url: launchUrl.trim() || null,
+        prompt_type: promptType
       });
 
       if (!res.success) {
@@ -717,6 +729,102 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
               ></textarea>
             </div>
           </div>
+        </div>
+
+        {/* Advanced Launcher Settings (Collapsible) */}
+        <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-3xl p-6 shadow-sm mb-8">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedLauncher(!showAdvancedLauncher)}
+            className="w-full flex items-center justify-between font-black text-sm text-zinc-700 uppercase tracking-wider cursor-pointer"
+          >
+            <span>Advanced Launcher Settings (Optional)</span>
+            <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${showAdvancedLauncher ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showAdvancedLauncher && (
+            <div className="mt-6 pt-6 border-t border-zinc-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Primary AI Platform Override</label>
+                <input
+                  type="text"
+                  value={primaryAiPlatform}
+                  onChange={(e) => setPrimaryAiPlatform(e.target.value)}
+                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
+                  placeholder="e.g. ChatGPT, Gemini, Claude (leave blank to auto-detect)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Launcher URL Override</label>
+                <input
+                  type="url"
+                  value={launchUrl}
+                  onChange={(e) => setLaunchUrl(e.target.value)}
+                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
+                  placeholder="e.g. https://chatgpt.com/g/g-xxxxx (custom GPT link)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Prompt Type</label>
+                <select
+                  value={promptType}
+                  onChange={(e) => setPromptType(e.target.value)}
+                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
+                >
+                  <option value="text">Text Prompt</option>
+                  <option value="image">Image Generation</option>
+                  <option value="video">Video Generation</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Supported Models</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={modelInput}
+                    onChange={(e) => setModelInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
+                          setSupportedModels([...supportedModels, modelInput.trim()]);
+                          setModelInput('');
+                        }
+                      }
+                    }}
+                    className="block flex-1 px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
+                    placeholder="Add model (e.g. gpt-4o) and press Enter"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
+                        setSupportedModels([...supportedModels, modelInput.trim()]);
+                        setModelInput('');
+                      }
+                    }}
+                    className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-2xl text-xs font-bold text-zinc-700 transition-all cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {supportedModels.map(m => (
+                    <span key={m} className="inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 text-xs font-bold border border-zinc-200">
+                      {m}
+                      <button
+                        type="button"
+                        onClick={() => setSupportedModels(supportedModels.filter(x => x !== m))}
+                        className="ml-1.5 text-zinc-400 hover:text-zinc-700"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col items-end pt-6 border-t border-zinc-200">
