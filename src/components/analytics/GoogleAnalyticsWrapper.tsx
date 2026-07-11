@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
 interface GoogleAnalyticsWrapperProps {
@@ -8,27 +7,11 @@ interface GoogleAnalyticsWrapperProps {
 }
 
 export default function GoogleAnalyticsWrapper({ gaId }: GoogleAnalyticsWrapperProps) {
-  const [hasConsent, setHasConsent] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const checkConsent = () => {
-      const consent = localStorage.getItem('prizom-cookie-consent');
-      setHasConsent(consent === 'granted');
-    };
-
-    // Initial check on mount
-    checkConsent();
-
-    // Listen for cookie consent updates
-    window.addEventListener('cookie-consent-updated', checkConsent);
-    return () => {
-      window.removeEventListener('cookie-consent-updated', checkConsent);
-    };
-  }, []);
-
-  if (!hasConsent) return null;
+  // GA loads unconditionally. Consent Mode v2 (in layout.tsx) controls
+  // whether data collection is active or restricted.
+  // When consent is 'denied', GA sends cookieless pings only.
+  // When consent is 'granted', GA sends full tracking data.
+  if (!gaId || gaId === 'G-XXXXXX') return null;
 
   return <GoogleAnalytics gaId={gaId} />;
 }

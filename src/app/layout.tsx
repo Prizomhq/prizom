@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
+import Script from 'next/script';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -9,6 +10,8 @@ import OnboardingWizard from "@/components/shared/OnboardingWizard";
 import CookieBanner from "@/components/shared/CookieBanner";
 import MainLayoutWrapper from "@/components/layout/MainLayoutWrapper";
 import GuestTracker from "@/components/analytics/GuestTracker";
+import RouteChangeTracker from "@/components/analytics/RouteChangeTracker";
+import ConsentRestorer from "@/components/analytics/ConsentRestorer";
 import { validateEnvironment } from "@/lib/environment_audit";
 import GoogleAnalyticsWrapper from "@/components/analytics/GoogleAnalyticsWrapper";
 import "./globals.css";
@@ -95,7 +98,25 @@ export default function RootLayout({
             <ConsentGuard />
             <OnboardingWizard />
             <CookieBanner />
-            <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXX"} />
+
+            {/* Google Analytics Consent Mode v2 — must load before GA */}
+            <Script id="ga-consent-defaults" strategy="beforeInteractive">{`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                analytics_storage: 'denied',
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                wait_for_update: 500
+              });
+            `}</Script>
+
+            <Suspense fallback={null}>
+              <RouteChangeTracker />
+            </Suspense>
+            <ConsentRestorer />
+            <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{

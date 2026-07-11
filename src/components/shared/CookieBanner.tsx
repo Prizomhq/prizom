@@ -25,6 +25,13 @@ export default function CookieBanner() {
     setShowBanner(false);
     // Reload guest tracker state
     window.dispatchEvent(new Event('cookie-consent-updated'));
+
+    // Tell GA consent was granted
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: 'granted',
+      });
+    }
   };
 
   const handleDeclineAll = () => {
@@ -32,6 +39,13 @@ export default function CookieBanner() {
     localStorage.setItem('prizom-cookie-consent-analytics', 'false');
     setShowBanner(false);
     window.dispatchEvent(new Event('cookie-consent-updated'));
+
+    // Explicitly confirm denial to GA
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: 'denied',
+      });
+    }
   };
 
   const handleSavePreferences = () => {
@@ -40,6 +54,13 @@ export default function CookieBanner() {
     localStorage.setItem('prizom-cookie-consent-analytics', consentAnalytics ? 'true' : 'false');
     setShowBanner(false);
     window.dispatchEvent(new Event('cookie-consent-updated'));
+
+    // Update GA with the user's preference
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: consent,
+      });
+    }
   };
 
   if (!showBanner) return null;
