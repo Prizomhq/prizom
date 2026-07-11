@@ -9,6 +9,7 @@ import { rateLimit } from '@/lib/rateLimit';
 import { getClientIpHash } from './interactions';
 import { getGuestAnalytics } from './guestActions';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import { safePermanentDelete as dbPermanentDelete } from '@/lib/db/user-cleanup';
 
 // Granular role helpers (Priority 3 & 4)
 async function assertModeratorOrAbove() {
@@ -137,7 +138,7 @@ export async function syncAdminRole() {
   return { success: true, role: adminConfig.role };
 }
 
-export async function revalidateModerationTargets({
+async function revalidateModerationTargets({
   promptId,
   username,
   userId
@@ -799,98 +800,11 @@ export async function adminForceDeletionAction(userId: string): Promise<{ succes
   await assertAdminOrAbove();
   
   try {
-    const res = await safePermanentDelete(userId);
-    return res;
+    return await dbPermanentDelete(userId);
   } catch (err: any) {
     console.error('Failed to force delete user:', err);
     return { success: false, error: err.message || 'Failed to force delete user.' };
   }
-}
-
-export async function safePermanentDelete(userId: string): Promise<{ success: boolean; error?: string }> {
-  const adminSupabase = await createAdminClient();
-
-  // 1. Fetch user's profile and prompts for Cloudinary media cleanups
-  const { data: profile } = await adminSupabase
-    .from('profiles')
-    .select('avatar_url')
-    .eq('id', userId)
-    .maybeSingle();
-
-  const { data: prompts } = await adminSupabase
-    .from('prompts')
-    .select('image_url')
-    .eq('user_id', userId);
-
-  // 2. Cloudinary assets purge
-  try {
-    const { deleteCloudinaryAsset } = await import('@/lib/cloudinary');
-    
-    if (profile?.avatar_url) {
-      await deleteCloudinaryAsset(profile.avatar_url);
-    }
-    
-    if (prompts) {
-      for (const p of prompts) {
-        if (p.image_url) {
-          await deleteCloudinaryAsset(p.image_url);
-        }
-      }
-    }
-  } catch (cloudinaryErr) {
-    console.error(`[CLOUDINARY PURGE ERROR] Failed to delete assets for user ${userId}:`, cloudinaryErr);
-  }
-
-  // 3. Database cascade deletion (ordered to prevent foreign key errors)
-  // Delete notifications
-  await adminSupabase.from('notifications').delete().or(`user_id.eq.${userId},actor_id.eq.${userId}`);
-  
-  // Delete follows
-  await adminSupabase.from('followers').delete().or(`follower_id.eq.${userId},following_id.eq.${userId}`);
-
-  // Delete saved prompts
-  await adminSupabase.from('saved_prompts').delete().eq('user_id', userId);
-
-  // Delete likes
-  await adminSupabase.from('likes').delete().eq('user_id', userId);
-
-  // Delete comments
-  await adminSupabase.from('comments').delete().eq('user_id', userId);
-
-  // Delete reports
-  await adminSupabase.from('user_reports').delete().or(`reporter_id.eq.${userId},reported_id.eq.${userId}`);
-  await adminSupabase.from('prompt_reports').delete().eq('reporter_id', userId);
-
-  // Delete appeals
-  await adminSupabase.from('prompt_appeals').delete().eq('user_id', userId);
-
-  // Delete analytics logs
-  await adminSupabase.from('prompt_views').delete().eq('user_id', userId);
-  await adminSupabase.from('prompt_copy_logs').delete().eq('copier_id', userId);
-
-  // Delete user prompts
-  await adminSupabase.from('prompts').delete().eq('user_id', userId);
-
-  // Delete profile
-  await adminSupabase.from('profiles').delete().eq('id', userId);
-
-  // Delete Auth User
-  const { error: authDeleteError } = await adminSupabase.auth.admin.deleteUser(userId);
-  if (authDeleteError) {
-    throw new Error(`Failed to delete auth user: ${authDeleteError.message}`);
-  }
-
-  // Log in moderation logs
-  await adminSupabase
-    .from('moderation_logs')
-    .insert([{
-      moderator_email: 'system@prizom.com',
-      action: 'ACCOUNT_DELETED_PERMANENT',
-      target_id: userId,
-      reason: 'Safe permanent delete executed successfully.'
-    }]);
-
-  return { success: true };
 }
 
 export async function toggleUserBan(userId: string, reason: string = '', actionType: 'suspended' | 'permanently_banned' | 'active' = 'suspended') {
@@ -2644,8 +2558,8 @@ export async function suggestCategoryOrToolAction(type: 'category' | 'tool', nam
       name: name.trim(),
       order,
       is_featured: false,
-      show_on_explore: true,
-      approved: true,
+      show_on_explore: false, // 🔴 Change to false
+      approved: false,        // 🔴 Change to false (moderation required)
       suggestedBy: user.email
     };
     await store.addCategory(newCat);
@@ -2659,8 +2573,8 @@ export async function suggestCategoryOrToolAction(type: 'category' | 'tool', nam
     const newTool: store.AiTool = {
       id,
       name: name.trim(),
-      approved: true,
-      show_on_explore: true,
+      approved: false,        // 🔴 Change to false (moderation required)
+      show_on_explore: false, // 🔴 Change to false
       suggestedBy: user.email
     };
     await store.addAiTool(newTool);

@@ -130,7 +130,7 @@ export default function Navbar() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth, supabase, pathname]);
+  }, [supabase.auth, supabase]);
 
   useEffect(() => {
     if (profile) {

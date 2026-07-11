@@ -349,31 +349,49 @@ async function saveSettingsVal<T>(key: string, value: T): Promise<boolean> {
 // --- CORE STORE LOAD/SAVE ---
 export async function getStore(): Promise<AdminStore> {
   try {
-    const categories = await getCategories();
-    const aiTools = await getAiTools();
-    const adminUsers = await getAdminUsersList();
-    const bannedUsers = await getBannedUsers();
-    const suspendedUsers = await getSuspendedUsers();
-    
-    const homepageSettings = await getSettingsVal<HomepageSettings>('homepage_settings', DEFAULT_STORE.homepage_settings);
-    const meetDeveloper = await getSettingsVal<MeetDeveloperSettings>('meet_developer', DEFAULT_STORE.meet_developer);
-    const footerSettings = await getSettingsVal<FooterSettings>('footer_settings', DEFAULT_STORE.footer_settings);
-    const aboutSettings = await getSettingsVal<AboutSettings>('about_settings', DEFAULT_STORE.about_settings!);
-    const exploreSections = await getSettingsVal<ExploreSection[]>('explore_sections', DEFAULT_STORE.explore_sections!);
-    const aspectRatios = await getSettingsVal<AspectRatioOption[]>('aspect_ratios', DEFAULT_STORE.aspect_ratios!);
-    const manualBoosts = await getSettingsVal<Record<string, number>>('manual_boosts', DEFAULT_STORE.manual_boosts);
-
-    const contactMessages = await getContactMessages();
-    const moderationLogs = await getModerationLogs();
+    // Query independent settings in parallel
+    const [
+      categories,
+      aiTools,
+      adminUsers,
+      bannedUsers,
+      suspendedUsers,
+      homepageSettings,
+      meetDeveloper,
+      footerSettings,
+      aboutSettings,
+      exploreSections,
+      aspectRatios,
+      manualBoosts,
+      contactMessages,
+      moderationLogs
+    ] = await Promise.all([
+      getCategories(),
+      getAiTools(),
+      getAdminUsersList(),
+      getBannedUsers(),
+      getSuspendedUsers(),
+      getSettingsVal<HomepageSettings>('homepage_settings', DEFAULT_STORE.homepage_settings),
+      getSettingsVal<MeetDeveloperSettings>('meet_developer', DEFAULT_STORE.meet_developer),
+      getSettingsVal<FooterSettings>('footer_settings', DEFAULT_STORE.footer_settings),
+      getSettingsVal<AboutSettings>('about_settings', DEFAULT_STORE.about_settings!),
+      getSettingsVal<ExploreSection[]>('explore_sections', DEFAULT_STORE.explore_sections!),
+      getSettingsVal<AspectRatioOption[]>('aspect_ratios', DEFAULT_STORE.aspect_ratios!),
+      getSettingsVal<Record<string, number>>('manual_boosts', DEFAULT_STORE.manual_boosts),
+      getContactMessages(),
+      getModerationLogs()
+    ]);
 
     const supabase = await createAdminClient();
 
-    // Query active prompt IDs that are hidden or featured
-    const { data: hiddenData } = await supabase.from('prompts').select('id').eq('is_hidden', true);
-    const hiddenPrompts = (hiddenData || []).map(p => p.id);
+    // Query active prompt IDs that are hidden or featured in parallel
+    const [hiddenRes, featuredRes] = await Promise.all([
+      supabase.from('prompts').select('id').eq('is_hidden', true),
+      supabase.from('prompts').select('id').eq('is_featured', true)
+    ]);
 
-    const { data: featuredData } = await supabase.from('prompts').select('id').eq('is_featured', true);
-    const featuredPrompts = (featuredData || []).map(p => p.id);
+    const hiddenPrompts = (hiddenRes.data || []).map(p => p.id);
+    const featuredPrompts = (featuredRes.data || []).map(p => p.id);
 
     return {
       admin_users: adminUsers,

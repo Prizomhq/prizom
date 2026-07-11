@@ -117,6 +117,7 @@ export default function ExploreClient({
 
   // Load feed when filters change
   useEffect(() => {
+    let active = true; // 🔴 Request state flag
     async function loadFilteredFeed() {
       setLoading(true);
       setPage(0);
@@ -133,16 +134,24 @@ export default function ExploreClient({
             aspectRatio: activeAspectRatio
           }
         });
-        setPrompts(res.prompts);
-        setHasMore(res.hasMore);
-        setPage(1);
+        
+        // 🔴 Only update state if this query is still active
+        if (active) {
+          setPrompts(res.prompts);
+          setHasMore(res.hasMore);
+          setPage(1);
+        }
       } catch (err) {
         console.error('Failed to load explore feed:', err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
     loadFilteredFeed();
+    // Cleanup: invalidate this request if filters change again
+    return () => {
+      active = false;
+    };
   }, [debouncedSearch, activeCategory, activeTool, activeAspectRatio]);
 
   const saveRecentSearch = (term: string) => {

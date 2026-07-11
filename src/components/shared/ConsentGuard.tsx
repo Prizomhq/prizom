@@ -145,7 +145,15 @@ export default function ConsentGuard() {
     }
   };
 
-  if (loading || hasAccepted || !user || pathname?.startsWith('/admin')) {
+  // Bypassed paths: admin console and account lifecycle pages
+  const isBypassPath = pathname?.startsWith('/admin') ||
+                       pathname === '/reactivate-account' ||
+                       pathname === '/restore-account' ||
+                       pathname === '/suspended' ||
+                       pathname === '/account-appeal' ||
+                       pathname?.startsWith('/auth');
+
+  if (loading || hasAccepted || !user || isBypassPath) {
     return null;
   }
 

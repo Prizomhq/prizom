@@ -136,6 +136,7 @@ export default function GlobalSearch() {
 
   // Debounce search query
   useEffect(() => {
+    let active = true; // 🔴 Request state flag
     if (!query.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults({ prompts: [], profiles: [], tags: [] });
@@ -147,15 +148,21 @@ export default function GlobalSearch() {
     const delayDebounce = setTimeout(async () => {
       try {
         const data = await searchPrizom(query);
-        setResults(data);
+        // 🔴 Only update state if this query is still active
+        if (active) {
+          setResults(data);
+          setLoading(false);
+        }
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }, 300); // 300ms debounce
 
-    return () => clearTimeout(delayDebounce);
+    return () => {
+      active = false; // 🔴 Invalidate current promise resolution
+      clearTimeout(delayDebounce);
+    };
   }, [query]);
 
   // Save query to recent searches

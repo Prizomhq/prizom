@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { dispatchEmail, runEmailRetryQueue } from '@/lib/emailService';
-import { safePermanentDelete } from '@/app/actions/adminActions';
+import { safePermanentDelete } from '@/lib/db/user-cleanup';
 import { deleteCloudinaryAsset } from '@/lib/cloudinary';
 
 export async function GET(req: NextRequest) {
@@ -143,18 +143,25 @@ async function runModerationCleanup() {
   if (delPendingError) {
     console.error('[CRON] Error fetching deletion pending users:', delPendingError.message);
   } else if (deletionPendingUsers && deletionPendingUsers.length > 0) {
-    for (const user of deletionPendingUsers) {
-      try {
-        console.log(`[CRON] Performing safe permanent delete for pending deletion user: ${user.username} (${user.id})`);
-        const res = await safePermanentDelete(user.id);
-        if (res.success) {
-          deletedUsers.push(user.username);
-        } else {
-          console.error(`[CRON] Failed to permanently delete user ${user.id}:`, res.error);
-        }
-      } catch (err: any) {
-        console.error(`[CRON] Exception during permanent delete for user ${user.id}:`, err);
-      }
+    // Process in parallel batches of 5
+    const chunkSize = 5;
+    for (let i = 0; i < deletionPendingUsers.length; i += chunkSize) {
+      const chunk = deletionPendingUsers.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map(async (user) => {
+          try {
+            console.log(`[CRON] Performing safe permanent delete for pending deletion user: ${user.username} (${user.id})`);
+            const res = await safePermanentDelete(user.id);
+            if (res.success) {
+              deletedUsers.push(user.username);
+            } else {
+              console.error(`[CRON] Failed to permanently delete user ${user.id}:`, res.error);
+            }
+          } catch (err) {
+            console.error(`[CRON] Exception during permanent delete for user ${user.id}:`, err);
+          }
+        })
+      );
     }
   }
 

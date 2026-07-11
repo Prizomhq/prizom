@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 export async function getPlatformStats() {
   const supabase = await createClient();
@@ -152,6 +152,56 @@ export async function getPromptLineageStats(promptId: string) {
         originalRootId: promptId
       }
     };
+  }
+}
+
+export async function getCreatorAnalyticsAction(timeframe: '7d' | '30d' | '90d' | 'all') {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
+  const adminClient = await createAdminClient();
+
+  // Calculate start date
+  let startDate = new Date(0); // All time
+  const now = new Date();
+  if (timeframe === '7d') startDate = new Date(now.setDate(now.getDate() - 7));
+  else if (timeframe === '30d') startDate = new Date(now.setDate(now.getDate() - 30));
+  else if (timeframe === '90d') startDate = new Date(now.setDate(now.getDate() - 90));
+  const startIso = startDate.toISOString();
+
+  try {
+    // Get creator's prompts
+    const { data: prompts } = await adminClient
+      .from('prompts')
+      .select('id')
+      .eq('user_id', user.id);
+
+    const promptIds = prompts?.map(p => p.id) || [];
+    if (promptIds.length === 0) {
+      return { success: true, stats: { followers: 0, copies: 0, likes: 0, views: 0 } };
+    }
+
+    // Run parallel count queries
+    const [copiesRes, viewsRes, likesRes, followersRes] = await Promise.all([
+      adminClient.from('prompt_copy_logs').select('id', { count: 'exact', head: true }).in('prompt_id', promptIds).gte('copied_at', startIso),
+      adminClient.from('prompt_views').select('id', { count: 'exact', head: true }).in('prompt_id', promptIds).gte('viewed_at', startIso),
+      adminClient.from('likes').select('id', { count: 'exact', head: true }).in('prompt_id', promptIds).gte('created_at', startIso),
+      adminClient.from('followers').select('id', { count: 'exact', head: true }).eq('following_id', user.id).gte('created_at', startIso)
+    ]);
+
+    return {
+      success: true,
+      stats: {
+        followers: followersRes.count || 0,
+        copies: copiesRes.count || 0,
+        likes: likesRes.count || 0,
+        views: viewsRes.count || 0
+      }
+    };
+  } catch (err: any) {
+    console.error('Failed to query timeframe analytics:', err);
+    return { success: false, error: err.message };
   }
 }
 

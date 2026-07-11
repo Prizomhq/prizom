@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { getCreatorAnalyticsAction } from '@/app/actions/stats';
 import Link from 'next/link';
 import { 
   ArrowLeft, 
@@ -85,17 +86,47 @@ export default function CreatorAnalyticsDashboardClient({
     }
   }, [timeframe]);
 
+  const [fetchedStats, setFetchedStats] = useState({
+    followers: Math.max(1, Math.round(creator.follower_count * 0.35)),
+    copies: Math.max(0, Math.round(initialCopies * 0.35)),
+    likes: Math.max(0, Math.round(initialLikes * 0.35)),
+    views: Math.max(2, Math.round(totalViews * 0.35))
+  });
+
+  useEffect(() => {
+    let active = true;
+    async function fetchStats() {
+      try {
+        const res = await getCreatorAnalyticsAction(timeframe);
+        if (res.success && res.stats && active) {
+          setFetchedStats({
+            followers: res.stats.followers,
+            copies: res.stats.copies,
+            likes: res.stats.likes,
+            views: res.stats.views
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching creator analytics:', err);
+      }
+    }
+    fetchStats();
+    return () => {
+      active = false;
+    };
+  }, [timeframe]);
+
   const activeStats = useMemo(() => {
     const mult = timeframeMultiplier;
     return {
-      followers: Math.max(1, Math.round(creator.follower_count * mult)),
-      copies: Math.max(0, Math.round(initialCopies * mult)),
-      likes: Math.max(0, Math.round(initialLikes * mult)),
-      views: Math.max(2, Math.round(totalViews * mult)),
+      followers: fetchedStats.followers,
+      copies: fetchedStats.copies,
+      likes: fetchedStats.likes,
+      views: fetchedStats.views,
       saves: Math.max(0, Math.round(initialSaves * mult)),
       remixes: Math.max(0, Math.round(initialRemixes * mult)),
     };
-  }, [timeframeMultiplier, creator.follower_count, initialCopies, initialLikes, totalViews, initialSaves, initialRemixes]);
+  }, [fetchedStats, timeframeMultiplier, initialSaves, initialRemixes]);
 
   // Weighted Creator Power Score
   const engagementScore = useMemo(() => {
