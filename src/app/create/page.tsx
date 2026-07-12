@@ -178,9 +178,15 @@ function CreateContent() {
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
   const [availableRatios, setAvailableRatios] = useState<any[]>([]);
   const [aspectRatio, setAspectRatio] = useState('1:1');
-
-
-
+  const [imageMeta, setImageMeta] = useState<{
+    name: string;
+    size: string;
+    dimensions: string;
+    format: string;
+    isLowRes: boolean;
+    aspectRatio: number;
+  } | null>(null);
+  const [statusMessage, setStatusMessage] = useState('');
   // Tag suggestions state
   const [popularTags, setPopularTags] = useState<string[]>([]);
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
@@ -318,32 +324,65 @@ function CreateContent() {
     setError('');
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
-
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(selectedFile.type)) {
       setError('Please upload a valid image file (JPG, PNG, or WebP).');
       return;
     }
-
     const maxSize = 5 * 1024 * 1024;
     if (selectedFile.size > maxSize) {
       setError('Image size must be less than 5MB.');
       return;
     }
-
+    // 1. Revoke existing Object URL to clear memory leaks
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    const objectUrl = URL.createObjectURL(selectedFile);
     setFile(selectedFile);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
+    setPreviewUrl(objectUrl);
+    setStatusMessage(`File ${selectedFile.name} selected.`);
+    // 2. Extract dimensions and resolution quality status
+    const img = new Image();
+    img.onload = () => {
+      const isLowRes = img.naturalWidth < 512 || img.naturalHeight < 512;
+      setImageMeta({
+        name: selectedFile.name,
+        size: (selectedFile.size / (1024 * 1024)).toFixed(2) + ' MB',
+        dimensions: `${img.naturalWidth} × ${img.naturalHeight}`,
+        format: selectedFile.type.split('/')[1].toUpperCase(),
+        isLowRes,
+        aspectRatio: img.naturalWidth / img.naturalHeight
+      });
+    };
+    img.src = objectUrl;
   };
 
   const removeFile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    
     setFile(null);
     setPreviewUrl(null);
+    setImageMeta(null);
+    setStatusMessage('Cover image removed.');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  // Revoke object URL on page unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -797,76 +836,116 @@ function CreateContent() {
               ></textarea>
             </div>
           )}
-
           {/* Cover Image Upload (Optional) */}
           <div>
             <label className="block text-sm font-bold text-zinc-700 mb-2">Cover Image <span className="text-zinc-500 font-normal">(Optional)</span></label>
-            <div 
-              className={`rounded-3xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center h-80 relative overflow-hidden group hover:shadow-xs
-                ${previewUrl 
-                  ? 'border-transparent p-0 bg-transparent' 
-                  : isDragging 
-                    ? 'border-[var(--color-neon-purple)] bg-purple-50/40 shadow-inner scale-[0.99]' 
-                    : 'border-zinc-300/80 bg-zinc-50/80 hover:bg-zinc-55 hover:border-[var(--color-neon-purple)] cursor-pointer'
-                }
-              `}
-              onClick={() => !previewUrl && fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (!previewUrl) setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                if (previewUrl) return;
-                
-                const droppedFile = e.dataTransfer.files?.[0];
-                if (droppedFile) {
-                  const mockEvent = {
-                    target: {
-                      files: [droppedFile]
-                    }
-                  } as unknown as React.ChangeEvent<HTMLInputElement>;
-                  handleFileChange(mockEvent);
-                }
-              }}
-            >
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden" 
-              />
+            
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden" 
+            />
 
-              {previewUrl ? (
-                <div className="w-full h-full relative group">
-                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                    <button 
-                      type="button" 
-                      onClick={removeFile}
-                      className="px-6 py-3 bg-white text-red-600 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center shadow-lg cursor-pointer"
+            {previewUrl ? (
+              <div className="w-full flex flex-col gap-4 border border-zinc-200/60 rounded-3xl p-4 bg-white/50 backdrop-blur-xl">
+                {/* Preview Image with dynamic native aspect ratio (Pinterest style) */}
+                <div className="w-full overflow-hidden rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center max-h-[400px]">
+                  <img 
+                    src={previewUrl} 
+                    alt="Cover image preview" 
+                    className="w-full h-auto max-h-[400px] object-contain rounded-2xl" 
+                  />
+                </div>
+                {/* Metadata and Action Strip */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-xs">
+                  <div className="space-y-1 text-left">
+                    <p className="font-extrabold text-zinc-900 truncate max-w-xs">{imageMeta?.name || 'Uploaded File'}</p>
+                    <div className="flex flex-wrap gap-2 text-zinc-500 font-bold">
+                      <span>{imageMeta?.size}</span>
+                      <span>•</span>
+                      <span>{imageMeta?.dimensions}</span>
+                      <span>•</span>
+                      <span className="uppercase">{imageMeta?.format}</span>
+                    </div>
+                    {imageMeta?.isLowRes && (
+                      <p className="text-[10px] text-amber-600 font-extrabold flex items-center gap-1 mt-1">
+                        ⚠️ Low Resolution (Recommended: min 512px)
+                      </p>
+                    )}
+                  </div>
+                  {/* Action buttons (Min touch height 44px) */}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-black uppercase tracking-wider rounded-xl hover:bg-zinc-55 transition-all min-h-[44px] cursor-pointer"
                     >
-                      <X className="w-4 h-4 mr-2" />
-                      Remove Image
+                      Replace
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeFile}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-red-50 border border-red-100 text-red-600 font-black uppercase tracking-wider rounded-xl hover:bg-red-100/50 transition-all min-h-[44px] cursor-pointer"
+                    >
+                      Remove
                     </button>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="w-16 h-16 rounded-full bg-zinc-100 group-hover:bg-purple-50 flex items-center justify-center mb-4 transition-colors duration-300">
-                    <UploadCloud className="w-8 h-8 text-zinc-400 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300" />
-                  </div>
-                  <h3 className="text-lg font-bold text-zinc-900 mb-2 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300">
-                    Drag & drop or click to upload cover image
-                  </h3>
-                  <p className="text-xs text-zinc-500 font-bold max-w-sm">
-                    High-quality PNG, JPG, or WebP up to 5MB. If left blank, a dynamic CSS placeholder will be used.
-                  </p>
-                </>
-              )}
+              </div>
+            ) : (
+              <div 
+                tabIndex={0}
+                role="button"
+                aria-label="Upload cover image"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className={`rounded-3xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center h-80 relative overflow-hidden group hover:shadow-xs focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 cursor-pointer
+                  ${isDragging 
+                    ? 'border-[var(--color-neon-purple)] bg-purple-50/40 shadow-inner scale-[0.99]' 
+                    : 'border-zinc-300/80 bg-zinc-50/80 hover:bg-zinc-55 hover:border-[var(--color-neon-purple)]'
+                  }
+                `}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  
+                  const droppedFile = e.dataTransfer.files?.[0];
+                  if (droppedFile) {
+                    const mockEvent = {
+                      target: {
+                        files: [droppedFile]
+                      }
+                    } as unknown as React.ChangeEvent<HTMLInputElement>;
+                    handleFileChange(mockEvent);
+                  }
+                }}
+              >
+                <div className="w-16 h-16 rounded-full bg-zinc-100 group-hover:bg-purple-50 flex items-center justify-center mb-4 transition-colors duration-300">
+                  <UploadCloud className="w-8 h-8 text-zinc-400 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300" />
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 mb-2 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300">
+                  Drag & drop or click to upload cover image
+                </h3>
+                <p className="text-xs text-zinc-500 font-bold max-w-sm">
+                  High-quality PNG, JPG, or WebP up to 5MB. If left blank, a dynamic CSS placeholder will be used.
+                </p>
+              </div>
+            )}
+            
+            <div className="sr-only" aria-live="polite">
+              {statusMessage}
             </div>
           </div>
 
