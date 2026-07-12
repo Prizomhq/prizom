@@ -77,7 +77,7 @@ export default function DynamicDialog({
     accentColorClass = 'bg-gradient-to-r from-red-500 via-rose-500 to-orange-500';
     iconContainerClass = 'bg-red-50 text-red-500 border border-red-100/50';
     Icon = AlertCircle;
-    primaryBtnClass = 'bg-red-650 hover:bg-red-700 text-white';
+    primaryBtnClass = 'bg-red-600 hover:bg-red-700 text-white';
   } else if (type === 'confirm') {
     accentColorClass = 'bg-gradient-to-r from-[var(--color-neon-purple)] via-indigo-500 to-[var(--color-electric-blue)]';
     iconContainerClass = 'bg-purple-50 text-[var(--color-neon-purple)] border border-purple-100/50';
@@ -113,7 +113,7 @@ export default function DynamicDialog({
         </div>
 
         <h2 className="text-2xl font-black text-zinc-900 mb-3 tracking-tight">{title}</h2>
-        <p className="text-zinc-550 font-semibold text-sm leading-relaxed mb-8 whitespace-pre-line">
+        <p className="text-zinc-500 font-semibold text-sm leading-relaxed mb-8 whitespace-pre-line">
           {description}
         </p>
 

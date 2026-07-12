@@ -194,7 +194,7 @@ export default function FollowListModal({
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between shrink-0">
           <div>
             <h2 id="follow-list-title" className="text-xl font-black text-zinc-900 tracking-tight">{title}</h2>
-            <p className="text-xs text-zinc-650 font-semibold mt-0.5">{creatorName}</p>
+            <p className="text-xs text-zinc-600 font-semibold mt-0.5">{creatorName}</p>
           </div>
           <button 
             onClick={onClose}

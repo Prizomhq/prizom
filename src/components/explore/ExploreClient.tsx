@@ -277,7 +277,7 @@ export default function ExploreClient({
         <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-2 leading-none">
           Discover Prompt Universe
         </h1>
-        <p className="text-zinc-650 font-semibold text-sm max-w-lg mb-8">
+        <p className="text-zinc-600 font-semibold text-sm max-w-lg mb-8">
           Personalized discovery feed. Search templates or select categories below.
         </p>
 
@@ -317,7 +317,7 @@ export default function ExploreClient({
                   setSearchVal('');
                   router.push('/discover');
                 }}
-                className="absolute inset-y-0 right-3.5 flex items-center text-zinc-400 hover:text-zinc-650 transition-colors cursor-pointer"
+                className="absolute inset-y-0 right-3.5 flex items-center text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
                 aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -336,7 +336,7 @@ export default function ExploreClient({
             <SlidersHorizontal className="w-4 h-4" />
             <span className="hidden sm:inline">Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="h-5 w-5 rounded-full bg-indigo-650 text-white text-[9px] font-black flex items-center justify-center shrink-0">
+              <span className="h-5 w-5 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">
                 {activeFiltersCount}
               </span>
             )}
@@ -494,7 +494,7 @@ export default function ExploreClient({
           <h2 className="text-xl font-black text-zinc-900 uppercase tracking-wide flex items-center gap-2">
             <Grid className="w-5 h-5 text-indigo-500" />
             {activeCategory ? `${activeCategory} Prompts` : 'All Prompt Discoveries'}
-            {prompts.length > 0 && <span className="text-zinc-650 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
+            {prompts.length > 0 && <span className="text-zinc-600 font-semibold text-xs lowercase">({prompts.length} loaded)</span>}
           </h2>
         </div>
 
@@ -512,7 +512,7 @@ export default function ExploreClient({
               </div>
             </div>
             <h3 className="text-2xl font-black text-zinc-900 mb-2 tracking-tight">No results found</h3>
-            <p className="text-zinc-650 font-medium text-sm leading-relaxed mb-2">
+            <p className="text-zinc-600 font-medium text-sm leading-relaxed mb-2">
               {searchVal
                 ? <>No prompts match <strong className="text-zinc-800">&quot;{searchVal}&quot;</strong>. Try different keywords or clear your filters.</>
                 : "No prompts match your active filters. Try a different combination."}
@@ -528,7 +528,7 @@ export default function ExploreClient({
             </div>
             {visibleCategories.length > 0 && (
               <div className="w-full">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-650 mb-3">Try browsing a category</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-3">Try browsing a category</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {visibleCategories.slice(0, 6).map((cat) => (
                     <button
@@ -588,7 +588,7 @@ export default function ExploreClient({
             )}
 
             {!hasMore && prompts.length > 0 && (
-              <div className="flex justify-center items-center py-16 text-center text-zinc-650 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
+              <div className="flex justify-center items-center py-16 text-center text-zinc-600 text-xs font-black uppercase tracking-widest border-t border-zinc-100 mt-10">
                 ✨ End of Discover ✨
               </div>
             )}

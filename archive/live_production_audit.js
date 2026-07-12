@@ -7,8 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import dns from 'dns';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from './src/lib/resend';
-import { getTemplateContent, dispatchEmail } from './src/lib/emailService';
+import { sendEmail } from '../src/lib/resend';
+import { getTemplateContent, dispatchEmail } from '../src/lib/emailService';
 
 // Resolve directory name
 const __dirname = path.resolve();
@@ -169,11 +169,20 @@ async function runProductionAudit() {
 
     // --- SEED TEST USER FOR AUTH & EMAILS ---
     console.log('\n--- Seeding Transient Test Audit User ---');
+    // Query an active invite key to bypass the signup trigger restriction
+    const { data: keyData } = await supabase
+      .from('invite_keys')
+      .select('key')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    const inviteKey = keyData?.key || 'prizom-beta-8x4f';
+
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: testEmail,
       password: 'AuditPassword123!',
       email_confirm: false,
-      user_metadata: { username: testUsername }
+      user_metadata: { username: testUsername, invite_key: inviteKey }
     });
     if (authError) throw authError;
     createdUserId = authData.user.id;
@@ -208,7 +217,7 @@ async function runProductionAudit() {
     } catch (fetchErr) {
       console.warn(`  [INFO] HTTP fetch to ${siteUrl} failed (Connection refused/offline). Falling back to mock route verification...`);
       // Fallback: mock route GET handler verification
-      const { GET } = await import('./src/app/api/cron/cleanup/route.ts');
+      const { GET } = await import('../src/app/api/cron/cleanup/route.ts');
       
       const createMockRequest = (authHeaderVal) => ({
         headers: { get: (name) => name.toLowerCase() === 'authorization' ? authHeaderVal : null },
@@ -248,7 +257,7 @@ async function runProductionAudit() {
       }
     } catch (fetchErr) {
       // Fallback mock execution
-      const { GET } = await import('./src/app/api/cron/cleanup/route.ts');
+      const { GET } = await import('../src/app/api/cron/cleanup/route.ts');
       const reqAuthMock = {
         headers: { get: (name) => name.toLowerCase() === 'authorization' ? `Bearer ${process.env.CRON_SECRET}` : null },
         nextUrl: { searchParams: { get: () => null } }

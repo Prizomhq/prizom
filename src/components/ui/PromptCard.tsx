@@ -431,7 +431,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/[0.03] via-transparent to-transparent pointer-events-none" />
               {/* Top row: Tool badge */}
               <div className="flex justify-between items-start">
-                <span className="px-2.5 py-1 rounded-full bg-zinc-900/5 text-[9px] font-black uppercase tracking-wider text-zinc-650 border border-zinc-900/5 backdrop-blur-xs">
+                <span className="px-2.5 py-1 rounded-full bg-zinc-900/5 text-[9px] font-black uppercase tracking-wider text-zinc-600 border border-zinc-900/5 backdrop-blur-xs">
                   {tool}
                 </span>
               </div>
@@ -585,7 +585,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
           </button>
           <button
             onClick={handleReportPrompt}
-            className="w-full px-4 py-3.5 text-left text-xs font-bold text-red-650 hover:bg-red-50/50 flex items-center gap-2 border-t border-zinc-100 mt-1 cursor-pointer"
+            className="w-full px-4 py-3.5 text-left text-xs font-bold text-red-600 hover:bg-red-50/50 flex items-center gap-2 border-t border-zinc-100 mt-1 cursor-pointer"
           >
             <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
             Flag Review

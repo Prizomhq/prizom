@@ -182,7 +182,7 @@ export default function NotificationDropdown() {
         return {
           glow: 'hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] border-l-4 border-l-red-500 hover:border-l-red-600',
           bg: 'bg-red-500/[0.04]',
-          avatarBg: 'bg-gradient-to-tr from-red-500 to-rose-750 shadow-[0_4px_12px_rgba(239,68,68,0.3)]',
+          avatarBg: 'bg-gradient-to-tr from-red-500 to-rose-800 shadow-[0_4px_12px_rgba(239,68,68,0.3)]',
           avatarEmoji: '🛡️'
         };
       case 'report':
@@ -320,7 +320,7 @@ export default function NotificationDropdown() {
                             src={item.actor.avatarUrl} 
                             username={item.actor.username} 
                             size="sm"
-                            className="border border-zinc-150 shadow-sm hover:scale-105 transition-transform"
+                            className="border border-zinc-200 shadow-sm hover:scale-105 transition-transform"
                           />
                         </Link>
                       ) : (

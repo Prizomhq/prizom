@@ -219,7 +219,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center space-x-2.5 group text-zinc-900 hover:text-[var(--color-neon-purple)] transition-colors">
                 <PrizomLogo size={40} className="transition-transform group-hover:scale-105" />
                 <PrizomWordmark height={20} className="hidden xl:block transition-transform group-hover:scale-102" />
-                <span className="hidden xl:inline-block px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[8px] font-extrabold uppercase tracking-wider select-none leading-none border border-zinc-250/30 align-middle">
+                <span className="hidden xl:inline-block px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[8px] font-extrabold uppercase tracking-wider select-none leading-none border border-zinc-200/30 align-middle">
                   Beta
                 </span>
               </Link>
@@ -309,7 +309,7 @@ export default function Navbar() {
                             setProfileMenuOpen(false);
                             handleLogout();
                           }}
-                          className="w-full px-4 py-2 text-left text-xs font-bold text-red-650 hover:bg-red-50/50 flex items-center gap-2 cursor-pointer transition-colors border-t border-zinc-100 mt-1"
+                          className="w-full px-4 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50/50 flex items-center gap-2 cursor-pointer transition-colors border-t border-zinc-200 mt-1"
                         >
                           <LogOut className="w-3.5 h-3.5 text-red-500" />
                           Logout
@@ -352,11 +352,11 @@ export default function Navbar() {
           {/* Drawer Menu Panel */}
           <div ref={mobileMenuRef} className="relative w-full h-[100dvh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 pointer-events-auto">
             {/* Header: Brand & Close Trigger */}
-            <div className="flex justify-between items-center px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 border-b border-zinc-150 shrink-0">
+            <div className="flex justify-between items-center px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 border-b border-zinc-200 shrink-0">
               <Link href="/" className="flex items-center space-x-2.5 text-zinc-900" onClick={() => setIsOpen(false)}>
                 <PrizomLogo size={36} />
                 <PrizomWordmark height={20} />
-                <span className="inline-block px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[8px] font-extrabold uppercase tracking-wider select-none leading-none border border-zinc-250/30 align-middle">
+                <span className="inline-block px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 text-[8px] font-extrabold uppercase tracking-wider select-none leading-none border border-zinc-200/30 align-middle">
                   Beta
                 </span>
               </Link>

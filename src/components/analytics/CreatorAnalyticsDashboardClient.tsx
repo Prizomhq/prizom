@@ -444,7 +444,7 @@ export default function CreatorAnalyticsDashboardClient({
               <p className="text-zinc-700 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
                 <span className={`inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-r ${creatorLevelInfo.theme}`} />
                 {creatorLevelInfo.title}
-                <span className="text-zinc-650">•</span>
+                <span className="text-zinc-600">•</span>
                 <span>Level {creatorLevelInfo.level}</span>
               </p>
             </div>
@@ -658,7 +658,7 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
             
             {/* Dynamic Graph bottom labels */}
-            <div className="flex justify-between items-center mt-4 text-[9px] font-black uppercase text-zinc-650 tracking-wider">
+            <div className="flex justify-between items-center mt-4 text-[9px] font-black uppercase text-zinc-600 tracking-wider">
               {graphLabels.map((lbl, idx) => (
                 <span key={idx}>{lbl}</span>
               ))}
@@ -677,14 +677,14 @@ export default function CreatorAnalyticsDashboardClient({
                 <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
                     <MousePointerClick className="w-4 h-4 text-zinc-700" />
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Total Created Prompts</span>
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Total Created Prompts</span>
                   </div>
                   <span className="text-xs font-black text-zinc-900">{promptCount}</span>
                 </div>
                 <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-zinc-700" />
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Follower Engagement Ratio</span>
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Follower Engagement Ratio</span>
                   </div>
                   <span className="text-xs font-black text-zinc-900">
                     {creator.follower_count > 0 ? (activeStats.likes / creator.follower_count).toFixed(1) : 0.0}x
@@ -693,7 +693,7 @@ export default function CreatorAnalyticsDashboardClient({
                 <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
                     <Bookmark className="w-4 h-4 text-zinc-700" />
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Saves Conversion</span>
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Saves Conversion</span>
                   </div>
                   <span className="text-xs font-black text-zinc-900">
                     {activeStats.copies > 0 ? Math.round((activeStats.saves / activeStats.copies) * 100) : 0}%
@@ -702,7 +702,7 @@ export default function CreatorAnalyticsDashboardClient({
                 <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-zinc-700" />
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Total Remixes</span>
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Total Remixes</span>
                   </div>
                   <span className="text-xs font-black text-zinc-900">{activeStats.remixes}</span>
                 </div>
@@ -745,7 +745,7 @@ export default function CreatorAnalyticsDashboardClient({
             </div>
 
             {topPrompts.length === 0 ? (
-              <div className="p-12 text-center text-zinc-650 border border-dashed border-zinc-200 rounded-[2rem] font-bold text-xs uppercase bg-zinc-50">
+              <div className="p-12 text-center text-zinc-600 border border-dashed border-zinc-200 rounded-[2rem] font-bold text-xs uppercase bg-zinc-50">
                 Create prompts to populate top performers.
               </div>
             ) : (
@@ -792,13 +792,13 @@ export default function CreatorAnalyticsDashboardClient({
                             <p className="text-[11px] font-black text-zinc-900 tracking-tight">
                               {curVal.toLocaleString()}
                             </p>
-                            <span className="text-[8px] font-black uppercase text-zinc-650 tracking-wider">
+                            <span className="text-[8px] font-black uppercase text-zinc-600 tracking-wider">
                               {topSortKey}
                             </span>
                           </div>
                           <Link 
                             href={`/prompt/${p.id}`}
-                            className="w-8 h-8 rounded-xl bg-zinc-100 border border-zinc-200 hover:border-zinc-300 flex items-center justify-center text-zinc-650 hover:text-zinc-950 transition-colors"
+                            className="w-8 h-8 rounded-xl bg-zinc-100 border border-zinc-200 hover:border-zinc-300 flex items-center justify-center text-zinc-600 hover:text-zinc-950 transition-colors"
                           >
                             <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                           </Link>
@@ -825,7 +825,7 @@ export default function CreatorAnalyticsDashboardClient({
                 <div>
                   <span className="text-[9px] font-black uppercase text-zinc-700 tracking-wider">Niche Prompt Distribution</span>
                   {audienceInsights.distribution.length === 0 ? (
-                    <p className="text-[10px] font-black text-zinc-650 uppercase mt-2">No category metrics.</p>
+                    <p className="text-[10px] font-black text-zinc-600 uppercase mt-2">No category metrics.</p>
                   ) : (
                     <div className="space-y-3 mt-3">
                       {audienceInsights.distribution.map((d, idx) => (
@@ -877,7 +877,7 @@ export default function CreatorAnalyticsDashboardClient({
                 <div>
                   <span className="text-[9px] font-black uppercase text-zinc-700 tracking-wider">Aspect Ratio Usage</span>
                   {aspectRatioInsights.length === 0 ? (
-                    <p className="text-[10px] font-black text-zinc-650 uppercase mt-2">No aspect ratio data.</p>
+                    <p className="text-[10px] font-black text-zinc-600 uppercase mt-2">No aspect ratio data.</p>
                   ) : (
                     <div className="space-y-3 mt-3">
                       {aspectRatioInsights.map((d, idx) => (
@@ -934,7 +934,7 @@ export default function CreatorAnalyticsDashboardClient({
 
                   {/* Lock Indicator for locked achievements */}
                   {!ach.unlocked ? (
-                    <span className="p-1 border border-zinc-200 bg-zinc-100 rounded-md text-zinc-650 flex items-center justify-center shadow-inner">
+                    <span className="p-1 border border-zinc-200 bg-zinc-100 rounded-md text-zinc-600 flex items-center justify-center shadow-inner">
                       <Lock className="w-3.5 h-3.5" />
                     </span>
                   ) : (
@@ -955,7 +955,7 @@ export default function CreatorAnalyticsDashboardClient({
 
                 {/* Progress Indicators */}
                 <div className="pt-2 border-t border-zinc-200">
-                  <div className="flex justify-between items-center text-[8px] font-black uppercase text-zinc-650 tracking-wider">
+                  <div className="flex justify-between items-center text-[8px] font-black uppercase text-zinc-600 tracking-wider">
                     <span>Progress</span>
                     <span>
                       {ach.current.toLocaleString()} / {ach.target.toLocaleString()}

@@ -492,7 +492,7 @@ export default function GlobalSearch() {
     return createPortal(
       <div className="fixed inset-0 bg-white z-[10000] flex flex-col pt-[env(safe-area-inset-top,0px)] pointer-events-auto">
         {/* Mobile Search Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-150 shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-200 shrink-0">
           <button 
             onClick={() => setIsOpen(false)}
             className="w-11 h-11 -ml-2 text-zinc-600 hover:text-zinc-900 rounded-full hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
@@ -515,7 +515,7 @@ export default function GlobalSearch() {
               <div className="absolute inset-y-0 right-1 flex items-center space-x-1">
                 <button
                   onClick={() => setQuery('')}
-                  className="p-1 text-zinc-400 hover:text-zinc-650 rounded-full cursor-pointer relative after:content-[''] after:absolute after:-inset-3"
+                  className="p-1 text-zinc-400 hover:text-zinc-600 rounded-full cursor-pointer relative after:content-[''] after:absolute after:-inset-3"
                   aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />

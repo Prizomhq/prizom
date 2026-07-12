@@ -170,7 +170,7 @@ export default function RelatedPromptsFeed({
           {loadingMore ? (
             <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-6 py-2 border border-zinc-200/50 rounded-full shadow-md">
               <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--color-neon-purple)]" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-650">Finding similar prompts...</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-600">Finding similar prompts...</span>
             </div>
           ) : (
             <div className="h-4 w-full" />

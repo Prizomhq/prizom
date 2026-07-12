@@ -37,10 +37,23 @@ export async function checkUsernameAvailability(username: string) {
 }
 
 export async function sendPasswordResetEmail(email: string) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in';
+  
+  // Secure protocol validation on redirection target to prevent open-redirect vulnerabilities
+  let validatedUrl = siteUrl;
+  try {
+    const parsedUrl = new URL(siteUrl);
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.hostname !== 'localhost' && parsedUrl.hostname !== '127.0.0.1') {
+      validatedUrl = 'https://prizom.in';
+    }
+  } catch (err) {
+    validatedUrl = 'https://prizom.in';
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+    redirectTo: `${validatedUrl}/auth/callback?next=/reset-password`,
   });
 
   if (error) {

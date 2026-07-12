@@ -165,7 +165,7 @@ export default function OnboardingWizard() {
       <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-zinc-200/50 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
         
         {/* Header */}
-        <div className="p-8 pb-4 shrink-0 flex items-center justify-between border-b border-zinc-150 bg-zinc-50/50">
+        <div className="p-8 pb-4 shrink-0 flex items-center justify-between border-b border-zinc-200 bg-zinc-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] flex items-center justify-center shadow-md shadow-[var(--color-neon-purple)]/20">
               <Lightbulb className="w-5 h-5 text-white animate-pulse" />
@@ -287,7 +287,7 @@ export default function OnboardingWizard() {
 
 
         {/* Footer */}
-        <div className="p-8 border-t border-zinc-150 shrink-0 flex items-center justify-between bg-zinc-50/50">
+        <div className="p-8 border-t border-zinc-200 shrink-0 flex items-center justify-between bg-zinc-50/50">
           <div>
             {step === 2 ? (
               <button

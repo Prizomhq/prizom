@@ -368,7 +368,7 @@ export default function ContactForm({ developer: initialDeveloper }: { developer
                     href={developer.instagram} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group flex items-center justify-between p-4 bg-white/70 border border-zinc-200/60 rounded-2xl hover:border-pink-200 hover:shadow-[0_4px_20px_rgba(236,72,153,0.06)] hover:text-pink-650 transition-all duration-300 w-full"
+                    className="group flex items-center justify-between p-4 bg-white/70 border border-zinc-200/60 rounded-2xl hover:border-pink-200 hover:shadow-[0_4px_20px_rgba(236,72,153,0.06)] hover:text-pink-600 transition-all duration-300 w-full"
                   >
                     <div className="flex items-center space-x-3.5">
                       <div className="p-2 bg-pink-50 text-pink-500 rounded-xl group-hover:scale-105 transition-transform duration-300">
@@ -379,7 +379,7 @@ export default function ContactForm({ developer: initialDeveloper }: { developer
                         <p className="text-[10px] text-zinc-400 font-semibold">Creator updates & creative edits</p>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-zinc-300 group-hover:text-pink-650 group-hover:translate-x-0.5 transition-all" />
+                    <ArrowRight className="w-4 h-4 text-zinc-300 group-hover:text-pink-600 group-hover:translate-x-0.5 transition-all" />
                   </a>
                 )}
               </div>

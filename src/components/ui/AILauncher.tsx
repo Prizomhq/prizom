@@ -298,7 +298,7 @@ export default function AILauncher({ prompt, isLoggedIn, isOwner = false }: AILa
       <div className="flex flex-col gap-3 w-full">
         {/* Pop-up Blocker Retry Banner */}
         {popupBlocked && (
-          <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-250 p-4 rounded-xl text-amber-900 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-300 p-4 rounded-xl text-amber-900 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2 text-xs font-bold leading-relaxed">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span>Pop-up was blocked. Click the button to open {config.displayName} manually.</span>

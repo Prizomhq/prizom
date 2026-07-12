@@ -89,7 +89,7 @@ async function runCronAudit() {
 
   try {
     // Load GET handler from API route using tsx compiler loader
-    const { GET } = require('./src/app/api/cron/cleanup/route.ts');
+    const { GET } = require('../src/app/api/cron/cleanup/route.ts');
 
     // --- 1. TEST CRON AUTHORIZATION SECURITY ---
     console.log('--- Test 1: Security Authorization Check ---');
@@ -118,9 +118,23 @@ async function runCronAudit() {
     // --- 2. SEED SECTIONS FOR LIFECYCLE SWEEPS ---
     console.log('\n--- Seeding Transient Test Lifecycle Records ---');
 
+    // Query an active invite key to bypass the signup trigger restriction
+    const { data: keyData } = await adminClient
+      .from('invite_keys')
+      .select('key')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    const inviteKey = keyData?.key || 'prizom-beta-8x4f';
+
     // User A: Suspended 14 days ago (triggers Day 13 warning, warning_sent = false)
     const emailWarn = `cron_warn_${Date.now()}@prizom.com`;
-    const { data: authWarn } = await adminClient.auth.admin.createUser({ email: emailWarn, password: 'Password123!', email_confirm: true });
+    const { data: authWarn } = await adminClient.auth.admin.createUser({
+      email: emailWarn,
+      password: 'Password123!',
+      email_confirm: true,
+      user_metadata: { invite_key: inviteKey }
+    });
     testUserWarn = authWarn.user;
     
     // Ensure profiles trigger finishes
@@ -137,7 +151,12 @@ async function runCronAudit() {
 
     // User B: Suspended 16 days ago (triggers Day 15 deletion)
     const emailDel = `cron_del_${Date.now()}@prizom.com`;
-    const { data: authDel } = await adminClient.auth.admin.createUser({ email: emailDel, password: 'Password123!', email_confirm: true });
+    const { data: authDel } = await adminClient.auth.admin.createUser({
+      email: emailDel,
+      password: 'Password123!',
+      email_confirm: true,
+      user_metadata: { invite_key: inviteKey }
+    });
     testUserDelete = authDel.user;
     
     await new Promise(resolve => setTimeout(resolve, 1000));
