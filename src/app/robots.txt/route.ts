@@ -17,6 +17,8 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /settings
 Disallow: /create
+Disallow: /upload
+Disallow: /upload/
 Disallow: /profile
 Disallow: /notifications
 Disallow: /restore-account

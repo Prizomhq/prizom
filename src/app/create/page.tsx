@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { UploadCloud, Wand2, X, Plus, Image as ImageIcon, Loader2, Lock, ArrowRight, ChevronDown, Check } from 'lucide-react';
+import { UploadCloud, Wand2, X, Plus, Image as ImageIcon, Loader2, Lock, ArrowRight, ChevronDown, Check, HelpCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { checkBlockStatus } from '@/app/actions/moderation';
@@ -179,13 +179,7 @@ function CreateContent() {
   const [availableRatios, setAvailableRatios] = useState<any[]>([]);
   const [aspectRatio, setAspectRatio] = useState('1:1');
 
-  // AI Launcher Advanced States
-  const [primaryAiPlatform, setPrimaryAiPlatform] = useState('');
-  const [supportedModels, setSupportedModels] = useState<string[]>([]);
-  const [modelInput, setModelInput] = useState('');
-  const [launchUrl, setLaunchUrl] = useState('');
-  const [promptType, setPromptType] = useState('text');
-  const [showAdvancedLauncher, setShowAdvancedLauncher] = useState(false);
+
 
   // Tag suggestions state
   const [popularTags, setPopularTags] = useState<string[]>([]);
@@ -439,10 +433,7 @@ function CreateContent() {
         remix_of: remixId || null,
         remix_notes: remixId ? remixNotes : null,
         remix_parent_chain: parentPrompt ? [...(parentPrompt.remix_parent_chain || []), parentPrompt.id] : [],
-        primary_ai_platform: primaryAiPlatform.trim() || undefined,
-        supported_models: supportedModels,
-        launch_url: launchUrl.trim() || undefined,
-        prompt_type: promptType
+        prompt_type: 'image'
       });
 
       if (!res.success || !res.data) {
@@ -599,368 +590,285 @@ function CreateContent() {
             </div>
           )}
           
-          {/* Image Upload Area */}
-          <div 
-            className={`rounded-3xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center h-80 relative overflow-hidden group hover:shadow-xs
-              ${previewUrl 
-                ? 'border-transparent p-0 bg-transparent' 
-                : isDragging 
-                  ? 'border-[var(--color-neon-purple)] bg-purple-50/40 shadow-inner scale-[0.99]' 
-                  : 'border-zinc-300/80 bg-zinc-50/80 hover:bg-zinc-50 hover:border-[var(--color-neon-purple)] cursor-pointer'
-              }
-            `}
-            onClick={() => !previewUrl && fileInputRef.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (!previewUrl) setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-              if (previewUrl) return;
-              
-              const droppedFile = e.dataTransfer.files?.[0];
-              if (droppedFile) {
-                const mockEvent = {
-                  target: {
-                    files: [droppedFile]
-                  }
-                } as unknown as React.ChangeEvent<HTMLInputElement>;
-                handleFileChange(mockEvent);
-              }
-            }}
-          >
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden" 
+          {/* Title (Required) */}
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-2">Title <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm font-bold text-base sm:text-sm"
+              placeholder="e.g. Cinematic Cyberpunk City"
             />
-
-            {previewUrl ? (
-              <div className="w-full h-full relative group">
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                  <button 
-                    type="button" 
-                    onClick={removeFile}
-                    className="px-6 py-3 bg-white text-red-600 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center shadow-lg"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Remove Image
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="w-16 h-16 rounded-full bg-zinc-100 group-hover:bg-purple-50 flex items-center justify-center mb-4 transition-colors duration-300">
-                  <UploadCloud className="w-8 h-8 text-zinc-400 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300" />
-                </div>
-                <h3 className="text-lg font-bold text-zinc-900 mb-2 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300">
-                  Drag & drop or click to upload cover image
-                </h3>
-                <p className="text-xs text-zinc-500 font-bold max-w-sm">
-                  High-quality PNG, JPG, or WebP up to 5MB. If left blank, a dynamic CSS placeholder will be used.
-                </p>
-              </>
-            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-zinc-700 mb-2">Title <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm font-bold text-base sm:text-sm"
-                  placeholder="e.g. Cinematic Cyberpunk City"
-                />
-              </div>
+          {/* Prompt (Required - core textarea) */}
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-2">Prompt <span className="text-red-500">*</span></label>
+            <textarea
+              required
+              value={promptText}
+              onChange={(e) => setPromptText(e.target.value)}
+              onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              rows={8}
+              className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-zinc-55 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:bg-white focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all font-mono text-base sm:text-sm shadow-inner"
+              placeholder="Enter the exact prompt used to generate this image..."
+            ></textarea>
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Combobox
-                  label="AI Tool"
-                  value={tool}
-                  onChange={setTool}
-                  options={availableTools}
-                  placeholder="Search/create AI Tool"
-                  required
-                />
-                <Combobox
-                  label="Category"
-                  value={category}
-                  onChange={setCategory}
-                  options={availableCategories}
-                  placeholder="Search/create Category"
-                  required
-                />
+          {/* Negative Prompt (Optional - textarea with tooltip explaining what it is) */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <label className="text-sm font-bold text-zinc-700">Negative Prompt <span className="text-zinc-500 font-normal">(Optional)</span></label>
+              <div className="relative group inline-block">
+                <HelpCircle className="w-4 h-4 text-zinc-400 hover:text-zinc-650 transition-colors cursor-help" />
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 bg-zinc-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center font-medium shadow-lg leading-normal">
+                  Specify details or styles you want the AI to avoid or exclude from the generated image (e.g. "blurry, low quality").
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900"></div>
+                </div>
               </div>
+            </div>
+            <textarea
+              value={negativePrompt}
+              onChange={(e) => setNegativePrompt(e.target.value)}
+              onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              rows={4}
+              className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-zinc-55 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:bg-white focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all font-mono text-base sm:text-sm shadow-inner"
+              placeholder="Enter elements you want the AI to avoid..."
+            ></textarea>
+          </div>
 
-              {/* Aspect Ratio Field */}
-              <div>
-                <label className="block text-sm font-bold text-zinc-700 mb-3">Aspect Ratio <span className="text-red-500">*</span></label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {availableRatios.map((r: any) => {
-                    const isSelected = aspectRatio === r.id;
-                    return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => setAspectRatio(r.id)}
-                        className={`relative p-3.5 rounded-2xl border text-left flex flex-col justify-between items-center text-center gap-2.5 transition-all duration-300 hover:scale-[1.02] cursor-pointer hover:shadow-sm
+          {/* AI Tool & Category (Required - dropdowns) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Combobox
+              label="AI Tool"
+              value={tool}
+              onChange={setTool}
+              options={availableTools}
+              placeholder="Search/create AI Tool"
+              required
+            />
+            <Combobox
+              label="Category"
+              value={category}
+              onChange={setCategory}
+              options={availableCategories}
+              placeholder="Search/create Category"
+              required
+            />
+          </div>
+
+          {/* Aspect Ratio (Required - touch-friendly grid) */}
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-3">Aspect Ratio <span className="text-red-500">*</span></label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {availableRatios.map((r: any) => {
+                const isSelected = aspectRatio === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setAspectRatio(r.id)}
+                    className={`relative p-4 rounded-2xl border text-left flex flex-col justify-between items-center text-center gap-2.5 transition-all duration-300 hover:scale-[1.02] cursor-pointer hover:shadow-sm
+                      ${isSelected 
+                        ? 'bg-purple-50/50 border-[var(--color-neon-purple)] shadow-sm' 
+                        : 'bg-white border-zinc-200 text-zinc-650 hover:bg-zinc-50'
+                      }
+                    `}
+                  >
+                    <div className="h-8 flex items-center justify-center">
+                      <div 
+                        className={`rounded border transition-all duration-300
                           ${isSelected 
-                            ? 'bg-purple-50/50 border-[var(--color-neon-purple)] shadow-sm' 
-                            : 'bg-white border-zinc-200 text-zinc-650 hover:bg-zinc-50'
+                            ? 'border-[var(--color-neon-purple)] bg-[var(--color-neon-purple)]/10' 
+                            : 'border-zinc-300 bg-zinc-55'
                           }
                         `}
-                      >
-                        <div className="h-8 flex items-center justify-center">
-                          <div 
-                            className={`rounded border transition-all duration-300
-                              ${isSelected 
-                                ? 'border-[var(--color-neon-purple)] bg-[var(--color-neon-purple)]/10' 
-                                : 'border-zinc-300 bg-zinc-55'
-                              }
-                            `}
-                            style={{
-                              width: r.id === '1:1' ? '20px' :
-                                     r.id === '16:9' ? '32px' :
-                                     r.id === '9:16' ? '15px' :
-                                     r.id === '4:5' ? '20px' :
-                                     r.id === '3:4' ? '20px' :
-                                     r.id === '21:9' ? '36px' :
-                                     r.id === '2:3' ? '17px' :
-                                     r.id === '3:2' ? '26px' : '20px',
-                              height: r.id === '1:1' ? '20px' :
-                                      r.id === '16:9' ? '18px' :
-                                      r.id === '9:16' ? '27px' :
-                                      r.id === '4:5' ? '25px' :
-                                      r.id === '3:4' ? '27px' :
-                                      r.id === '21:9' ? '15px' :
-                                      r.id === '2:3' ? '26px' :
-                                      r.id === '3:2' ? '17px' : '20px',
-                            }}
-                          />
-                        </div>
-                        
-                        <div className="flex flex-col items-center">
-                          <span className={`text-[10px] font-black tracking-tight ${isSelected ? 'text-[var(--color-neon-purple)]' : 'text-zinc-900'}`}>
-                            {r.icon} {r.id}
-                          </span>
-                          <span className="text-[9px] text-zinc-400 font-bold mt-0.5">{r.label.split('(')[1]?.replace(')', '') || ''}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-zinc-700 mb-2">Tags</label>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {tags.map(tag => (
-                    <span key={tag} className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-50 text-[var(--color-neon-purple)] text-sm font-medium border border-purple-100">
-                      {tag}
-                      <button type="button" onClick={() => removeTag(tag)} className="ml-1.5 focus:outline-none hover:text-purple-700">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Plus className="h-5 w-5 text-zinc-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleAddTag}
-                    onFocus={(e) => {
-                      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      const query = tagInput.trim().toLowerCase();
-                      const unusedTags = popularTags.filter(t => !tags.includes(t));
-                      const filtered = query 
-                        ? unusedTags.filter(t => t.toLowerCase().includes(query))
-                        : unusedTags.slice(0, 5);
-                      setFilteredTags(filtered);
-                      setShowTagSuggestions(filtered.length > 0);
-                    }}
-                    className="block w-full pl-12 pr-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm text-base sm:text-sm"
-                    placeholder="Add tags and press Enter"
-                  />
-                  {showTagSuggestions && (
-                    <div ref={tagSuggestionsRef} className="absolute z-50 w-full mt-2 bg-white border border-zinc-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                      {filteredTags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => {
-                            if (!tags.includes(tag)) {
-                              setTags([...tags, tag]);
-                            }
-                            setTagInput('');
-                            setShowTagSuggestions(false);
-                          }}
-                          className="w-full px-4 py-2.5 text-left text-xs font-black text-zinc-700 hover:bg-purple-50 hover:text-[var(--color-neon-purple)] flex items-center justify-between transition-all cursor-pointer"
-                        >
-                          <span>{tag}</span>
-                          <span className="text-[10px] text-zinc-400 font-bold">Popular tag</span>
-                        </button>
-                      ))}
+                        style={{
+                          width: r.id === '1:1' ? '20px' :
+                                 r.id === '16:9' ? '32px' :
+                                 r.id === '9:16' ? '15px' :
+                                 r.id === '4:5' ? '20px' :
+                                 r.id === '3:4' ? '20px' :
+                                 r.id === '21:9' ? '36px' :
+                                 r.id === '2:3' ? '17px' :
+                                 r.id === '3:2' ? '26px' : '20px',
+                          height: r.id === '1:1' ? '20px' :
+                                  r.id === '16:9' ? '18px' :
+                                  r.id === '9:16' ? '27px' :
+                                  r.id === '4:5' ? '25px' :
+                                  r.id === '3:4' ? '27px' :
+                                  r.id === '21:9' ? '15px' :
+                                  r.id === '2:3' ? '26px' :
+                                  r.id === '3:2' ? '17px' : '20px',
+                        }}
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
+                    
+                    <div className="flex flex-col items-center w-full min-w-0">
+                      <span className={`text-xs font-black tracking-tight whitespace-nowrap ${isSelected ? 'text-[var(--color-neon-purple)]' : 'text-zinc-900'}`}>
+                        {r.icon} {r.id}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-bold mt-0.5 truncate w-full text-center">
+                        {r.label.split('(')[1]?.replace(')', '') || ''}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-              {/* Remix Notes */}
-              {remixId && (
-                <div className="animate-in fade-in duration-300">
-                  <label className="block text-sm font-bold text-zinc-700 mb-2">
-                    Remix Notes <span className="text-zinc-500 font-normal">(Explain your creative updates)</span>
-                  </label>
-                  <textarea
-                    value={remixNotes}
-                    onChange={(e) => setRemixNotes(e.target.value)}
-                    onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                    rows={3}
-                    required
-                    className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm font-medium text-base sm:text-sm"
-                    placeholder="e.g. Changed aspect ratio to 16:9, corrected contrast parameters, and optimized cinematic atmosphere."
-                  ></textarea>
+          {/* Tags (Optional) */}
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {tags.map(tag => (
+                <span key={tag} className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-50 text-[var(--color-neon-purple)] text-sm font-medium border border-purple-100">
+                  {tag}
+                  <button type="button" onClick={() => removeTag(tag)} className="ml-1.5 focus:outline-none hover:text-purple-700">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Plus className="h-5 w-5 text-zinc-400" />
+              </div>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+                onFocus={(e) => {
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  const query = tagInput.trim().toLowerCase();
+                  const unusedTags = popularTags.filter(t => !tags.includes(t));
+                  const filtered = query 
+                    ? unusedTags.filter(t => t.toLowerCase().includes(query))
+                    : unusedTags.slice(0, 5);
+                  setFilteredTags(filtered);
+                  setShowTagSuggestions(filtered.length > 0);
+                }}
+                className="block w-full pl-12 pr-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm text-base sm:text-sm font-bold"
+                placeholder="Add tags and press Enter"
+              />
+              {showTagSuggestions && (
+                <div ref={tagSuggestionsRef} className="absolute z-50 w-full mt-2 bg-white border border-zinc-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {filteredTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        if (!tags.includes(tag)) {
+                          setTags([...tags, tag]);
+                        }
+                        setTagInput('');
+                        setShowTagSuggestions(false);
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-xs font-black text-zinc-700 hover:bg-purple-50 hover:text-[var(--color-neon-purple)] flex items-center justify-between transition-all cursor-pointer"
+                    >
+                      <span>{tag}</span>
+                      <span className="text-[10px] text-zinc-400 font-bold">Popular tag</span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-zinc-700 mb-2">Prompt <span className="text-red-500">*</span></label>
-                <textarea
-                  required
-                  value={promptText}
-                  onChange={(e) => setPromptText(e.target.value)}
-                  onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                  rows={8}
-                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-zinc-55 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:bg-white focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all font-mono text-base sm:text-sm shadow-inner"
-                  placeholder="Enter the exact prompt used to generate this image..."
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-zinc-700 mb-2">Negative Prompt <span className="text-zinc-500 font-normal">(Optional)</span></label>
-                <textarea
-                  value={negativePrompt}
-                  onChange={(e) => setNegativePrompt(e.target.value)}
-                  onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                  rows={4}
-                  className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-zinc-55 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:bg-white focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all font-mono text-base sm:text-sm shadow-inner"
-                  placeholder="Enter elements you want the AI to avoid..."
-                ></textarea>
-              </div>
-            </div>
           </div>
 
-      {/* Advanced Launcher Settings (Collapsible) */}
-      <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-3xl p-6 shadow-sm">
-        <button
-          type="button"
-          onClick={() => setShowAdvancedLauncher(!showAdvancedLauncher)}
-          className="w-full flex items-center justify-between font-black text-sm text-zinc-700 uppercase tracking-wider cursor-pointer"
-        >
-          <span>Advanced Launcher Settings (Optional)</span>
-          <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${showAdvancedLauncher ? 'rotate-180' : ''}`} />
-        </button>
-        
-        {showAdvancedLauncher && (
-          <div className="mt-6 pt-6 border-t border-zinc-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
-            <div>
-              <label className="block text-sm font-bold text-zinc-700 mb-2">Primary AI Platform Override</label>
-              <input
-                type="text"
-                value={primaryAiPlatform}
-                onChange={(e) => setPrimaryAiPlatform(e.target.value)}
-                className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
-                placeholder="e.g. ChatGPT, Gemini, Claude (leave blank to auto-detect)"
-              />
+          {/* Remix Notes (Optional) */}
+          {remixId && (
+            <div className="animate-in fade-in duration-300">
+              <label className="block text-sm font-bold text-zinc-700 mb-2">
+                Remix Notes <span className="text-zinc-500 font-normal">(Explain your creative updates)</span>
+              </label>
+              <textarea
+                value={remixNotes}
+                onChange={(e) => setRemixNotes(e.target.value)}
+                onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                rows={3}
+                required
+                className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all shadow-sm font-medium text-base sm:text-sm"
+                placeholder="e.g. Changed aspect ratio to 16:9, corrected contrast parameters, and optimized cinematic atmosphere."
+              ></textarea>
             </div>
-            <div>
-              <label className="block text-sm font-bold text-zinc-700 mb-2">Launcher URL Override</label>
-              <input
-                type="url"
-                value={launchUrl}
-                onChange={(e) => setLaunchUrl(e.target.value)}
-                className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
-                placeholder="e.g. https://chatgpt.com/g/g-xxxxx (custom GPT link)"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-zinc-700 mb-2">Prompt Type</label>
-              <select
-                value={promptType}
-                onChange={(e) => setPromptType(e.target.value)}
-                className="block w-full px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
-              >
-                <option value="text">Text Prompt</option>
-                <option value="image">Image Generation</option>
-                <option value="video">Video Generation</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-zinc-700 mb-2">Supported Models</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={modelInput}
-                  onChange={(e) => setModelInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
-                        setSupportedModels([...supportedModels, modelInput.trim()]);
-                        setModelInput('');
-                      }
+          )}
+
+          {/* Cover Image Upload (Optional) */}
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-2">Cover Image <span className="text-zinc-500 font-normal">(Optional)</span></label>
+            <div 
+              className={`rounded-3xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center h-80 relative overflow-hidden group hover:shadow-xs
+                ${previewUrl 
+                  ? 'border-transparent p-0 bg-transparent' 
+                  : isDragging 
+                    ? 'border-[var(--color-neon-purple)] bg-purple-50/40 shadow-inner scale-[0.99]' 
+                    : 'border-zinc-300/80 bg-zinc-50/80 hover:bg-zinc-55 hover:border-[var(--color-neon-purple)] cursor-pointer'
+                }
+              `}
+              onClick={() => !previewUrl && fileInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (!previewUrl) setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (previewUrl) return;
+                
+                const droppedFile = e.dataTransfer.files?.[0];
+                if (droppedFile) {
+                  const mockEvent = {
+                    target: {
+                      files: [droppedFile]
                     }
-                  }}
-                  className="block flex-1 px-4 py-3 border border-zinc-200 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[var(--color-neon-purple)] focus:ring-2 focus:ring-[var(--color-neon-purple)]/20 transition-all text-sm font-bold shadow-sm"
-                  placeholder="Add model (e.g. gpt-4o) and press Enter"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
-                      setSupportedModels([...supportedModels, modelInput.trim()]);
-                      setModelInput('');
-                    }
-                  }}
-                  className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-2xl text-xs font-bold text-zinc-700 transition-all cursor-pointer"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {supportedModels.map(m => (
-                  <span key={m} className="inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 text-xs font-bold border border-zinc-200">
-                    {m}
-                    <button
-                      type="button"
-                      onClick={() => setSupportedModels(supportedModels.filter(x => x !== m))}
-                      className="ml-1.5 text-zinc-400 hover:text-zinc-700"
+                  } as unknown as React.ChangeEvent<HTMLInputElement>;
+                  handleFileChange(mockEvent);
+                }
+              }}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden" 
+              />
+
+              {previewUrl ? (
+                <div className="w-full h-full relative group">
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                    <button 
+                      type="button" 
+                      onClick={removeFile}
+                      className="px-6 py-3 bg-white text-red-600 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center shadow-lg cursor-pointer"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-4 h-4 mr-2" />
+                      Remove Image
                     </button>
-                  </span>
-                ))}
-              </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-zinc-100 group-hover:bg-purple-50 flex items-center justify-center mb-4 transition-colors duration-300">
+                    <UploadCloud className="w-8 h-8 text-zinc-400 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-900 mb-2 group-hover:text-[var(--color-neon-purple)] transition-colors duration-300">
+                    Drag & drop or click to upload cover image
+                  </h3>
+                  <p className="text-xs text-zinc-500 font-bold max-w-sm">
+                    High-quality PNG, JPG, or WebP up to 5MB. If left blank, a dynamic CSS placeholder will be used.
+                  </p>
+                </>
+              )}
             </div>
           </div>
-        )}
-      </div>
 
           <div className="flex flex-col items-end pt-6 border-t border-zinc-200">
             <button

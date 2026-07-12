@@ -19,12 +19,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (request.nextUrl.pathname === '/upload' || request.nextUrl.pathname.startsWith('/upload/')) {
-    const url = request.nextUrl.clone();
-    url.pathname = url.pathname.replace('/upload', '/create');
-    return NextResponse.redirect(url);
-  }
-
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -75,6 +69,17 @@ export async function middleware(request: NextRequest) {
     userRole = user.user_metadata?.role || 'user';
     isDeactivated = user.user_metadata?.is_deactivated || false;
     isPendingDeletion = user.user_metadata?.pending_deletion || false;
+  }
+
+  if (request.nextUrl.pathname === '/upload' || request.nextUrl.pathname.startsWith('/upload/')) {
+    const url = request.nextUrl.clone();
+    // Redirect unauthenticated guests to public discovery or landing instead of protected /create
+    if (!user) {
+      url.pathname = '/discover';
+    } else {
+      url.pathname = '/create';
+    }
+    return copyCookies(supabaseResponse, NextResponse.redirect(url));
   }
 
   // Account Lifecycle routing checks
