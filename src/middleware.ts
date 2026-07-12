@@ -13,11 +13,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (request.nextUrl.pathname === '/explore' || request.nextUrl.pathname.startsWith('/explore/')) {
-    const url = request.nextUrl.clone();
-    url.pathname = url.pathname.replace('/explore', '/discover');
-    return NextResponse.redirect(url);
-  }
 
   let supabaseResponse = NextResponse.next({
     request,
@@ -71,11 +66,22 @@ export async function middleware(request: NextRequest) {
     isPendingDeletion = user.user_metadata?.pending_deletion || false;
   }
 
+  if (request.nextUrl.pathname === '/explore' || request.nextUrl.pathname.startsWith('/explore/')) {
+    const url = request.nextUrl.clone();
+    // Redirect unauthenticated guests to landing page '/'
+    if (!user) {
+      url.pathname = '/';
+    } else {
+      url.pathname = '/discover';
+    }
+    return copyCookies(supabaseResponse, NextResponse.redirect(url));
+  }
+
   if (request.nextUrl.pathname === '/upload' || request.nextUrl.pathname.startsWith('/upload/')) {
     const url = request.nextUrl.clone();
-    // Redirect unauthenticated guests to public discovery or landing instead of protected /create
+    // Redirect unauthenticated guests to landing page '/' instead of protected /create
     if (!user) {
-      url.pathname = '/discover';
+      url.pathname = '/';
     } else {
       url.pathname = '/create';
     }
