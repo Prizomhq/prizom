@@ -38,7 +38,8 @@ CREATE TABLE prompts (
   remix_parent_chain UUID[] DEFAULT '{}',
   remix_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  serial_id SERIAL UNIQUE
 );
 
 -- LIKES
@@ -328,4 +329,20 @@ ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
   description = EXCLUDED.description,
   badge_icon = EXCLUDED.badge_icon;
+
+-- SHARE CARD GENERATION LOGS
+CREATE TABLE share_card_generation_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+  creator_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE share_card_generation_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can view share card logs" ON share_card_generation_logs
+  FOR SELECT USING (public.is_admin(auth.uid()));
+
+CREATE POLICY "Anyone can insert share card logs" ON share_card_generation_logs
+  FOR INSERT WITH CHECK (true);
 

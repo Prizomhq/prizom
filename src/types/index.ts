@@ -31,6 +31,7 @@ export interface DBPrompt {
   prompt_text: string;
   negative_prompt?: string | null;
   generation_settings?: Record<string, any> | null;
+  serial_id?: number | null;
 }
 
 export interface AITool {

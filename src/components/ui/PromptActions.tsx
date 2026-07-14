@@ -11,6 +11,8 @@ import SaveModal from '@/components/ui/SaveModal';
 import UnsaveModal from '@/components/ui/UnsaveModal';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
+import ShareCardModal from '@/components/ui/ShareCardModal';
+import { Image as ImageIcon } from 'lucide-react';
 
 interface PromptActionsProps {
   promptId: string;
@@ -42,6 +44,7 @@ export default function PromptActions({
   const [isUnsaveOpen, setIsUnsaveOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isLoginRequiredOpen, setIsLoginRequiredOpen] = useState(false);
+  const [isShareCardOpen, setIsShareCardOpen] = useState(false);
 
   // Custom Actions state
   const [menuOpen, setMenuOpen] = useState(false);
@@ -247,6 +250,13 @@ export default function PromptActions({
         onClose={() => setIsLoginRequiredOpen(false)}
       />
 
+      <ShareCardModal
+        isOpen={isShareCardOpen}
+        onClose={() => setIsShareCardOpen(false)}
+        promptId={promptId}
+        promptTitle={promptTitle}
+      />
+
       {toastMessage && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-zinc-900 text-white px-6 py-3 rounded-full shadow-xl font-medium text-sm animate-in fade-in slide-in-from-top-4 duration-300">
           {toastMessage}
@@ -296,6 +306,17 @@ export default function PromptActions({
           <GitFork className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
           <span className="whitespace-nowrap truncate">Remix</span>
         </button>
+
+        {/* Generate Share Card Button (only visible to prompt owner) */}
+        {isOwner && (
+          <button
+            onClick={() => setIsShareCardOpen(true)}
+            className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-2xl bg-white border border-zinc-200 hover:border-[var(--color-neon-purple)] hover:text-[var(--color-neon-purple)] text-zinc-700 transition-all duration-300 font-bold text-xs shadow-sm hover:bg-purple-50/[0.2] flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-[var(--color-neon-purple)] shrink-0" />
+            <span className="whitespace-nowrap truncate font-bold text-xs">Generate Share Card</span>
+          </button>
+        )}
 
         {/* Edit Button (only visible to prompt owner) */}
         {isOwner && (
