@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Image as ImageIcon, Download, Loader2, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Download, Sparkles, CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 interface ShareCardModalProps {
   isOpen: boolean;
@@ -186,140 +186,189 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div 
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-card-title"
+      className="fixed inset-0 z-[9999] bg-[#0a0a0c] text-zinc-100 flex flex-col overflow-hidden animate-in fade-in duration-300"
+    >
+      {/* Background Animated Glows */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[50%] bg-purple-900/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[50%] bg-blue-900/10 rounded-full blur-[140px] pointer-events-none" />
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-[10000] bg-zinc-950/95 border border-zinc-800 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs tracking-wide backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[10000] bg-zinc-900/90 border border-zinc-800 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs tracking-wide backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md transition-opacity"
-        onClick={() => !loading && !isDownloading && onClose()}
-      />
-
-      {/* Modal Card container */}
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="share-card-title"
-        className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] max-w-lg w-full shadow-2xl backdrop-blur-xl relative z-10 overflow-hidden transform animate-in fade-in zoom-in-95 duration-250 flex flex-col max-h-[90vh]"
-      >
-        {/* Glow Accent Line */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--color-neon-purple)] via-indigo-500 to-[var(--color-electric-blue)]"></div>
-
-        {/* Modal Header */}
-        <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-zinc-800/60 shrink-0">
-          <div className="flex items-center space-x-2.5 text-white">
-            <div className="p-2 bg-purple-500/10 text-[var(--color-neon-purple)] rounded-xl border border-purple-500/20">
-              <Sparkles className="w-4 h-4" />
+      {/* Main Layout Container */}
+      <div className="flex flex-col h-full w-full relative z-10">
+        
+        {/* Full-screen Loading State */}
+        {loading && (
+          <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-6 text-zinc-400">
+            <div className="relative flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full border-2 border-purple-500/10 border-t-purple-500 animate-spin absolute" />
+              <Sparkles className="w-8 h-8 text-[var(--color-neon-purple)] animate-pulse" />
             </div>
-            <h3 id="share-card-title" className="text-base font-black tracking-tight uppercase">Share Card Generator</h3>
+            
+            <div className="text-center space-y-3 max-w-md">
+              <h2 id="share-card-title" className="text-2xl font-black text-white tracking-tight uppercase">
+                Creator Share Card Studio
+              </h2>
+              <p className="text-sm text-zinc-400 font-medium">
+                Rendering your premium branded social card at 1080x1350 px...
+              </p>
+            </div>
+
+            {/* Shimmer skeleton */}
+            <div className="w-[240px] aspect-[4/5] bg-zinc-900/60 rounded-[2rem] border border-zinc-800/80 mt-6 relative overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-800/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+              <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-zinc-800/30" />
+              <div className="absolute top-4 right-4 w-20 h-5 rounded-full bg-zinc-800/30" />
+              <div className="absolute bottom-16 left-4 right-4 h-32 rounded-xl bg-zinc-800/30" />
+              <div className="absolute bottom-4 left-4 w-28 h-4 rounded bg-zinc-800/20" />
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading || isDownloading}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-800/50 border border-zinc-700/30 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors shrink-0 disabled:opacity-40 disabled:pointer-events-none"
-            aria-label="Close Share Card Generator"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        )}
 
-        {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center min-h-[300px]">
-          {loading && (
-            <div className="flex flex-col items-center justify-center space-y-6 text-zinc-400 w-full py-12">
-              <div className="relative flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-[var(--color-neon-purple)] animate-spin" />
-                <ImageIcon className="w-5 h-5 text-indigo-400 absolute" />
-              </div>
-              <div className="text-center space-y-1.5">
-                <p className="text-sm font-bold text-zinc-200">Generating branded image...</p>
-                <p className="text-xs text-zinc-500">Creating a premium social card at 1080x1350 px</p>
-              </div>
-
-              {/* Shimmer skeleton */}
-              <div className="w-[200px] aspect-[4/5] bg-zinc-800/40 rounded-2xl animate-pulse border border-zinc-800/50 mt-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-700/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
-              </div>
+        {/* Full-screen Error State */}
+        {error && (
+          <div className="flex-1 flex flex-col items-center justify-center space-y-6 text-center p-6">
+            <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center text-red-500">
+              <AlertTriangle className="w-10 h-10 animate-bounce" />
             </div>
-          )}
+            <div className="space-y-2 max-w-md">
+              <h4 className="font-extrabold text-white text-xl uppercase tracking-wider">Workspace Error</h4>
+              <p className="text-zinc-400 text-sm font-semibold leading-relaxed">
+                {error}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="mt-6 px-8 py-3.5 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 text-zinc-200 text-xs font-black uppercase tracking-wider rounded-full transition-all hover:-translate-y-0.5 shadow-lg"
+            >
+              Back to Prompt
+            </button>
+          </div>
+        )}
 
-          {error && (
-            <div className="flex flex-col items-center justify-center space-y-4 text-center py-10 w-full">
-              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center text-red-500">
-                <AlertTriangle className="w-8 h-8 animate-bounce" />
-              </div>
-              <div className="space-y-2 max-w-sm">
-                <h4 className="font-extrabold text-white text-base">Generation Failed</h4>
-                <p className="text-zinc-400 text-xs font-semibold leading-relaxed">
-                  {error}
-                </p>
-              </div>
+        {/* Studio Viewport (Loaded Success State) */}
+        {!loading && !error && imageUrl && (
+          <div className="flex-1 flex flex-col lg:flex-row h-full">
+            
+            {/* Left/Top Pane: Card Preview Viewport */}
+            <div className="flex-1 bg-zinc-950/40 border-b lg:border-b-0 lg:border-r border-zinc-800/40 p-6 sm:p-12 flex items-center justify-center relative overflow-y-auto min-h-0">
+              
+              {/* Back navigation button inside preview area */}
               <button
-                onClick={() => {
-                  setError(null);
-                  onClose();
-                }}
-                className="mt-4 px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-bold rounded-xl transition-all"
+                onClick={onClose}
+                disabled={isDownloading}
+                className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-350 hover:text-white transition-all text-xs font-bold border border-zinc-800/60 shadow-md disabled:opacity-40 disabled:pointer-events-none"
               >
-                Go Back
+                <ArrowLeft className="w-4 h-4" />
+                Back to Prompt
               </button>
-            </div>
-          )}
 
-          {!loading && !error && imageUrl && (
-            <div className="w-full flex flex-col items-center space-y-6">
-              {/* Image Preview frame */}
-              <div className="relative group max-w-[280px] sm:max-w-[320px] w-full rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl shadow-black/80 aspect-[4/5]">
-                {/* Preview Badge */}
-                <span className="absolute top-3 left-3 bg-zinc-950/80 text-zinc-400 border border-zinc-800/50 rounded-md px-2.5 py-1 text-[9px] font-black uppercase tracking-wider z-20">
-                  Preview (4:5)
+              <div className="relative w-full max-w-[360px] md:max-w-[400px] lg:max-w-[460px] aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
+                <span className="absolute top-4 left-4 bg-zinc-950/80 text-zinc-400 border border-zinc-800/50 rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-wider z-20">
+                  Preview Card (4:5)
                 </span>
-                
-                {/* Image */}
                 <img
                   src={imageUrl}
                   alt={promptTitle}
                   className="w-full h-full object-cover select-none"
                 />
               </div>
-
-              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest text-center">
-                Ready for Instagram, X, LinkedIn, and Threads
-              </p>
             </div>
-          )}
-        </div>
 
-        {/* Modal Footer / Actions */}
-        {!loading && !error && imageUrl && (
-          <div className="px-6 py-5 border-t border-zinc-800/60 bg-zinc-950/20 shrink-0 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleDownloadPng}
-              disabled={isDownloading}
-              className="flex-1 h-12 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:text-white text-zinc-200 rounded-full font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Download className="w-4 h-4 shrink-0" />
-              Download PNG
-            </button>
-            
-            <button
-              onClick={handleDownloadJpg}
-              disabled={isDownloading}
-              className="flex-1 h-12 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] hover:shadow-lg text-white rounded-full font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Download className="w-4 h-4 shrink-0" />
-              Download JPG
-            </button>
+            {/* Right/Bottom Pane: Control Dashboard Panel */}
+            <div className="w-full lg:w-[480px] bg-zinc-900/30 backdrop-blur-xl p-8 sm:p-12 flex flex-col justify-between overflow-y-auto shrink-0 border-t lg:border-t-0 border-zinc-800/40">
+              
+              {/* Top Section: Studio Branding & Prompt Summary */}
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full w-fit block">
+                    Workspace Studio
+                  </span>
+                  <h2 id="share-card-title" className="text-3xl font-black text-white tracking-tight uppercase leading-none">
+                    Creator Card Ready
+                  </h2>
+                  <p className="text-xs text-zinc-450 font-bold uppercase tracking-wider">
+                    Generate & Download Branded Assets
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-3xl bg-zinc-950/50 border border-zinc-800/60 space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">Source Prompt</span>
+                    <span className="text-xs font-bold text-zinc-400 bg-zinc-800/60 px-2.5 py-1 rounded-md border border-zinc-800">
+                      Active
+                    </span>
+                  </div>
+                  <h4 className="font-extrabold text-white text-base leading-snug line-clamp-2">
+                    &quot;{promptTitle}&quot;
+                  </h4>
+                  <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                    This premium share card naturally promotes your prompt template while showcasing your creator branding across visual feeds.
+                  </p>
+                </div>
+
+                {/* Social Tips */}
+                <div className="space-y-3">
+                  <span className="text-xs font-black text-zinc-400 uppercase tracking-wider block">Recommended Platforms</span>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
+                    <div className="px-3.5 py-2.5 bg-zinc-950/30 border border-zinc-800/40 rounded-xl flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-pink-500" /> Instagram
+                    </div>
+                    <div className="px-3.5 py-2.5 bg-zinc-950/30 border border-zinc-800/40 rounded-xl flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" /> LinkedIn
+                    </div>
+                    <div className="px-3.5 py-2.5 bg-zinc-950/30 border border-zinc-800/40 rounded-xl flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" /> X / Twitter
+                    </div>
+                    <div className="px-3.5 py-2.5 bg-zinc-950/30 border border-zinc-800/40 rounded-xl flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> Threads
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Section: Action Download Buttons */}
+              <div className="space-y-4 mt-8 lg:mt-12">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleDownloadPng}
+                    disabled={isDownloading}
+                    className="flex-1 h-13 bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 hover:text-white rounded-full font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider"
+                  >
+                    <Download className="w-4 h-4 shrink-0" />
+                    Download PNG
+                  </button>
+                  
+                  <button
+                    onClick={handleDownloadJpg}
+                    disabled={isDownloading}
+                    className="flex-1 h-13 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] hover:shadow-lg text-white rounded-full font-extrabold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider"
+                  >
+                    <Download className="w-4 h-4 shrink-0" />
+                    Download JPG
+                  </button>
+                </div>
+
+                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest text-center">
+                  Assets generated locally on-demand
+                </p>
+              </div>
+
+            </div>
           </div>
         )}
+
       </div>
     </div>
   );
