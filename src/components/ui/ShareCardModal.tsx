@@ -270,7 +270,37 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
           <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-6 text-zinc-400">
             <div className="relative flex items-center justify-center">
               <div className="w-24 h-24 rounded-full border-2 border-purple-500/10 border-t-purple-500 animate-spin absolute" />
-              <Sparkles className="w-8 h-8 text-[var(--color-neon-purple)] animate-pulse" />
+              {/* Custom Branded geometric P logo */}
+              <svg
+                width="36"
+                height="36"
+                viewBox="25 15 63 67"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="animate-pulse relative z-10"
+              >
+                <path d="M 46,16 L 26,27.5 L 46,39 Z" fill="#3b4fe4" />
+                <path d="M 50,17.5 L 50,39.5 L 67,28.5 Z" fill="#802cf6" />
+                <path d="M 26,30 L 44,40.5 L 44,49.5 L 35,55 L 44,60.5 L 44,71.5 L 26,81 Z" fill="#2c3ce6" />
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M 50,27.5 C 65,27.5 76,34 76,44.5 C 76,55 65,61.5 50,61.5 L 50,71.5 C 71,71.5 87,60 87,44.5 C 87,29 71,17.5 50,17.5 Z"
+                  fill="url(#loadingLogoGrad)"
+                />
+                <line x1="35" y1="55" x2="51" y2="43" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="51" cy="43" r="4" fill="#a855f7" />
+                <line x1="35" y1="55" x2="62" y2="55" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="62" cy="55" r="4" fill="#a855f7" />
+                <line x1="35" y1="55" x2="51" y2="67" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="51" cy="67" r="4" fill="#a855f7" />
+                <defs>
+                  <linearGradient id="loadingLogoGrad" x1="50" y1="17.5" x2="50" y2="71.5" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#802cf6" />
+                    <stop offset="100%" stopColor="#2c3ce6" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
             
             <div className="text-center space-y-3 max-w-md">
@@ -283,7 +313,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
             </div>
 
             {/* Shimmer skeleton */}
-            <div className="w-[240px] aspect-[4/5] bg-zinc-900/60 rounded-[2rem] border border-zinc-800/80 mt-6 relative overflow-hidden shadow-2xl">
+            <div className="h-[50vh] sm:h-[60vh] lg:h-[70vh] aspect-[4/5] bg-zinc-900/60 rounded-[2rem] border border-zinc-800/80 mt-6 relative overflow-hidden shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-800/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
               <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-zinc-800/30" />
               <div className="absolute top-4 right-4 w-20 h-5 rounded-full bg-zinc-800/30" />
@@ -319,7 +349,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
           <div className="flex-1 flex flex-col lg:flex-row h-full">
             
             {/* Left/Top Pane: Card Preview Viewport */}
-            <div className="flex-1 bg-zinc-950/40 border-b lg:border-b-0 lg:border-r border-zinc-800/40 p-6 sm:p-12 flex items-center justify-center relative overflow-y-auto min-h-0">
+            <div className="flex-1 bg-zinc-950/40 border-b lg:border-b-0 lg:border-r border-zinc-800/40 pt-18 pb-6 px-6 sm:p-12 flex items-center justify-center relative overflow-y-auto min-h-0">
               
               {/* Back navigation button inside preview area */}
               <button
@@ -331,14 +361,14 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
                 Back to Prompt
               </button>
 
-              <div className="relative h-[55vh] sm:h-[65vh] lg:h-[75vh] max-h-[calc(100vh-160px)] aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300 transition-all duration-300 hover:scale-[1.02]">
+              <div className="relative h-[60vh] sm:h-[70vh] lg:h-[76vh] xl:h-[80vh] max-h-[calc(100vh-120px)] w-auto max-w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300 transition-all duration-300 hover:scale-[1.02]">
                 <span className="absolute top-4 left-4 bg-zinc-950/80 text-zinc-400 border border-zinc-800/50 rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-wider z-20">
                   Preview Card (4:5)
                 </span>
                 <img
                   src={imageUrl}
                   alt={promptTitle}
-                  className="w-full h-full object-cover select-none"
+                  className="w-full h-full object-contain select-none"
                 />
               </div>
             </div>
@@ -349,7 +379,36 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
               {/* Top Section: Studio Branding & Prompt Summary */}
               <div className="space-y-8">
                 <div className="space-y-3">
-                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full w-fit block">
+                  <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-3.5 py-1.5 rounded-full w-fit flex items-center gap-1.5 animate-pulse">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="25 15 63 67"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M 46,16 L 26,27.5 L 46,39 Z" fill="#3b4fe4" />
+                      <path d="M 50,17.5 L 50,39.5 L 67,28.5 Z" fill="#802cf6" />
+                      <path d="M 26,30 L 44,40.5 L 44,49.5 L 35,55 L 44,60.5 L 44,71.5 L 26,81 Z" fill="#2c3ce6" />
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M 50,27.5 C 65,27.5 76,34 76,44.5 C 76,55 65,61.5 50,61.5 L 50,71.5 C 71,71.5 87,60 87,44.5 C 87,29 71,17.5 50,17.5 Z"
+                        fill="url(#badgeLogoGrad)"
+                      />
+                      <line x1="35" y1="55" x2="51" y2="43" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                      <circle cx="51" cy="43" r="4" fill="#a855f7" />
+                      <line x1="35" y1="55" x2="62" y2="55" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                      <circle cx="62" cy="55" r="4" fill="#a855f7" />
+                      <line x1="35" y1="55" x2="51" y2="67" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
+                      <circle cx="51" cy="67" r="4" fill="#a855f7" />
+                      <defs>
+                        <linearGradient id="badgeLogoGrad" x1="50" y1="17.5" x2="50" y2="71.5" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#802cf6" />
+                          <stop offset="100%" stopColor="#2c3ce6" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                     Workspace Studio
                   </span>
                   <h2 id="share-card-title" className="text-3xl font-black text-white tracking-tight uppercase leading-none">
