@@ -144,6 +144,37 @@ export async function GET(
       ? prompt.title.substring(0, 67) + '...'
       : prompt.title;
 
+    // Sizing Calculation for Adaptive Image Wrapper
+    // 1. Get raw dimensions from prompt data (default to 1:1 if not present)
+    let width = prompt.image_width || 1000;
+    let height = prompt.image_height || 1000;
+    // 2. Fallback to parse aspect_ratio string if width/height are null
+    if ((!prompt.image_width || !prompt.image_height) && prompt.aspect_ratio) {
+      const parts = prompt.aspect_ratio.split(':');
+      if (parts.length === 2) {
+        const pw = parseFloat(parts[0]);
+        const ph = parseFloat(parts[1]);
+        if (!isNaN(pw) && !isNaN(ph) && ph !== 0) {
+          width = pw;
+          height = ph;
+        }
+      }
+    }
+    // 3. Define constraints
+    const maxW = 960;
+    const maxH = 840;
+    const imageRatio = width / height;
+    let containerW = maxW;
+    let containerH = maxH;
+    // 4. Calculate adaptive dimensions
+    if (imageRatio > maxW / maxH) {
+      // Landscape / wide image -> fit width, adjust height
+      containerH = Math.round(maxW / imageRatio);
+    } else {
+      // Portrait / tall image -> fit height, adjust width
+      containerW = Math.round(maxH * imageRatio);
+    }
+
     // 9. Generate ImageResponse
     return new ImageResponse(
       (
@@ -254,31 +285,41 @@ export async function GET(
               </div>
             </div>
 
-            {/* Hero Section: Large Cover Image or Branded Text Placeholder */}
+            {/* Hero Wrapper: Flexbox Centered Container */}
             <div
               style={{
                 width: '960px',
                 height: '840px',
-                borderRadius: '32px',
-                overflow: 'hidden',
-                position: 'relative',
                 display: 'flex',
-                boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.5)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(255, 255, 255, 0.01)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
               }}
             >
-              {coverBase64 ? (
-                <img
-                  src={coverBase64}
-                  alt={prompt.title}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                />
-              ) : (
+              {/* Dynamic Image Container */}
+              <div
+                style={{
+                  width: `${containerW}px`,
+                  height: `${containerH}px`,
+                  borderRadius: '32px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.5)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(255, 255, 255, 0.01)',
+                }}
+              >
+                {coverBase64 ? (
+                  <img
+                    src={coverBase64}
+                    alt={prompt.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover', // Since container matches aspect ratio, this behaves identically to fill
+                    }}
+                  />
+                ) : (
                 /* Branded Premium Placeholder for missing/text-only prompt images */
                 <div
                   style={{
@@ -352,6 +393,7 @@ export async function GET(
                   </span>
                 </div>
               )}
+              </div>
             </div>
 
             {/* Details Section */}
