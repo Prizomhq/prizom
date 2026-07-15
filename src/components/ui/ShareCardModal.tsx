@@ -22,6 +22,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     return () => setMounted(false);
   }, []);
@@ -257,7 +258,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
       role="dialog"
       aria-modal="true"
       aria-labelledby="share-card-title"
-      className="fixed inset-0 z-[9999] bg-[#0a0a0c] text-zinc-100 flex flex-col overflow-hidden animate-in fade-in duration-300"
+      className="fixed inset-0 z-[9999] bg-[#0a0a0c] text-zinc-100 flex flex-col overflow-y-auto lg:overflow-hidden animate-in fade-in duration-300"
     >
       {/* Background Animated Glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[50%] bg-purple-900/10 rounded-full blur-[140px] pointer-events-none" />
@@ -272,7 +273,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
       )}
 
       {/* Main Layout Container */}
-      <div className="flex flex-col h-full w-full relative z-10">
+      <div className="flex flex-col lg:h-full w-full relative z-10">
         
         {/* Full-screen Loading State */}
         {loading && (
@@ -355,10 +356,10 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
 
         {/* Studio Viewport (Loaded Success State) */}
         {!loading && !error && imageUrl && (
-          <div className="flex-1 flex flex-col lg:flex-row h-full">
+          <div className="flex-1 flex flex-col lg:flex-row lg:h-full">
             
             {/* Left/Top Pane: Card Preview Viewport */}
-            <div className="flex-1 bg-zinc-950/40 border-b lg:border-b-0 lg:border-r border-zinc-800/40 pt-18 pb-6 px-6 sm:p-12 flex items-center justify-center relative overflow-y-auto min-h-0">
+            <div className="flex-1 bg-zinc-950/40 border-b lg:border-b-0 lg:border-r border-zinc-800/40 pt-18 pb-6 px-6 sm:p-12 flex items-center justify-center relative lg:overflow-y-auto lg:min-h-0 min-h-[60vh]">
               
               {/* Back navigation button inside preview area */}
               <button
