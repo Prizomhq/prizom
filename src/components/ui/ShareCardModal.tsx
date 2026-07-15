@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Download, Sparkles, CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Download, Sparkles, CheckCircle2, AlertTriangle, ArrowLeft, Copy, Share2 } from 'lucide-react';
 
 interface ShareCardModalProps {
   isOpen: boolean;
@@ -185,6 +185,63 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
     img.src = imageUrl || '';
   };
 
+  // Copy PNG image to clipboard
+  const handleCopyImage = async () => {
+    if (!imageBlob) return;
+    setIsDownloading(true);
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [imageBlob.type]: imageBlob
+        })
+      ]);
+      showToast('Image copied to clipboard.');
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      showToast('Copy image not supported or failed.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Share card or fallback to copy link
+  const handleShareCard = async () => {
+    if (!imageBlob) return;
+    setIsDownloading(true);
+    try {
+      const file = new File([imageBlob], `prizom-${fileNameBase}-share-card.png`, {
+        type: 'image/png'
+      });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Prizom Share Card: ${promptTitle}`,
+          text: `Check out my prompt "${promptTitle}" on Prizom!`
+        });
+        showToast('Card shared successfully!');
+      } else {
+        // Fallback: Copy link
+        const shareUrl = `${window.location.origin}/prompt/${promptId}`;
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Link copied to clipboard.');
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Sharing failed:', err);
+        try {
+          const shareUrl = `${window.location.origin}/prompt/${promptId}`;
+          await navigator.clipboard.writeText(shareUrl);
+          showToast('Link copied to clipboard.');
+        } catch (clipErr) {
+          showToast('Failed to share or copy link.');
+        }
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div 
       ref={modalRef}
@@ -274,7 +331,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
                 Back to Prompt
               </button>
 
-              <div className="relative w-full max-w-[360px] md:max-w-[400px] lg:max-w-[460px] aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
+              <div className="relative h-[55vh] sm:h-[65vh] lg:h-[75vh] max-h-[calc(100vh-160px)] aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-zinc-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300 transition-all duration-300 hover:scale-[1.02]">
                 <span className="absolute top-4 left-4 bg-zinc-950/80 text-zinc-400 border border-zinc-800/50 rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-wider z-20">
                   Preview Card (4:5)
                 </span>
@@ -338,25 +395,45 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
                 </div>
               </div>
 
-              {/* Bottom Section: Action Download Buttons */}
+              {/* Bottom Section: Action Download & Share Buttons */}
               <div className="space-y-4 mt-8 lg:mt-12">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handleDownloadPng}
                     disabled={isDownloading}
-                    className="flex-1 h-13 bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 hover:text-white rounded-full font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider"
+                    className="flex-1 h-12 bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 hover:text-white rounded-full font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-300"
                   >
                     <Download className="w-4 h-4 shrink-0" />
-                    Download PNG
+                    PNG
                   </button>
                   
                   <button
                     onClick={handleDownloadJpg}
                     disabled={isDownloading}
-                    className="flex-1 h-13 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] hover:shadow-lg text-white rounded-full font-extrabold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider"
+                    className="flex-1 h-12 bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 hover:text-white rounded-full font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-300"
                   >
                     <Download className="w-4 h-4 shrink-0" />
-                    Download JPG
+                    JPG
+                  </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleCopyImage}
+                    disabled={isDownloading}
+                    className="flex-1 h-12 bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 hover:text-white rounded-full font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    <Copy className="w-4 h-4 shrink-0" />
+                    Copy Image
+                  </button>
+                  
+                  <button
+                    onClick={handleShareCard}
+                    disabled={isDownloading}
+                    className="flex-1 h-12 bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] hover:shadow-lg text-white rounded-full font-extrabold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    <Share2 className="w-4 h-4 shrink-0" />
+                    Share Card
                   </button>
                 </div>
 
