@@ -488,7 +488,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
 
           {/* Right Column: Prompt Info & Actions */}
           <div className="lg:col-span-7 space-y-8">
-            <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-xl shadow-zinc-200/20">
+            <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-xl shadow-zinc-200/20 relative z-20">
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-6">
                   <Link href={`/discover?tool=${prompt.ai_tool}`} className="px-4 py-1.5 rounded-full bg-[var(--color-neon-purple)]/10 hover:bg-[var(--color-neon-purple)]/20 text-[var(--color-neon-purple)] text-xs font-black uppercase tracking-wider border border-[var(--color-neon-purple)]/20 transition-colors">
