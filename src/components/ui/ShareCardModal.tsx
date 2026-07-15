@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Download, Sparkles, CheckCircle2, AlertTriangle, ArrowLeft, Copy, Share2 } from 'lucide-react';
 
 interface ShareCardModalProps {
@@ -11,6 +12,7 @@ interface ShareCardModalProps {
 }
 
 export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle }: ShareCardModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -18,6 +20,11 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Trigger Toast Notification
   const showToast = (msg: string) => {
@@ -242,7 +249,9 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div 
       ref={modalRef}
       role="dialog"
@@ -506,6 +515,7 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
