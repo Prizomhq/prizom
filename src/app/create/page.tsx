@@ -493,6 +493,15 @@ function CreateContent() {
       setUploadProgress(100);
 
       if (data && data.length > 0) {
+        // Track prompt upload or remix in Google Analytics
+        if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+          (window as any).gtag('event', remixId ? 'share_remix' : 'share_prompt', {
+            item_id: data[0].id,
+            item_name: title,
+            ai_tool: finalTool,
+            category: finalCategory
+          });
+        }
         router.push(`/prompt/${data[0].id}`);
       }
     } catch (err: any) {

@@ -15,6 +15,9 @@ export default function HomeFeed() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   
   const observerRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -32,6 +35,9 @@ export default function HomeFeed() {
         });
         setPrompts(res.prompts);
         setHasMore(res.hasMore);
+        setLikedIds(res.likedIds || []);
+        setSavedIds(res.savedIds || []);
+        setCurrentUserId(res.currentUserId);
         setPage(1);
       } catch (err) {
         console.error('Failed to load initial recommended prompts:', err);
@@ -68,6 +74,12 @@ export default function HomeFeed() {
               });
               setHasMore(res.hasMore);
               setPage((prev) => prev + 1);
+              if (res.likedIds) {
+                setLikedIds((prev) => Array.from(new Set([...prev, ...res.likedIds])));
+              }
+              if (res.savedIds) {
+                setSavedIds((prev) => Array.from(new Set([...prev, ...res.savedIds])));
+              }
             } else {
               setHasMore(false);
             }
@@ -101,13 +113,11 @@ export default function HomeFeed() {
     );
   }
 
-  if (prompts.length === 0) {
+  if (!loading && prompts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center max-w-xl mx-auto px-6">
-        <div className="relative mb-8">
-          <div className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 flex items-center justify-center border border-[var(--color-neon-purple)]/20">
-            <Compass className="w-12 h-12 text-zinc-400" />
-          </div>
+      <div className="flex flex-col items-center justify-center text-center py-20 px-4 bg-zinc-50 border border-dashed border-zinc-200 rounded-[2.5rem] max-w-2xl mx-auto my-8">
+        <div className="w-16 h-16 bg-purple-50 rounded-[1.5rem] border border-purple-100 flex items-center justify-center mb-6 text-[var(--color-neon-purple)] shadow-sm">
+          <Compass className="w-8 h-8 animate-pulse" />
         </div>
         <h3 className="text-2xl font-black text-zinc-900 mb-3 tracking-tight">Your feed is warming up</h3>
         <p className="text-zinc-500 font-medium text-sm leading-relaxed mb-8">
@@ -153,6 +163,9 @@ export default function HomeFeed() {
             category={prompt.category}
             imageWidth={prompt.image_width}
             imageHeight={prompt.image_height}
+            initialLiked={likedIds.includes(prompt.id)}
+            initialSaved={savedIds.includes(prompt.id)}
+            currentUserId={currentUserId}
           />
         ))}
       </MasonryGrid>

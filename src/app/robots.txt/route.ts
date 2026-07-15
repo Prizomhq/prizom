@@ -2,15 +2,19 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const urlObj = new URL(request.url);
-  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
-    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '') 
-    : `${urlObj.protocol}//${urlObj.host}`;
+  const host = request.headers.get('host') || urlObj.host;
+  
+  // Staging/Preview Environments Safeguard
+  const isProduction = host === 'www.prizom.in' || host === 'prizom.in';
 
-  if (siteUrl.includes('://prizom.in')) {
-    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
-  }
-
-  const robots = `User-agent: *
+  let robots = '';
+  if (!isProduction) {
+    robots = `User-agent: *
+Disallow: /
+`;
+  } else {
+    const siteUrl = 'https://www.prizom.in';
+    robots = `User-agent: *
 Allow: /
 # Directories
 Disallow: /admin/
@@ -28,6 +32,7 @@ Disallow: /account-appeal
 # Sitemap
 Sitemap: ${siteUrl}/sitemap.xml
 `;
+  }
 
   return new NextResponse(robots, {
     headers: {

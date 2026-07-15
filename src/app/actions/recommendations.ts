@@ -1,9 +1,10 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPublicCMS } from './adminActions';
 import { getBlockedUserIdsFilter } from './moderation';
 import { getEffectiveHiddenPromptIds } from './hiddenActions';
+import { unstable_cache } from 'next/cache';
 
 export interface UserInterests {
   categories?: Record<string, number>;
@@ -49,6 +50,51 @@ function getMaxSimilarWeight(category: string, userCategories: Record<string, nu
   return maxWeight;
 }
 
+const getCachedRawPrompts = unstable_cache(
+  async () => {
+    const supabase = await createAdminClient();
+
+    const [trendingRes, recentRes] = await Promise.all([
+      supabase
+        .from('prompts')
+        .select('*, profiles!user_id!inner(username, full_name, avatar_url, role, badges), remix_of, remix_count')
+        .not('profiles.role', 'in', '(suspended,banned,permanently_banned,disabled)')
+        .eq('profiles.is_deactivated', false)
+        .eq('profiles.pending_deletion', false)
+        .eq('moderation_status', 'active')
+        .order('likes_count', { ascending: false })
+        .limit(150),
+      supabase
+        .from('prompts')
+        .select('*, profiles!user_id!inner(username, full_name, avatar_url, role, badges), remix_of, remix_count')
+        .not('profiles.role', 'in', '(suspended,banned,permanently_banned,disabled)')
+        .eq('profiles.is_deactivated', false)
+        .eq('profiles.pending_deletion', false)
+        .eq('moderation_status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(150)
+    ]);
+
+    if (trendingRes.error || recentRes.error) {
+      console.error('Error fetching prompts for recommendations pool:', trendingRes.error, recentRes.error);
+      return [];
+    }
+
+    // Merge and deduplicate by prompt ID
+    const seenIds = new Set<string>();
+    const mergedPrompts: any[] = [];
+    for (const p of [...(trendingRes.data || []), ...(recentRes.data || [])]) {
+      if (!seenIds.has(p.id)) {
+        seenIds.add(p.id);
+        mergedPrompts.push(p);
+      }
+    }
+    return mergedPrompts;
+  },
+  ['raw-prompts-recommendations-pool'],
+  { revalidate: 300, tags: ['prompts-pool'] }
+);
+
 export async function fetchRecommendedPrompts(params: {
   page?: number;
   limit?: number;
@@ -67,76 +113,46 @@ export async function fetchRecommendedPrompts(params: {
   
   const supabase = await createClient();
 
-  // 1. Get authenticated context to filter blocked users
+  // 1. Get authenticated context to filter blocked users and fetch interactions in batch
   const { data: { session } } = await supabase.auth.getSession();
 
-  // 2. Fetch CMS configs for banned/hidden filters
-  const { hiddenPrompts, bannedUsers } = await getPublicCMS();
+  // Fetch user blocked list and liked/saved list in parallel if logged in
+  let blockedIds: string[] = [];
+  let likedIds: string[] = [];
+  let savedIds: string[] = [];
 
-  let query = supabase
-    .from('prompts')
-    .select('*, profiles!user_id!inner(username, full_name, avatar_url, role, badges), remix_of, remix_count')
-    .not('profiles.role', 'in', '(suspended,banned,permanently_banned,disabled)')
-    .eq('profiles.is_deactivated', false)
-    .eq('profiles.pending_deletion', false);
-
-  const filterIds = new Set<string>();
-
-  // Add standard blocked users
   if (session?.user) {
-    const blockedIds = await getBlockedUserIdsFilter();
-    blockedIds.forEach(id => filterIds.add(id));
+    const [blockedList, likesRes, savesRes] = await Promise.all([
+      getBlockedUserIdsFilter(),
+      supabase.from('likes').select('prompt_id').eq('user_id', session.user.id),
+      supabase.from('saved_prompts').select('prompt_id').eq('user_id', session.user.id)
+    ]);
+    blockedIds = blockedList;
+    if (likesRes.data) likedIds = likesRes.data.map(l => l.prompt_id);
+    if (savesRes.data) savedIds = savesRes.data.map(s => s.prompt_id);
   }
 
-  // Add banned users from admin store
+  // 2. Fetch CMS configs for banned/hidden filters
+  const { bannedUsers } = await getPublicCMS();
+
+  const filterIds = new Set<string>();
+  blockedIds.forEach(id => filterIds.add(id));
   if (bannedUsers && bannedUsers.length > 0) {
     bannedUsers.forEach((id: string) => filterIds.add(id));
   }
 
-  if (filterIds.size > 0) {
-    query = query.not('user_id', 'in', `(${Array.from(filterIds).join(',')})`);
-  }
-
   // Exclude user/cookie self-hidden prompts
   const userHiddenIds = await getEffectiveHiddenPromptIds();
-  if (userHiddenIds.length > 0) {
-    query = query.not('id', 'in', `(${userHiddenIds.join(',')})`);
-  }
 
-  // Hybrid fetch: trending prompts + recent prompts to solve cold-start stagnation.
-  // Without this, new prompts with 0 likes would never appear in recommendations.
-  const [trendingRes, recentRes] = await Promise.all([
-    query
-      .order('likes_count', { ascending: false })
-      .limit(150),
-    supabase
-      .from('prompts')
-      .select('*, profiles!user_id!inner(username, full_name, avatar_url, role, badges), remix_of, remix_count')
-      .not('profiles.role', 'in', '(suspended,banned,permanently_banned,disabled)')
-      .eq('profiles.is_deactivated', false)
-      .eq('profiles.pending_deletion', false)
-      .order('created_at', { ascending: false })
-      .limit(150)
-  ]);
+  // 3. Load raw prompts from memory cache
+  const rawPool = await getCachedRawPrompts();
 
-  if (trendingRes.error && recentRes.error) {
-    console.error('Error fetching prompts for recommendations:', trendingRes.error, recentRes.error);
-    return { prompts: [], hasMore: false };
-  }
-
-  // Merge and deduplicate by prompt ID
-  const seenIds = new Set<string>();
-  const mergedPrompts: any[] = [];
-  for (const p of [...(trendingRes.data || []), ...(recentRes.data || [])]) {
-    if (!seenIds.has(p.id)) {
-      seenIds.add(p.id);
-      mergedPrompts.push(p);
-    }
-  }
-
-  // Apply exclusion filters to the merged set
+  // Apply exclusion and search filters to the merged set in memory
   const allFilterIds = Array.from(filterIds);
-  const prompts = mergedPrompts.filter(p => {
+  const prompts = rawPool.filter(p => {
+    // Basic active checks (already handled in cache query, but kept as safeguard)
+    if (p.profiles?.is_deactivated || p.profiles?.pending_deletion) return false;
+    
     if (allFilterIds.length > 0 && allFilterIds.includes(p.user_id)) return false;
     if (userHiddenIds.length > 0 && userHiddenIds.includes(p.id)) return false;
     if (filters.category && filters.category !== 'All' && p.category !== filters.category) return false;
@@ -153,7 +169,7 @@ export async function fetchRecommendedPrompts(params: {
   });
 
   if (!prompts || prompts.length === 0) {
-    return { prompts: [], hasMore: false };
+    return { prompts: [], hasMore: false, likedIds, savedIds, currentUserId: session?.user?.id };
   }
 
   // 3. Score each prompt
@@ -243,7 +259,10 @@ export async function fetchRecommendedPrompts(params: {
 
   return {
     prompts: paginatedPrompts,
-    hasMore
+    hasMore,
+    likedIds,
+    savedIds,
+    currentUserId: session?.user?.id
   };
 }
 

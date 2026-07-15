@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { assertNotSuspendedOrBanned } from './moderation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import crypto from 'crypto';
 import { rateLimit } from '@/lib/rateLimit';
 import { getClientIpHash } from './interactions';
@@ -124,6 +124,7 @@ export async function createPromptAction(promptData: {
 
     if (error) throw error;
 
+    revalidateTag('prompts-pool');
     revalidatePath('/');
     revalidatePath('/discover');
     revalidatePath('/trending');
@@ -263,6 +264,7 @@ export async function updatePromptAction(
     }
 
     // 5. Revalidate cache
+    revalidateTag('prompts-pool');
     revalidatePath('/');
     revalidatePath('/discover');
     revalidatePath('/trending');

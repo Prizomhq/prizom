@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient, createAdminClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache';
 import * as store from '@/lib/db/admin-store';
 import { triggerNotification } from './notifications';
 import { dispatchEmail } from '@/lib/emailService';
@@ -10,6 +10,12 @@ import { getClientIpHash } from './interactions';
 import { getGuestAnalytics } from './guestActions';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { safePermanentDelete as dbPermanentDelete } from '@/lib/db/user-cleanup';
+
+async function revalidateCMS() {
+  revalidateTag('cms-settings');
+  revalidateTag('platform-directories');
+  revalidateTag('prompts-pool');
+}
 
 // Granular role helpers (Priority 3 & 4)
 async function assertModeratorOrAbove() {
@@ -148,6 +154,10 @@ async function revalidateModerationTargets({
   userId?: string;
 }) {
   const supabase = await createAdminClient();
+  
+  // Invalidate cached dynamic feeds & moderation lists
+  revalidateTag('prompts-pool');
+  revalidateTag('cms-settings');
   
   // 1. Revalidate static lists and feeds
   revalidatePath('/');
@@ -1327,6 +1337,7 @@ export async function toggleUserVerification(userId: string) {
   }
 
   // Revalidate all caches across the platform to ensure immediate visual updates
+  revalidateCMS();
   revalidatePath('/admin/users');
   revalidatePath('/');
   revalidatePath('/discover');
@@ -2102,19 +2113,35 @@ export async function getAuditLogs() {
   return { success: true, logs: formatted };
 }
 
-// 9. Public CMS Read (Unauthenticated)
+const fetchRawPublicCMS = unstable_cache(
+  async () => {
+    const currentStore = await store.getStore();
+    return {
+      homepage: currentStore.homepage_settings,
+      developer: currentStore.meet_developer,
+      footer: currentStore.footer_settings,
+      featuredPrompts: currentStore.featured_prompts,
+      manualBoosts: currentStore.manual_boosts,
+      bannedUsers: currentStore.banned_users.map(bu => bu.userId),
+      exploreSections: currentStore.explore_sections || store.DEFAULT_EXPLORE_SECTIONS
+    };
+  },
+  ['public-cms-settings'],
+  { tags: ['cms-settings'] }
+);
+
 export async function getPublicCMS() {
-  const currentStore = await store.getStore();
+  const data = await fetchRawPublicCMS();
   return {
     success: true,
-    homepage: currentStore.homepage_settings,
-    developer: currentStore.meet_developer,
-    footer: currentStore.footer_settings,
-    featuredPrompts: currentStore.featured_prompts,
+    homepage: data.homepage,
+    developer: data.developer,
+    footer: data.footer,
+    featuredPrompts: data.featuredPrompts,
     hiddenPrompts: [], // Decoupled: moderation status now stored in PostgreSQL & filtered via RLS
-    manualBoosts: currentStore.manual_boosts,
-    bannedUsers: currentStore.banned_users.map(bu => bu.userId),
-    exploreSections: currentStore.explore_sections || store.DEFAULT_EXPLORE_SECTIONS
+    manualBoosts: data.manualBoosts,
+    bannedUsers: data.bannedUsers,
+    exploreSections: data.exploreSections
   };
 }
 
@@ -2378,6 +2405,7 @@ export async function createCategoryAction(name: string, description: string = '
   if (!success) return { success: false, error: 'Category already exists or failed to save.' };
 
   await store.addModerationLog(adminUser.email!, 'create_category', id, `Created category: ${name}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true, category: newCat };
@@ -2418,6 +2446,7 @@ export async function editCategoryAction(id: string, name: string, description: 
   if (!success) return { success: false, error: 'Failed to update category.' };
 
   await store.addModerationLog(adminUser.email!, 'edit_category', id, `Updated category: ${name}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true, category: found };
@@ -2443,6 +2472,7 @@ export async function deleteCategoryAction(id: string) {
   }
 
   await store.addModerationLog(adminUser.email!, 'delete_category', id, `Deleted category ID: ${id}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2465,6 +2495,7 @@ export async function reorderCategoriesAction(orders: { id: string; order: numbe
   if (!success) return { success: false, error: 'Failed to save category order.' };
 
   await store.addModerationLog(adminUser.email!, 'reorder_categories', 'all', 'Reordered categories list.');
+  revalidateCMS();
   revalidatePath('/discover');
   return { success: true };
 }
@@ -2475,6 +2506,7 @@ export async function approveCategoryAction(id: string) {
   if (!success) return { success: false, error: 'Failed to approve category.' };
 
   await store.addModerationLog(adminUser.email!, 'approve_category', id, `Approved category ID: ${id}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2498,6 +2530,7 @@ export async function createAiToolAction(name: string) {
   if (!success) return { success: false, error: 'AI Tool already exists.' };
 
   await store.addModerationLog(adminUser.email!, 'create_ai_tool', id, `Created AI Tool: ${name}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true, tool: newTool };
@@ -2509,6 +2542,7 @@ export async function deleteAiToolAction(id: string) {
   if (!success) return { success: false, error: 'Failed to delete AI Tool.' };
 
   await store.addModerationLog(adminUser.email!, 'delete_ai_tool', id, `Deleted AI Tool ID: ${id}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2520,18 +2554,33 @@ export async function approveAiToolAction(id: string) {
   if (!success) return { success: false, error: 'Failed to approve AI Tool.' };
 
   await store.addModerationLog(adminUser.email!, 'approve_ai_tool', id, `Approved AI Tool ID: ${id}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
 }
 
+const fetchRawPlatformDirectories = unstable_cache(
+  async () => {
+    const [categories, ai_tools, aspect_ratios] = await Promise.all([
+      store.getCategories(),
+      store.getAiTools(),
+      store.getAspectRatios()
+    ]);
+    return { categories, ai_tools, aspect_ratios };
+  },
+  ['platform-directories'],
+  { tags: ['platform-directories'] }
+);
+
 // 14. Public Unauthenticated Dynamic Categories & Tools fetch
 export async function getPlatformCategoriesAndTools() {
+  const data = await fetchRawPlatformDirectories();
   return {
     success: true,
-    categories: await store.getCategories(),
-    ai_tools: await store.getAiTools(),
-    aspect_ratios: await store.getAspectRatios()
+    categories: data.categories,
+    ai_tools: data.ai_tools,
+    aspect_ratios: data.aspect_ratios
   };
 }
 
@@ -2747,6 +2796,7 @@ export async function mergeCategoriesAction(sourceId: string, targetId: string) 
   await store.saveStore(currentStore);
 
   await store.addModerationLog(adminUser.email!, 'merge_categories', `${sourceId}->${targetId}`, `Merged category ${sourceCat.name} into ${targetCat.name}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2780,6 +2830,7 @@ export async function mergeAiToolsAction(sourceId: string, targetId: string) {
   await store.saveStore(currentStore);
 
   await store.addModerationLog(adminUser.email!, 'merge_ai_tools', `${sourceId}->${targetId}`, `Merged tool ${sourceTool.name} into ${targetTool.name}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2810,6 +2861,7 @@ export async function renameCategoryAction(id: string, newName: string) {
 
   await store.saveStore(currentStore);
   await store.addModerationLog(adminUser.email!, 'rename_category', id, `Renamed category ${oldName} to ${newName}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2840,6 +2892,7 @@ export async function renameAiToolAction(id: string, newName: string) {
 
   await store.saveStore(currentStore);
   await store.addModerationLog(adminUser.email!, 'rename_ai_tool', id, `Renamed tool ${oldName} to ${newName}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2851,6 +2904,7 @@ export async function toggleAiToolVisibilityAction(id: string) {
   if (!success) return { success: false, error: 'Failed to toggle tool visibility.' };
 
   await store.addModerationLog(adminUser.email!, 'toggle_ai_tool_visibility', id, '');
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true };
@@ -2867,6 +2921,7 @@ export async function updateAspectRatiosAction(ratios: store.AspectRatioOption[]
   if (!success) return { success: false, error: 'Failed to update aspect ratios.' };
 
   await store.addModerationLog(adminUser.email!, 'update_aspect_ratios', 'all', 'Updated aspect ratio configurations.');
+  revalidateCMS();
   return { success: true };
 }
 
@@ -2887,6 +2942,7 @@ export async function reorderAiToolsAction(orders: { id: string; order: number }
   if (!success) return { success: false, error: 'Failed to save AI Tools order.' };
 
   await store.addModerationLog(adminUser.email!, 'reorder_ai_tools', 'all', 'Reordered AI Tools list.');
+  revalidateCMS();
   revalidatePath('/discover');
   return { success: true };
 }
@@ -2910,6 +2966,7 @@ export async function updateSectionPromptsAction(sectionId: string, promptIds: s
   if (!success) return { success: false, error: 'Failed to update section prompts.' };
 
   await store.addModerationLog(adminUser.email!, 'update_section_prompts', sectionId, `Updated prompts inside section: ${found.title}`);
+  revalidateCMS();
   revalidatePath('/discover');
   revalidatePath('/');
   return { success: true, section: found };
@@ -3098,6 +3155,7 @@ export async function evaluateCreatorVerificationStanding(userId: string) {
   }
 
   // Revalidate caches if verified status changed
+  revalidateCMS();
   revalidatePath('/admin/users');
   revalidatePath('/');
   revalidatePath('/discover');
@@ -3140,6 +3198,7 @@ export async function updateAboutCMS(settings: Partial<store.AboutSettings>) {
     await store.saveStore(currentStore);
     await store.addModerationLog(adminUser.email!, 'update_about_cms', 'settings', 'About Prizom section contents updated.');
     
+    revalidateCMS();
     revalidatePath('/settings');
     revalidatePath('/');
     return { success: true };
@@ -3160,6 +3219,7 @@ export async function assignPromptCategoryAction(promptId: string, categoryName:
 
     if (error) throw error;
 
+    revalidateTag('prompts-pool');
     revalidatePath('/admin/prompts');
     revalidatePath('/discover');
     revalidatePath('/');

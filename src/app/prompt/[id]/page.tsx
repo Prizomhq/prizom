@@ -14,6 +14,7 @@ import { getOptimizedImageUrl, getAspectRatioStyle } from '@/lib/cloudinary-clie
 import { getPublicCMS } from '@/app/actions/adminActions';
 import RelatedPromptsFeed from '@/components/ui/RelatedPromptsFeed';
 import { Metadata } from 'next';
+import PromptViewTracker from '@/components/analytics/PromptViewTracker';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -39,7 +40,10 @@ export async function generateMetadata(
   const title = `"${prompt.title}" by ${creatorName} | Prizom`;
   const description = prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`;
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in';
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prizom.in';
+  if (siteUrl.includes('://prizom.in')) {
+    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
+  }
   const canonicalUrl = `${siteUrl}/prompt/${resolvedParams.id}`;
   const ogImage = prompt.image_url || `${siteUrl}/og-image.png`;
 
@@ -325,6 +329,61 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="min-h-screen pb-6 md:pb-24 pt-8 bg-[#fcfcfc] relative overflow-hidden">
+      <PromptViewTracker
+        id={prompt.id}
+        title={prompt.title}
+        category={prompt.category}
+        tool={prompt.ai_tool}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://www.prizom.in"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Prompts",
+                  "item": "https://www.prizom.in/discover"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": prompt.title,
+                  "item": `https://www.prizom.in/prompt/${prompt.id}`
+                }
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "CreativeWork",
+              "name": prompt.title,
+              "description": prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`,
+              "text": prompt.prompt_text,
+              "image": prompt.image_url || "https://www.prizom.in/og-image.png",
+              "author": {
+                "@type": "Person",
+                "name": prompt.profiles?.username ? `@${prompt.profiles.username}` : 'unknown',
+                "url": prompt.profiles?.username ? `https://www.prizom.in/creator/${prompt.profiles.username}` : 'https://www.prizom.in'
+              },
+              "provider": {
+                "@type": "Organization",
+                "name": "Prizom",
+                "url": "https://www.prizom.in"
+              }
+            }
+          ])
+        }}
+      />
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[var(--color-electric-blue)]/[0.01] via-[var(--color-neon-purple)]/[0.01] to-transparent rounded-full blur-[100px] pointer-events-none -z-10"></div>
 

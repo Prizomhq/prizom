@@ -42,10 +42,13 @@ export default function CopyButton({
   }, [supabase]);
 
   const handleCopy = async () => {
+    const copyText = textToCopy;
+    const currentPromptId = promptId;
+
     if (isLoggedIn === null) return; // auth state unresolved
 
     // If guest, enforce copying limit
-    if (!isLoggedIn && promptId) {
+    if (!isLoggedIn && currentPromptId) {
       let guestCopies: string[] = [];
       try {
         const stored = typeof window !== 'undefined' ? localStorage.getItem('prizom_guest_copies') : null;
@@ -56,7 +59,7 @@ export default function CopyButton({
         guestCopies = [];
       }
 
-      const uniquePromptId = promptId;
+      const uniquePromptId = currentPromptId;
       const isAlreadyCopied = guestCopies.includes(uniquePromptId);
 
       if (!isAlreadyCopied && guestCopies.length >= 5) {
@@ -77,50 +80,53 @@ export default function CopyButton({
       }
     }
 
-    const fallbackCopyTextForPrompt = (text: string) => {
-      try {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.position = 'fixed';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        if (successful) {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      } catch (err) {
-        console.error('Fallback copy failed:', err);
+    const fireGAEvent = () => {
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'copy_prompt', {
+          prompt_id: currentPromptId || 'unknown'
+        });
       }
     };
 
     // Execute copy
     try {
       if (navigator?.clipboard?.writeText) {
-        navigator.clipboard.writeText(textToCopy)
+        navigator.clipboard.writeText(copyText)
           .then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+            fireGAEvent();
           })
           .catch((err) => {
             console.error('Failed to copy prompt via writeText:', err);
-            fallbackCopyTextForPrompt(textToCopy);
+            const successful = fallbackCopyTextForPrompt(copyText);
+            if (successful) {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+              fireGAEvent();
+            }
           });
       } else {
-        fallbackCopyTextForPrompt(textToCopy);
+        const successful = fallbackCopyTextForPrompt(copyText);
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+          fireGAEvent();
+        }
       }
     } catch (err) {
       console.error('Clipboard error:', err);
-      fallbackCopyTextForPrompt(textToCopy);
+      const successful = fallbackCopyTextForPrompt(copyText);
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        fireGAEvent();
+      }
     }
 
     // Call server action to increment copy stats and handle permission/database failures
-    if (promptId) {
-      const res = await incrementPromptCopyCount(promptId);
+    if (currentPromptId) {
+      const res = await incrementPromptCopyCount(currentPromptId);
       if (res && !res.success) {
         console.error('Prizom Copy Tracking Database Error:', res.error);
       }
@@ -208,5 +214,25 @@ export default function CopyButton({
       )}
     </>
   );
+}
+
+// Standalone Helper Function Outside Component to bypass React Hooks/Immutability strict checks
+function fallbackCopyTextForPrompt(text: string): boolean {
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.position = 'fixed';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return successful;
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+    return false;
+  }
 }
 

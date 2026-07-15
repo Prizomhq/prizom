@@ -38,6 +38,9 @@ interface PromptCardProps {
   category?: string | null;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  initialLiked?: boolean;
+  initialSaved?: boolean;
+  currentUserId?: string;
 }
 
 function formatStatsNumber(num: number): string {
@@ -51,12 +54,12 @@ function formatStatsNumber(num: number): string {
   return num.toString();
 }
 
-export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight }: PromptCardProps) {
+export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight, initialLiked, initialSaved, currentUserId }: PromptCardProps) {
   const router = useRouter();
   const supabase = createClient();
   
-  const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(initialSaves > 0 ? true : false);
+  const [isLiked, setIsLiked] = useState(initialLiked !== undefined ? initialLiked : false);
+  const [isSaved, setIsSaved] = useState(initialSaved !== undefined ? initialSaved : (initialSaves > 0 ? true : false));
   const [likes, setLikes] = useState(initialLikes);
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isUnsaveOpen, setIsUnsaveOpen] = useState(false);
@@ -126,6 +129,16 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
   useEffect(() => {
     let active = true;
     async function fetchStatus() {
+      // 🔴 Performance: Skip database N+1 query if parent passed batched parameters
+      if (initialLiked !== undefined && initialSaved !== undefined && currentUserId !== undefined) {
+        if (active) {
+          setIsLoggedIn(!!currentUserId);
+          const isUserOwner = currentUserId === creator?.username;
+          setIsOwner(isUserOwner);
+        }
+        return;
+      }
+
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (active) {
@@ -150,7 +163,7 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
     return () => {
       active = false;
     };
-  }, [id, supabase, creator?.username]);
+  }, [id, supabase, creator?.username, initialLiked, initialSaved, currentUserId]);
 
   useEffect(() => {
     if (!menuOpen) return;

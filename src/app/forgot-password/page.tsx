@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, ArrowRight, Loader2, ArrowLeft, Lock } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { sendPasswordResetEmail } from '@/app/actions/auth';
+import PrizomLogo from '@/components/ui/PrizomLogo';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -40,9 +41,12 @@ export default function ForgotPasswordPage() {
         </Link>
 
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-6">
-            <Lock className="h-8 w-8 text-[var(--color-neon-purple)]" />
-          </div>
+          <Link href="/" className="inline-flex items-center space-x-2 group mb-6 hover:scale-105 transition-transform">
+            <PrizomLogo size={44} />
+            <span className="font-bold text-3xl tracking-tight text-zinc-900">
+              Prizom
+            </span>
+          </Link>
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">Forgot password?</h1>
           <p className="text-zinc-500">No worries, we&apos;ll send you reset instructions.</p>
         </div>

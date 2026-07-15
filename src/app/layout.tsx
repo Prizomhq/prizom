@@ -102,13 +102,34 @@ export default function RootLayout({
             {/* Google Analytics Consent Mode v2 — must load before GA */}
             <Script id="ga-consent-defaults" strategy="beforeInteractive">{`
               window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                analytics_storage: 'denied',
-                ad_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
+              window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+              
+              var consentAnalytics = 'denied';
+              try {
+                var stored = localStorage.getItem('prizom-cookie-consent');
+                if (stored === 'granted') {
+                  consentAnalytics = 'granted';
+                }
+              } catch (e) {
+                console.warn('Consent LocalStorage access blocked:', e);
+              }
+
+              window.gtag('consent', 'default', {
+                analytics_storage: consentAnalytics,
+                ad_storage: consentAnalytics,
+                ad_user_data: consentAnalytics,
+                ad_personalization: consentAnalytics,
                 wait_for_update: 500
+              });
+
+              // Global Javascript exception tracker
+              window.addEventListener('error', function(event) {
+                try {
+                  window.gtag('event', 'exception', {
+                    description: event.message || 'Script error',
+                    fatal: true
+                  });
+                } catch (err) {}
               });
             `}</Script>
 
@@ -120,18 +141,31 @@ export default function RootLayout({
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  "@context": "https://schema.org",
-                  "@type": "Organization",
-                  "name": "Prizom",
-                  "url": "https://www.prizom.in",
-                  "logo": "https://www.prizom.in/logo.png",
-                  "sameAs": [
-                    "https://x.com/prizomHQ",
-                    "https://instagram.com/prizomHQ",
-                    "https://youtube.com/prizomhq"
-                  ]
-                })
+                __html: JSON.stringify([
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "Organization",
+                    "name": "Prizom",
+                    "url": "https://www.prizom.in",
+                    "logo": "https://www.prizom.in/logo.png",
+                    "sameAs": [
+                      "https://x.com/prizomHQ",
+                      "https://instagram.com/prizomHQ",
+                      "https://youtube.com/prizomhq"
+                    ]
+                  },
+                  {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "name": "Prizom",
+                    "url": "https://www.prizom.in",
+                    "potentialAction": {
+                      "@type": "SearchAction",
+                      "target": "https://www.prizom.in/discover?q={search_term_string}",
+                      "query-input": "required name=search_term_string"
+                    }
+                  }
+                ])
               }}
             />
           </>

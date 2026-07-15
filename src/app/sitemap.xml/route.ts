@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
-  const urlObj = new URL(request.url);
   let siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
     ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '') 
-    : `${urlObj.protocol}//${urlObj.host}`;
+    : 'https://www.prizom.in';
 
   if (siteUrl.includes('://prizom.in')) {
     siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
@@ -34,12 +33,18 @@ export async function GET(request: Request) {
     .order('updated_at', { ascending: false })
     .limit(1000);
 
+  const lastmodPolicy = '2026-06-26';
+  const lastmodToday = new Date().toISOString().split('T')[0];
+
   const staticPages = [
-    { loc: '', changefreq: 'daily', priority: '1.0' },
-    { loc: '/discover', changefreq: 'daily', priority: '0.9' },
-    { loc: '/trending', changefreq: 'daily', priority: '0.9' },
-    { loc: '/terms', changefreq: 'monthly', priority: '0.3' },
-    { loc: '/privacy', changefreq: 'monthly', priority: '0.3' },
+    { loc: '', changefreq: 'daily', priority: '1.0', lastmod: lastmodToday },
+    { loc: '/discover', changefreq: 'daily', priority: '0.9', lastmod: lastmodToday },
+    { loc: '/trending', changefreq: 'daily', priority: '0.9', lastmod: lastmodToday },
+    { loc: '/terms', changefreq: 'monthly', priority: '0.3', lastmod: lastmodPolicy },
+    { loc: '/privacy', changefreq: 'monthly', priority: '0.3', lastmod: lastmodPolicy },
+    { loc: '/community-guidelines', changefreq: 'monthly', priority: '0.3', lastmod: lastmodPolicy },
+    { loc: '/cookie-policy', changefreq: 'monthly', priority: '0.3', lastmod: lastmodPolicy },
+    { loc: '/copyright-policy', changefreq: 'monthly', priority: '0.3', lastmod: lastmodPolicy },
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -50,6 +55,7 @@ export async function GET(request: Request) {
     xml += `
   <url>
     <loc>${siteUrl}${page.loc}</loc>
+    <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`;

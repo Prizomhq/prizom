@@ -128,6 +128,13 @@ export default function SignupPage() {
         localStorage.removeItem('prizom_guest_copies');
       }
 
+      // Track signup event in Google Analytics
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'sign_up', {
+          method: 'email'
+        });
+      }
+
       // Track guest conversion event
       try {
         const newUserId = res.user?.id || null;

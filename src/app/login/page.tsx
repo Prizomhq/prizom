@@ -53,6 +53,12 @@ export default function LoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('prizom_guest_copies');
       }
+      // Track login event in Google Analytics
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'login', {
+          method: 'email'
+        });
+      }
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         // Trigger auto-sync role on login (Goal 1)

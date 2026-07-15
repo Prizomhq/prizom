@@ -38,7 +38,10 @@ export async function generateMetadata(
   const title = `${displayName} (@${creator.username}) | Prizom`;
   const description = creator.bio || `View prompt collections and remixes from creator ${displayName} on Prizom, the collaborative AI prompt registry.`;
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in';
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prizom.in';
+  if (siteUrl.includes('://prizom.in')) {
+    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
+  }
   const canonicalUrl = `${siteUrl}/creator/${creator.username}`;
   const ogImage = creator.avatar_url || `${siteUrl}/default-avatar.png`;
 
@@ -197,6 +200,46 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
 
   return (
     <div className="min-h-screen pb-6 md:pb-24 bg-[#fcfcfc] relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://www.prizom.in"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Creators",
+                  "item": "https://www.prizom.in/discover"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": creator.full_name || creator.username,
+                  "item": `https://www.prizom.in/creator/${creator.username}`
+                }
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              "name": creator.full_name || creator.username,
+              "username": creator.username,
+              "description": creator.bio || `View prompt collections and remixes from creator ${creator.full_name || creator.username} on Prizom.`,
+              "image": creator.avatar_url || "https://www.prizom.in/default-avatar.png",
+              "url": `https://www.prizom.in/creator/${creator.username}`
+            }
+          ])
+        }}
+      />
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-[var(--color-electric-blue)]/5 via-[var(--color-neon-purple)]/5 to-transparent blur-[120px] pointer-events-none -z-10"></div>
 

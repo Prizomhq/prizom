@@ -152,6 +152,12 @@ export default function GlobalSearch() {
         if (active) {
           setResults(data);
           setLoading(false);
+          // Track search event in Google Analytics
+          if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+            (window as any).gtag('event', 'search', {
+              search_term: query
+            });
+          }
         }
       } catch (err) {
         console.error(err);

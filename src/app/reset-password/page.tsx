@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Lock, ArrowRight, Loader2, Check, Eye, EyeOff } from 'lucide-react';
 import { updateSecurePassword } from '@/app/actions/auth';
+import PrizomLogo from '@/components/ui/PrizomLogo';
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +17,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   // Password Rules
   const hasMinLength = password.length >= 8;
@@ -23,6 +27,20 @@ export default function ResetPasswordPage() {
   const hasSpecial = /[^A-Za-z0-9]/.test(password);
   const isPasswordStrong = hasMinLength && hasUpper && hasLower && hasNumber && hasSpecial;
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
+
+  // Auto-redirect timer on success
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown === 0) {
+      router.push('/');
+      router.refresh();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +58,8 @@ export default function ResetPasswordPage() {
     if (!res.success) {
       setError(res.error || 'Failed to update password.');
     } else {
-      setMessage('Password successfully reset! You can now log in.');
+      setMessage('Password successfully reset! Automatically redirecting you in ');
+      setCountdown(3);
     }
     
     setLoading(false);
@@ -54,6 +73,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md relative z-10 py-8">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 group mb-6 hover:scale-105 transition-transform">
+            <PrizomLogo size={44} />
             <span className="font-bold text-3xl tracking-tight text-zinc-900">
               Prizom
             </span>
@@ -71,11 +91,18 @@ export default function ResetPasswordPage() {
           )}
 
           {message && (
-            <div className="mb-6 p-4 rounded-2xl bg-green-50 border border-green-100 text-green-700 text-sm font-medium animate-in fade-in zoom-in-95">
-              {message}
-              <div className="mt-4">
-                <Link href="/login" className="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-black hover:bg-zinc-800 transition-colors">
-                  Go to Login
+            <div className="mb-6 p-4 rounded-2xl bg-green-50 border border-green-100 text-green-700 text-sm font-medium animate-in fade-in zoom-in-95 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 mb-3 mx-auto">
+                <Check className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-base mb-1">Password updated!</p>
+              <p className="text-zinc-500 text-xs text-center">
+                {message}
+                <span className="font-extrabold text-[var(--color-neon-purple)]">{countdown}s</span>...
+              </p>
+              <div className="mt-6">
+                <Link href="/" className="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-black hover:bg-zinc-800 transition-colors">
+                  Go to Home
                 </Link>
               </div>
             </div>
@@ -110,7 +137,7 @@ export default function ResetPasswordPage() {
                 {password.length > 0 && (
                   <div className="mt-3 bg-zinc-50 rounded-xl p-4 border border-zinc-100 animate-in fade-in slide-in-from-top-2">
                     <p className="text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wider">Password Requirements</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-left">
                       <div className={`flex items-center ${hasMinLength ? 'text-green-600 font-bold' : 'text-zinc-500'}`}>
                         {hasMinLength ? <Check className="w-3.5 h-3.5 mr-1.5" /> : <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 mr-2.5 ml-1" />}
                         8+ characters
