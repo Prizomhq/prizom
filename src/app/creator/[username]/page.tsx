@@ -14,6 +14,7 @@ import CreatorProfileActions from '@/components/ui/CreatorProfileActions';
 import { getPublicCMS } from '@/app/actions/adminActions';
 import { getEffectiveHiddenPromptIds } from '@/app/actions/hiddenActions';
 import { Metadata } from 'next';
+import { SITE_CONFIG, getCanonicalUrl } from '@/lib/site-config';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ username: string }> }
@@ -30,20 +31,20 @@ export async function generateMetadata(
 
   if (!creator) {
     return {
-      title: 'Creator Profile Not Found | Prizom',
+      title: `Creator Profile Not Found | ${SITE_CONFIG.name}`,
     };
   }
 
   const displayName = creator.full_name || creator.username;
-  const title = `${displayName} (@${creator.username}) | Prizom`;
-  const description = creator.bio || `View prompt collections and remixes from creator ${displayName} on Prizom, the collaborative AI prompt registry.`;
-  
-  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prizom.in';
-  if (siteUrl.includes('://prizom.in')) {
-    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
-  }
-  const canonicalUrl = `${siteUrl}/creator/${creator.username}`;
-  const ogImage = creator.avatar_url || `${siteUrl}/default-avatar.png`;
+  const title = `${displayName} (@${creator.username}) | ${SITE_CONFIG.name}`;
+  const description = creator.bio || `View prompt collections and remixes from creator ${displayName} on ${SITE_CONFIG.name}, the collaborative AI prompt registry.`;
+
+  // Canonical always uses the production base — not the runtime SITE_URL.
+  const canonicalUrl = getCanonicalUrl(`/creator/${creator.username}`);
+
+  // OG image: avatar_url is an absolute Supabase/Cloudinary CDN URL (already HTTPS).
+  // Fallback to the dynamic opengraph-image route if no avatar is set.
+  const ogImage = creator.avatar_url || `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`;
 
   return {
     title,
@@ -55,7 +56,7 @@ export async function generateMetadata(
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Prizom',
+      siteName: SITE_CONFIG.name,
       images: [
         {
           url: ogImage,

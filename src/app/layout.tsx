@@ -14,6 +14,7 @@ import RouteChangeTracker from "@/components/analytics/RouteChangeTracker";
 import ConsentRestorer from "@/components/analytics/ConsentRestorer";
 import { validateEnvironment } from "@/lib/environment_audit";
 import GoogleAnalyticsWrapper from "@/components/analytics/GoogleAnalyticsWrapper";
+import { SITE_CONFIG } from "@/lib/site-config";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -32,16 +33,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    (process.env.NEXT_PUBLIC_SITE_URL || "https://www.prizom.in").replace("://prizom.in", "://www.prizom.in")
-  ),
-  title: "Prizom | Collaborative AI Prompt Registry",
-  description: "Discover, save, remix, and showcase next-generation AI prompts in a collaborative registry.",
+  // metadataBase resolves relative URLs in metadata (canonical, og:image, etc.).
+  // We always use the canonical production base so relative paths resolve correctly
+  // regardless of which environment is running.
+  metadataBase: new URL(SITE_CONFIG.canonicalBase),
+  title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+  description: SITE_CONFIG.description,
   alternates: {
     canonical: '/',
   },
   icons: {
-    apple: '/logo.png',
+    apple: SITE_CONFIG.logo,
   },
   manifest: '/manifest.json',
 };
@@ -137,7 +139,9 @@ export default function RootLayout({
               <RouteChangeTracker />
             </Suspense>
             <ConsentRestorer />
-            <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+            {/* GA ID sourced from SITE_CONFIG (which reads NEXT_PUBLIC_GA_ID env) */}
+            <GoogleAnalyticsWrapper gaId={SITE_CONFIG.gaId} />
+            {/* Structured Data — all URLs sourced from SITE_CONFIG.canonicalBase */}
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{
@@ -145,23 +149,23 @@ export default function RootLayout({
                   {
                     "@context": "https://schema.org",
                     "@type": "Organization",
-                    "name": "Prizom",
-                    "url": "https://www.prizom.in",
-                    "logo": "https://www.prizom.in/logo.png",
+                    "name": SITE_CONFIG.name,
+                    "url": SITE_CONFIG.canonicalBase,
+                    "logo": `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.logo}`,
                     "sameAs": [
-                      "https://x.com/prizomHQ",
-                      "https://instagram.com/prizomHQ",
-                      "https://youtube.com/prizomhq"
+                      SITE_CONFIG.socials.twitter,
+                      SITE_CONFIG.socials.instagram,
+                      SITE_CONFIG.socials.youtube,
                     ]
                   },
                   {
                     "@context": "https://schema.org",
                     "@type": "WebSite",
-                    "name": "Prizom",
-                    "url": "https://www.prizom.in",
+                    "name": SITE_CONFIG.name,
+                    "url": SITE_CONFIG.canonicalBase,
                     "potentialAction": {
                       "@type": "SearchAction",
-                      "target": "https://www.prizom.in/discover?q={search_term_string}",
+                      "target": `${SITE_CONFIG.canonicalBase}/discover?q={search_term_string}`,
                       "query-input": "required name=search_term_string"
                     }
                   }

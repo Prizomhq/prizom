@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { SITE_CONFIG } from '@/lib/site-config';
 
 export async function GET(request: Request) {
   const urlObj = new URL(request.url);
@@ -13,7 +14,8 @@ export async function GET(request: Request) {
 Disallow: /
 `;
   } else {
-    const siteUrl = 'https://www.prizom.in';
+    // Use the canonical base from SITE_CONFIG — do NOT hardcode the domain here.
+    const siteUrl = SITE_CONFIG.canonicalBase;
     robots = `User-agent: *
 Allow: /
 # Directories

@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
+import { SITE_CONFIG } from '@/lib/site-config';
 
 export async function GET(request: Request) {
-  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
-    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '') 
-    : 'https://www.prizom.in';
-
-  if (siteUrl.includes('://prizom.in')) {
-    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
-  }
+  // Use the canonical base for sitemap URLs — always www.prizom.in in production.
+  // getSiteUrl() from site-config centralises all URL normalization.
+  const siteUrl = SITE_CONFIG.canonicalBase;
 
   const supabase = await createAdminClient();
 

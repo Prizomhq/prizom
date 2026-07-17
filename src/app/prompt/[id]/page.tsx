@@ -15,6 +15,7 @@ import { getPublicCMS } from '@/app/actions/adminActions';
 import RelatedPromptsFeed from '@/components/ui/RelatedPromptsFeed';
 import { Metadata } from 'next';
 import PromptViewTracker from '@/components/analytics/PromptViewTracker';
+import { SITE_CONFIG, getCanonicalUrl } from '@/lib/site-config';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -30,22 +31,24 @@ export async function generateMetadata(
 
   if (!prompt) {
     return {
-      title: 'Prompt Not Found | Prizom',
+      title: `Prompt Not Found | ${SITE_CONFIG.name}`,
     };
   }
 
   const profilesData = prompt.profiles;
   const creatorProfile = Array.isArray(profilesData) ? profilesData[0] : profilesData;
   const creatorName = creatorProfile?.username ? `@${creatorProfile.username}` : 'unknown';
-  const title = `"${prompt.title}" by ${creatorName} | Prizom`;
-  const description = prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`;
-  
-  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prizom.in';
-  if (siteUrl.includes('://prizom.in')) {
-    siteUrl = siteUrl.replace('://prizom.in', '://www.prizom.in');
-  }
-  const canonicalUrl = `${siteUrl}/prompt/${resolvedParams.id}`;
-  const ogImage = prompt.image_url || `${siteUrl}/og-image.png`;
+  const title = `"${prompt.title}" by ${creatorName} | ${SITE_CONFIG.name}`;
+  const description = prompt.description || `Discover "${prompt.title}" on ${SITE_CONFIG.name}, the collaborative AI prompt registry.`;
+
+  // Canonical always uses the production base — not the runtime SITE_URL.
+  // This prevents preview deployment URLs from leaking into canonical tags.
+  const canonicalUrl = getCanonicalUrl(`/prompt/${resolvedParams.id}`);
+
+  // OG image: use prompt's actual image if available, otherwise the dynamic OG route.
+  // NOTE: /opengraph-image is the Next.js dynamic route (opengraph-image.tsx).
+  //       Do NOT use /og-image.png — that static file does not exist.
+  const ogImage = prompt.image_url || `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`;
 
   return {
     title,
@@ -57,7 +60,7 @@ export async function generateMetadata(
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Prizom',
+      siteName: SITE_CONFIG.name,
       images: [
         {
           url: ogImage,

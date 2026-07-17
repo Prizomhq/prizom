@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate:env": "node scripts/validate-production.js",
+    "validate:prod": "node scripts/validate-production.js --url https://www.prizom.in",
+    "validate:preview": "node scripts/validate-production.js --url",
+    "pre-deploy": "npm run lint && npm run build && npm run validate:env"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.9",
