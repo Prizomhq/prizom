@@ -80,6 +80,10 @@ ALTER TABLE public.trending_prompts_cache ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can read trending cache" ON public.trending_prompts_cache;
 CREATE POLICY "Anyone can read trending cache" ON public.trending_prompts_cache FOR SELECT USING (true);
 
+-- Grant select privileges to client roles
+GRANT SELECT ON TABLE public.trending_prompts_cache TO anon, authenticated, service_role;
+
+
 -- 4. Create function to refresh the precomputed trending prompts cache
 CREATE OR REPLACE FUNCTION public.refresh_trending_prompts_cache()
 RETURNS VOID AS $$

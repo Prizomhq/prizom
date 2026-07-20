@@ -38,3 +38,7 @@ GRANT ALL ON TABLE public.share_card_generation_logs TO service_role;
 GRANT INSERT ON TABLE public.share_card_generation_logs TO anon;
 GRANT INSERT ON TABLE public.share_card_generation_logs TO authenticated;
 GRANT SELECT ON TABLE public.share_card_generation_logs TO authenticated;
+
+-- 9. Grant usage on sequence for prompt creation
+GRANT USAGE, SELECT ON SEQUENCE public.prompts_serial_id_seq TO anon, authenticated, service_role;
+
