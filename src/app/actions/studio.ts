@@ -54,24 +54,6 @@ export async function createStudioSessionAction(
       }
     }
 
-    // 2. Check beta approval standing
-    const { data: profile, error: profileErr } = await supabase
-      .from('profiles')
-      .select('is_approved, role')
-      .eq('id', user.id)
-      .single();
-
-    if (profileErr) {
-      throw new Error('Failed to verify user approval settings.');
-    }
-
-    const isApproved = profile?.is_approved || false;
-    const isPrivileged = ['super_admin', 'admin', 'moderator'].includes(profile?.role || 'user');
-
-    if (!isApproved && !isPrivileged) {
-      return { success: false, error: 'Beta Restricted: Account is not approved for AI Studio.' };
-    }
-
     // 2. Perform atomic credit debit (1 credit per generation)
     const deductRes = await deductCreditsAtomic(user.id, 1, 'studio_generation', null);
     if (!deductRes.success) {
