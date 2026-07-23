@@ -39,7 +39,23 @@ export async function createStudioSessionAction(
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, error: 'Unauthorized: Authentication required.' };
+    // Guest demo mode: Create a guest studio session draft without database persistence
+    return {
+      success: true,
+      session: {
+        id: `guest_${requestId}`,
+        user_id: '00000000-0000-0000-0000-000000000000',
+        status: 'pending',
+        cloudinary_url: cloudinaryUrl,
+        cloudinary_public_id: cloudinaryPublicId,
+        request_id: requestId,
+        active_version: 1,
+        credits_deducted: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 86400000).toISOString()
+      }
+    };
   }
 
   try {
@@ -231,13 +247,6 @@ export async function analyzeImageStudioAction(
   imageUrl: string,
   options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: 'Unauthorized: Authentication required.' };
-  }
-
   try {
     const { generatePromptFromImage } = await import('@/lib/ai-studio/client');
     const response = await generatePromptFromImage(imageUrl, options);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck } from 'lucide-react';
+import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck, Clock } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { analyzeImageStudioAction } from '@/app/actions/studio';
 
@@ -16,13 +16,24 @@ export function StudioLoading() {
   const state = useStudioState();
   const dispatch = useStudioDispatch();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [secondsRemaining, setSecondsRemaining] = useState(3);
 
+  // Step advancement timer
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveStepIndex((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 1200);
+    }, 600);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Estimated countdown timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsRemaining((prev) => (prev > 0.5 ? Math.round((prev - 0.5) * 10) / 10 : 0.5));
+    }, 500);
+
+    return () => clearInterval(timer);
   }, []);
 
   // Execute AG Router vision analysis upon mounting during analyzing step
@@ -55,6 +66,8 @@ export function StudioLoading() {
     }
   }, [state.uploadedImageUrl, state.aiResponse, dispatch]);
 
+  const progressPercent = Math.min(95, Math.round(((activeStepIndex + 1) / LOADING_STEPS.length) * 100));
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-12">
       <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-12 shadow-sm text-center">
@@ -66,12 +79,31 @@ export function StudioLoading() {
           </div>
         </div>
 
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold mb-4">
+          <Clock className="w-3.5 h-3.5" />
+          <span>Estimated Time: ~{secondsRemaining}s</span>
+        </div>
+
         <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mb-2">
           AG Router is Analyzing Your Image
         </h2>
-        <p className="text-zinc-500 text-sm font-medium mb-8">
+        <p className="text-zinc-500 text-sm font-medium mb-6">
           Generating structured prompts, camera settings, lighting parameters, and taxonomy tags.
         </p>
+
+        {/* Visual Progress Bar */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden mb-2">
+            <div
+              className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-[11px] font-bold text-zinc-400">
+            <span>{progressPercent}% Complete</span>
+            <span>Step {activeStepIndex + 1} of {LOADING_STEPS.length}</span>
+          </div>
+        </div>
 
         {/* Step-by-Step Progress Pipeline */}
         <div className="max-w-md mx-auto space-y-3 mb-10 text-left">
