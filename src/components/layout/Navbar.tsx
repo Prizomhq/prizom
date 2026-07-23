@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Menu, X, LogOut, User as UserIcon, Settings as SettingsIcon, Plus, Terminal, Home, Compass, Bell, User2, Search as SearchIcon, TrendingUp, HelpCircle, Info, Bookmark, FileText } from 'lucide-react';
+import { Menu, X, LogOut, User as UserIcon, Settings as SettingsIcon, Plus, Terminal, Home, Compass, Bell, User2, Search as SearchIcon, TrendingUp, HelpCircle, Info, Bookmark, FileText, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { usePathname, useRouter } from 'next/navigation';
 import Avatar from '@/components/ui/Avatar';
@@ -224,9 +224,13 @@ export default function Navbar() {
                 </span>
               </Link>
               
-              <div className="hidden lg:flex space-x-6">
+              <div className="hidden lg:flex space-x-6 items-center">
                 <Link href="/discover" className={`text-sm transition-colors hover:text-[var(--color-electric-blue)] ${pathname === '/discover' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Discover</Link>
                 <Link href="/trending" className={`text-sm transition-colors hover:text-[var(--color-neon-purple)] ${pathname === '/trending' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Trending</Link>
+                <Link href="/create/studio" className={`text-sm transition-colors flex items-center gap-1.5 hover:text-purple-600 ${pathname?.startsWith('/create/studio') ? 'text-purple-600 font-bold' : 'text-zinc-500 font-medium'}`}>
+                  <PrizomLogo size={14} />
+                  <span>AI Studio</span>
+                </Link>
               </div>
             </div>
 
@@ -236,7 +240,7 @@ export default function Navbar() {
             </div>
 
             {/* Right Column: User Actions & Auth status */}
-            <div className="hidden lg:flex items-center space-x-4 z-20 shrink-0">
+            <div className="hidden lg:flex items-center space-x-3 z-20 shrink-0">
               {user ? (
                 <>
                   {((profile && ['super_admin', 'admin', 'moderator'].includes(profile.role)) || 
@@ -250,7 +254,16 @@ export default function Navbar() {
                       <span className="hidden xl:inline">Admin Panel</span>
                     </Link>
                   )}
-                  
+
+                  <Link 
+                    href="/create/studio" 
+                    className="flex items-center space-x-1.5 px-3.5 py-2 lg:px-4 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition-all hover:scale-105 cursor-pointer border border-purple-500/30"
+                    aria-label="AI Studio"
+                  >
+                    <PrizomLogo size={15} />
+                    <span>AI Studio</span>
+                  </Link>
+
                   <Link 
                     href="/create" 
                     className="flex items-center space-x-1.5 px-3 py-2 lg:px-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-900 text-sm font-bold border border-zinc-200 transition-all hover:border-neon-purple shadow-sm"
@@ -375,6 +388,15 @@ export default function Navbar() {
               <div className="space-y-2">
                 {user ? (
                   <>
+                    <Link 
+                      href="/create/studio" 
+                      onClick={() => setIsOpen(false)} 
+                      className="px-4 py-3 rounded-xl text-base font-extrabold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-3 cursor-pointer"
+                    >
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      AI Studio
+                    </Link>
+
                     <Link 
                       href="/trending" 
                       onClick={() => setIsOpen(false)} 

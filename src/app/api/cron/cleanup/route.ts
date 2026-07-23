@@ -436,3 +436,43 @@ async function runPromptModerationCleanup(supabaseAdmin: any) {
     deletedArchivedPrompts
   };
 }
+
+/**
+ * Deletes expired AI Studio draft images from Cloudinary and marks sessions expired.
+ */
+async function runStudioDraftsCleanup() {
+  const supabaseAdmin = await createAdminClient();
+  const nowISO = new Date().toISOString();
+
+  // Find expired studio sessions that were not published
+  const { data: expiredSessions, error } = await supabaseAdmin
+    .from('ai_studio_sessions')
+    .select('id, cloudinary_url')
+    .lte('expires_at', nowISO)
+    .neq('status', 'published');
+
+  if (error || !expiredSessions || expiredSessions.length === 0) {
+    return { cleanedCount: 0 };
+  }
+
+  let cleanedCount = 0;
+  for (const session of expiredSessions) {
+    if (session.cloudinary_url) {
+      try {
+        await deleteCloudinaryAsset(session.cloudinary_url);
+      } catch (assetErr) {
+        console.error(`[STUDIO CLEANUP ERROR] Failed to delete Cloudinary draft ${session.id}:`, assetErr);
+      }
+    }
+
+    await supabaseAdmin
+      .from('ai_studio_sessions')
+      .update({ status: 'expired' })
+      .eq('id', session.id);
+
+    cleanedCount++;
+  }
+
+  return { cleanedCount };
+}
+

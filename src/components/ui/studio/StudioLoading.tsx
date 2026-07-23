@@ -1,0 +1,97 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck } from 'lucide-react';
+import { useStudioState } from './context';
+
+const LOADING_STEPS = [
+  { icon: Eye, label: 'Analyzing visual composition and subject...' },
+  { icon: Wand2, label: 'Crafting prompt structure and negative parameters...' },
+  { icon: Tag, label: 'Extracting metadata, category, and tags...' },
+  { icon: ShieldCheck, label: 'Executing safety checks and quality scoring...' }
+];
+
+export function StudioLoading() {
+  const state = useStudioState();
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStepIndex((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+    }, 1200);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto px-4 py-12">
+      <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-12 shadow-sm text-center">
+        {/* Animated Icon Glow */}
+        <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-full blur-xl opacity-40 animate-pulse" />
+          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg text-white">
+            <Sparkles className="w-10 h-10 animate-bounce" />
+          </div>
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mb-2">
+          AG Router is Analyzing Your Image
+        </h2>
+        <p className="text-zinc-500 text-sm font-medium mb-8">
+          Generating structured prompts, camera settings, lighting parameters, and taxonomy tags.
+        </p>
+
+        {/* Step-by-Step Progress Pipeline */}
+        <div className="max-w-md mx-auto space-y-3 mb-10 text-left">
+          {LOADING_STEPS.map((step, idx) => {
+            const Icon = step.icon;
+            const isDone = idx < activeStepIndex;
+            const isCurrent = idx === activeStepIndex;
+
+            return (
+              <div
+                key={idx}
+                className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 ${
+                  isCurrent
+                    ? 'bg-purple-50 border border-purple-200 text-purple-900 shadow-sm'
+                    : isDone
+                    ? 'text-zinc-700 opacity-80'
+                    : 'text-zinc-400 opacity-40'
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                    isCurrent
+                      ? 'bg-purple-600 text-white'
+                      : isDone
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-zinc-100 text-zinc-400'
+                  }`}
+                >
+                  {isCurrent ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Icon className="w-4 h-4" />
+                  )}
+                </div>
+                <span className="text-xs sm:text-sm font-bold">{step.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Stream Field Skeleton Reveal */}
+        {state.streamingField && (
+          <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 text-left animate-in fade-in duration-200">
+            <div className="text-[10px] font-black uppercase text-purple-600 tracking-wider mb-1">
+              Streaming Stream Token: {state.streamingField}
+            </div>
+            <div className="text-xs font-mono text-zinc-700 truncate">
+              {state.userEdits[state.streamingField as keyof typeof state.userEdits] || 'Populating...'}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
