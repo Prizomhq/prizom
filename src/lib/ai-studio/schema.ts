@@ -1,3 +1,47 @@
+import { StyleDNA } from './style-dna';
+import { CharacterIdentityAnchor } from './identity';
+import { AutonomousRefinementResult } from './autonomous-engine';
+
+export interface SpatialElement {
+  label: string;
+  bbox?: [number, number, number, number]; // [ymin, xmin, ymax, xmax] normalized 0-1000
+  layer: 'foreground' | 'midground' | 'background';
+  description: string;
+}
+
+export interface CameraOptics {
+  focalLength: string;
+  aperture: string;
+  shotType: string;
+  cameraAngle: string;
+  depthOfField: string;
+  lensCharacter: string;
+}
+
+export interface LightingAnalysis {
+  primaryType: string;
+  directionality: string;
+  colorTemperature: string;
+  atmosphericEffects: string[];
+  ambientLevel: string;
+}
+
+export interface TypographyExtraction {
+  hasText: boolean;
+  detectedText: string[];
+  fontStyle: string;
+  placement: string;
+}
+
+export interface CompilerTargetOutput {
+  target: 'flux' | 'midjourney' | 'sdxl' | 'comfyui';
+  modelName: string;
+  promptText: string;
+  negativePrompt?: string;
+  parameters?: Record<string, any>;
+  comfyuiNodeGraph?: Record<string, any>;
+}
+
 export interface AGRouterPromptResponse {
   requestId: string;
   prompt: {
@@ -10,6 +54,17 @@ export interface AGRouterPromptResponse {
     colorPalette: string[];
     mood: string;
   };
+  spatial?: {
+    elements: SpatialElement[];
+    layoutSummary: string;
+  };
+  optics?: CameraOptics;
+  lightingDetail?: LightingAnalysis;
+  typography?: TypographyExtraction;
+  styleDNA?: StyleDNA;
+  characterIdentity?: CharacterIdentityAnchor;
+  autonomousRefinement?: AutonomousRefinementResult;
+  compilerTargets?: Record<string, CompilerTargetOutput>;
   metadata: {
     title: string;
     description: string;

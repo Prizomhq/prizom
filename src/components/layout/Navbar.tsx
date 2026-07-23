@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Menu, X, LogOut, User as UserIcon, Settings as SettingsIcon, Plus, Terminal, Home, Compass, Bell, User2, Search as SearchIcon, TrendingUp, HelpCircle, Info, Bookmark, FileText, Sparkles } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { createClient } from '@/lib/supabase/client';
 import { usePathname, useRouter } from 'next/navigation';
 import Avatar from '@/components/ui/Avatar';
-import GlobalSearch from '@/components/ui/GlobalSearch';
-import NotificationDropdown from '@/components/ui/NotificationDropdown';
 import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
 import { getUnreadNotificationCount } from '@/app/actions/notifications';
+
+const GlobalSearch = dynamic(() => import('@/components/ui/GlobalSearch'), { ssr: false });
+const NotificationDropdown = dynamic(() => import('@/components/ui/NotificationDropdown'), { ssr: false });
 
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -113,7 +115,7 @@ export default function Navbar() {
     };
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         (async () => {
@@ -130,7 +132,7 @@ export default function Navbar() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth, supabase]);
+  }, [pathname]);
 
   useEffect(() => {
     if (profile) {
@@ -197,7 +199,7 @@ export default function Navbar() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, supabase]);
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

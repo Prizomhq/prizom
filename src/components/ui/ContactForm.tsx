@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Mail, Send, CheckCircle, ArrowRight, Lightbulb } from 'lucide-react';
+import Image from 'next/image';
 import SocialIcon from '@/components/ui/SocialIcon';
 import { getPublicCMS, submitContactMessageAction } from '@/app/actions/adminActions';
 import Script from 'next/script';
@@ -273,10 +274,12 @@ export default function ContactForm({ developer: initialDeveloper }: { developer
               <div className="relative group/avatar w-28 h-28 mb-6 shrink-0">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[var(--color-electric-blue)] via-indigo-50 to-[var(--color-neon-purple)] animate-pulse opacity-60 blur-md group-hover/avatar:opacity-100 transition-opacity duration-300" />
                 <div className="relative w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] overflow-hidden shadow-md">
-                  <img 
+                  <Image 
                     src={developer?.avatar_url || '/developer_avatar.png'} 
                     alt={developer?.name || 'Developer Avatar'} 
-                    className="w-full h-full rounded-full object-cover bg-white"
+                    fill
+                    sizes="112px"
+                    className="rounded-full object-cover bg-white"
                   />
                 </div>
               </div>

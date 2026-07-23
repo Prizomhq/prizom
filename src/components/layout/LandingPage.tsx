@@ -17,6 +17,7 @@ import {
   Send
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import NextImage from 'next/image';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 import Avatar from '@/components/ui/Avatar';
 import PromptCard from '@/components/ui/PromptCard';
@@ -488,10 +489,12 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
                   className="relative w-full bg-zinc-100 rounded-t-3xl overflow-hidden"
                   style={{ aspectRatio: getAspectRatioStyle(tile.aspectRatio) }}
                 >
-                  <img
+                  <NextImage
                     src={tile.image}
                     alt={tile.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-left">

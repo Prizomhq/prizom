@@ -68,7 +68,7 @@ export default function ConsentGuard() {
 
     checkConsent();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       if (session?.user) {
         setUser(session.user);
         const localAccepted = localStorage.getItem('prizom-consent-accepted');

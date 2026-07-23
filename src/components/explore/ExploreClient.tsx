@@ -8,7 +8,9 @@ import {
   X, 
   Loader2, 
   Settings,
-  Grid
+  Grid,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import PromptCard from '@/components/ui/PromptCard';
 import MasonryGrid from '@/components/ui/MasonryGrid';
@@ -356,10 +358,33 @@ export default function ExploreClient({
       </div>
 
       {/* 2. Visual Category Cards */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative group/carousel">
         <div className="absolute left-4 top-4 bottom-4 w-8 bg-gradient-to-r from-[#fcfcfc] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-4 top-4 bottom-4 w-8 bg-gradient-to-l from-[#fcfcfc] to-transparent z-10 pointer-events-none" />
-        <div className="flex overflow-x-auto gap-4 py-4 scrollbar-hide snap-x snap-mandatory">
+        
+        <button
+          onClick={() => {
+            const el = document.getElementById('explore-category-carousel');
+            if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
+          }}
+          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-zinc-200 items-center justify-center text-zinc-700 hover:text-zinc-950 transition-all opacity-0 group-hover/carousel:opacity-100"
+          aria-label="Scroll Left"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        
+        <button
+          onClick={() => {
+            const el = document.getElementById('explore-category-carousel');
+            if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
+          }}
+          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-zinc-200 items-center justify-center text-zinc-700 hover:text-zinc-950 transition-all opacity-0 group-hover/carousel:opacity-100"
+          aria-label="Scroll Right"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        <div id="explore-category-carousel" className="flex overflow-x-auto gap-4 py-4 scrollbar-thin scrollbar-thumb-zinc-300 scrollbar-track-transparent snap-x snap-mandatory">
           {visibleCategories.map((cat) => {
             const isSelected = activeCategory === cat.name;
             const coverImg = getCategoryCoverImage(cat);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import NextImage from 'next/image';
 import { Download, Sparkles, CheckCircle2, AlertTriangle, ArrowLeft, Copy, Share2 } from 'lucide-react';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 
@@ -350,10 +351,12 @@ export default function ShareCardModal({ isOpen, onClose, promptId, promptTitle 
                 <span className="absolute top-4 left-4 bg-zinc-950/80 text-zinc-400 border border-zinc-800/50 rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-wider z-20">
                   Preview Card (4:5)
                 </span>
-                <img
+                <NextImage
                   src={imageUrl}
                   alt={promptTitle}
-                  className="w-full h-full object-contain select-none"
+                  fill
+                  unoptimized
+                  className="object-contain select-none"
                 />
               </div>
             </div>

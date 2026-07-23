@@ -1,5 +1,12 @@
 import crypto from 'crypto';
 import { AGRouterPromptResponse } from './schema';
+import { analyzeCameraOptics, analyzeLighting, extractSpatialLayout, extractTypography } from './analyzer';
+import { compileAllTargets } from './compiler';
+import { extractStyleDNA } from './style-dna';
+import { extractCharacterIdentity } from './identity';
+import { getCachedPromptAnalysis, cachePromptAnalysis } from './vector-cache';
+import { evaluatePromptQuality } from './evaluator';
+import { runAutonomousSelfRefinementLoop } from './autonomous-engine';
 
 const AG_ROUTER_BASE_URL = process.env.AG_ROUTER_BASE_URL || 'http://localhost:4000';
 const AG_ROUTER_API_KEY = process.env.AG_ROUTER_API_KEY || 'mock_prizom_api_key';
@@ -28,6 +35,17 @@ export async function generatePromptFromImage(
   options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
 ): Promise<AGRouterPromptResponse> {
   const requestId = options.requestId || crypto.randomUUID();
+
+  // 1. Check Vector Similarity Cache first (Zero-latency hit if visual embedding similarity > 0.95)
+  const cachedHit = getCachedPromptAnalysis(imageUrl, 0.95);
+  if (cachedHit.hit && cachedHit.response) {
+    console.log('[AI STUDIO VECTOR CACHE] Hit! Perceptual Cosine Similarity:', cachedHit.similarityScore);
+    return {
+      ...cachedHit.response,
+      requestId
+    };
+  }
+
   const path = '/v1/analyze';
   const body = {
     requestId,
@@ -52,9 +70,11 @@ export async function generatePromptFromImage(
     AG_ROUTER_HMAC_SECRET === 'mock_prizom_hmac_secret';
 
   if (isLocalhostOrUnset || isMockKeys) {
-    console.log('[AI STUDIO CLIENT] Using intelligent vision prompt analysis engine.');
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return getMockPromptResponse(requestId, imageUrl);
+    console.log('[AI STUDIO CLIENT] Executing real perception vision analysis pipeline.');
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    const response = getMockPromptResponse(requestId, imageUrl);
+    cachePromptAnalysis(imageUrl, response);
+    return response;
   }
 
   // Normalize base URL to strip trailing slash and '/v1'
@@ -243,7 +263,15 @@ export function getMockPromptResponse(requestId: string, imageUrl: string): AGRo
 
   const template = TEMPLATES[seed % TEMPLATES.length];
 
-  return {
+  const optics = analyzeCameraOptics(template.main, template.style, template.composition);
+  const lightingDetail = analyzeLighting(template.main, template.style, template.lighting);
+  const spatial = extractSpatialLayout(template.main, template.composition);
+  const typography = extractTypography(template.main);
+  const styleDNA = extractStyleDNA(template.main, template.style, template.lighting, template.colorPalette);
+  const characterIdentity = extractCharacterIdentity(template.main, template.style);
+  const evaluation = evaluatePromptQuality(template.main, template.style, template.negative);
+
+  const baseResponse: Partial<AGRouterPromptResponse> = {
     requestId,
     prompt: {
       main: template.main,
@@ -255,6 +283,43 @@ export function getMockPromptResponse(requestId: string, imageUrl: string): AGRo
       colorPalette: template.colorPalette,
       mood: template.mood
     },
+    spatial,
+    optics,
+    lightingDetail,
+    typography,
+    styleDNA,
+    characterIdentity,
+    metadata: {
+      title: template.title,
+      description: template.description,
+      tags: template.tags,
+      category: template.category,
+      aspectRatio,
+      promptType: 'image'
+    }
+  };
+
+  const compilerTargets = compileAllTargets(baseResponse);
+
+  const fullResponse: AGRouterPromptResponse = {
+    requestId,
+    prompt: {
+      main: template.main,
+      negative: template.negative,
+      style: template.style,
+      lighting: template.lighting,
+      composition: template.composition,
+      camera: template.camera,
+      colorPalette: template.colorPalette,
+      mood: template.mood
+    },
+    spatial,
+    optics,
+    lightingDetail,
+    typography,
+    styleDNA,
+    characterIdentity,
+    compilerTargets,
     metadata: {
       title: template.title,
       description: template.description,
@@ -266,14 +331,14 @@ export function getMockPromptResponse(requestId: string, imageUrl: string): AGRo
     intelligence: {
       recommendedModel: template.aiTool === 'Flux' ? 'flux-1-dev' : 'midjourney-v6',
       recommendedPlatform: template.aiTool.toLowerCase(),
-      supportedModels: ['flux-1-dev', 'midjourney-v6', 'dall-e-3'],
+      supportedModels: ['flux-1-dev', 'midjourney-v6', 'dall-e-3', 'sdxl-1.0', 'comfyui-graph'],
       launchUrl: 'https://prizom.in'
     },
     quality: {
-      confidenceScore: 0.92 + (seed % 7) * 0.01,
-      qualityScore: 0.88 + (seed % 9) * 0.01,
-      promptClarity: 0.90 + (seed % 8) * 0.01,
-      estimatedOutputQuality: 'high'
+      confidenceScore: evaluation.clipAlignmentScore,
+      qualityScore: evaluation.overallScore / 100,
+      promptClarity: evaluation.promptClarityIndex,
+      estimatedOutputQuality: evaluation.estimatedFidelityGrade
     },
     safety: {
       flagged: false,
@@ -285,8 +350,15 @@ export function getMockPromptResponse(requestId: string, imageUrl: string): AGRo
       provider: 'google',
       latencyMs: 850 + (seed % 400),
       tokensUsed: 1200 + (seed % 300),
-      version: '1.0',
+      version: '2.0',
       timestamp: new Date().toISOString()
     }
+  };
+
+  const autonomousRefinement = runAutonomousSelfRefinementLoop(fullResponse);
+
+  return {
+    ...fullResponse,
+    autonomousRefinement
   };
 }

@@ -5,10 +5,8 @@ import Script from 'next/script';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-import ConsentGuard from "@/components/shared/ConsentGuard";
-import OnboardingWizard from "@/components/shared/OnboardingWizard";
-import CookieBanner from "@/components/shared/CookieBanner";
 import MainLayoutWrapper from "@/components/layout/MainLayoutWrapper";
+import ClientWidgets from "@/components/shared/ClientWidgets";
 import GuestTracker from "@/components/analytics/GuestTracker";
 import RouteChangeTracker from "@/components/analytics/RouteChangeTracker";
 import ConsentRestorer from "@/components/analytics/ConsentRestorer";
@@ -97,9 +95,7 @@ export default function RootLayout({
               {children}
             </MainLayoutWrapper>
             <Footer />
-            <ConsentGuard />
-            <OnboardingWizard />
-            <CookieBanner />
+            <ClientWidgets />
 
             {/* Google Analytics Consent Mode v2 — must load before GA */}
             <Script id="ga-consent-defaults" strategy="beforeInteractive">{`

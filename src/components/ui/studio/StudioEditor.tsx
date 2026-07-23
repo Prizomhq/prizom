@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import Image from 'next/image';
 import { useStudioState, useStudioDispatch } from './context';
 import { StudioConfidenceBadge } from './StudioConfidenceBadge';
 import { StudioFieldCard } from './StudioFieldCard';
@@ -70,10 +71,13 @@ export function StudioEditor() {
             
             {state.uploadedImageUrl ? (
               <div className="relative rounded-2xl overflow-hidden border border-zinc-100 bg-zinc-950 aspect-square group shadow-inner">
-                <img
+                <Image
                   src={state.uploadedImageUrl}
                   alt="Studio Upload Draft"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  unoptimized
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
             ) : (

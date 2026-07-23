@@ -17,8 +17,10 @@ const REQUIRED_ENV_VARS = [
   'SUPABASE_SERVICE_ROLE_KEY',
   // Communications
   'RESEND_API_KEY',
-  // Security
+  // Security & Bot protection
   'CRON_SECRET',
+  'NEXT_PUBLIC_TURNSTILE_SITE_KEY',
+  'TURNSTILE_SECRET_KEY',
   // Site identity — must be set in Vercel Dashboard per-environment
   'NEXT_PUBLIC_SITE_URL',
   // Analytics — must be set in Vercel Dashboard; absence = silent GA failure

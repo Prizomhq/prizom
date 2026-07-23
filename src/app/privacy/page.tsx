@@ -78,18 +78,21 @@ export default function PrivacyPolicy() {
         {/* 2-Column layout for desktop, collapsible on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-7xl mx-auto">
           
-          {/* Mobile navigation ribbon */}
-          <div className="lg:hidden sticky top-[64px] bg-white/95 border-b border-zinc-200/80 backdrop-blur-md z-20 py-3.5 -mx-6 sm:-mx-8 px-6 sm:px-8 overflow-x-auto max-w-[100vw] flex items-center space-x-3.5 no-scrollbar shadow-sm">
-            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest shrink-0">Sections:</span>
-            {sections.map((sec) => (
-              <button
-                key={sec.id}
-                onClick={() => handleScroll(sec.id)}
-                className="text-[10px] font-bold text-zinc-600 hover:text-indigo-600 bg-zinc-50 hover:bg-indigo-50/50 border border-zinc-200/50 px-3.5 py-1.5 rounded-full shrink-0 transition-all"
-              >
-                {sec.label.split('. ')[1]}
-              </button>
-            ))}
+          {/* Mobile navigation ribbon with right edge scroll affordance */}
+          <div className="relative lg:hidden">
+            <div className="sticky top-[64px] bg-white/95 border-b border-zinc-200/80 backdrop-blur-md z-20 py-3.5 -mx-6 sm:-mx-8 px-6 sm:px-8 overflow-x-auto max-w-[100vw] flex items-center space-x-3.5 scrollbar-thin scrollbar-thumb-zinc-300 shadow-sm">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest shrink-0">Sections:</span>
+              {sections.map((sec) => (
+                <button
+                  key={sec.id}
+                  onClick={() => handleScroll(sec.id)}
+                  className="text-[10px] font-bold text-zinc-600 hover:text-indigo-600 bg-zinc-50 hover:bg-indigo-50/50 border border-zinc-200/50 px-3.5 py-1.5 rounded-full shrink-0 transition-all"
+                >
+                  {sec.label.split('. ')[1]}
+                </button>
+              ))}
+            </div>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-30 lg:hidden" />
           </div>
 
           {/* Left Column: Table of Contents */}
