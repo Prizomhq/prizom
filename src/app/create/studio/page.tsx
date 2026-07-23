@@ -14,13 +14,7 @@ function StudioContent() {
   }
 
   if (state.step === 'analyzing') {
-    return (
-      <>
-        <StudioLoading />
-        {/* Render editor beneath when initial response stream arrives */}
-        {state.aiResponse && <StudioEditor />}
-      </>
-    );
+    return <StudioLoading />;
   }
 
   return <StudioEditor />;

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck } from 'lucide-react';
-import { useStudioState } from './context';
+import { useStudioState, useStudioDispatch } from './context';
+import { analyzeImageStudioAction } from '@/app/actions/studio';
 
 const LOADING_STEPS = [
   { icon: Eye, label: 'Analyzing visual composition and subject...' },
@@ -13,6 +14,7 @@ const LOADING_STEPS = [
 
 export function StudioLoading() {
   const state = useStudioState();
+  const dispatch = useStudioDispatch();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   useEffect(() => {
@@ -22,6 +24,36 @@ export function StudioLoading() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Execute AG Router vision analysis upon mounting during analyzing step
+  useEffect(() => {
+    if (state.uploadedImageUrl && !state.aiResponse) {
+      let isMounted = true;
+
+      const runAnalysis = async () => {
+        try {
+          const res = await analyzeImageStudioAction(state.uploadedImageUrl!);
+          if (!res.success || !res.response) {
+            throw new Error(res.error || 'Analysis failed.');
+          }
+          if (isMounted) {
+            dispatch({ type: 'SET_RESPONSE', response: res.response });
+          }
+        } catch (err: any) {
+          console.error('[STUDIO LOADING ANALYSIS ERROR]', err);
+          if (isMounted) {
+            dispatch({ type: 'SET_ERROR', message: err.message || 'Analysis failed.' });
+          }
+        }
+      };
+
+      runAnalysis();
+
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [state.uploadedImageUrl, state.aiResponse, dispatch]);
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-12">
