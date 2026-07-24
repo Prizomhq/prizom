@@ -48,7 +48,7 @@ export async function generatePromptFromImage(
     };
   }
 
-  const path = '/v1/analyze';
+  const path = '/v1/vision/analyze';
   const body = {
     requestId,
     operation: 'image_to_prompt',
@@ -61,17 +61,14 @@ export async function generatePromptFromImage(
   const timestamp = Date.now();
   const nonce = crypto.randomBytes(16).toString('hex');
 
-  // Verify if using mocked environment or unconfigured/localhost router URL
-  const isLocalhostOrUnset = 
-    !process.env.AG_ROUTER_BASE_URL || 
-    process.env.AG_ROUTER_BASE_URL.includes('localhost') || 
-    process.env.AG_ROUTER_BASE_URL.includes('127.0.0.1');
+  // Verify if using unconfigured router URL or mock keys
+  const isUnconfigured = !process.env.AG_ROUTER_BASE_URL;
   
   const isMockKeys = 
     AG_ROUTER_API_KEY === 'mock_prizom_api_key' || 
     AG_ROUTER_HMAC_SECRET === 'mock_prizom_hmac_secret';
 
-  if (isLocalhostOrUnset || isMockKeys) {
+  if (isUnconfigured || isMockKeys) {
     console.log('[AI STUDIO CLIENT] Executing 14-Stage Vision Reasoning Perception Pipeline.');
     const response = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
     cachePromptAnalysis(imageUrl, response);
@@ -93,12 +90,28 @@ export async function generatePromptFromImage(
   };
 
   try {
-    const response = await fetch(requestUrl, {
+    let response = await fetch(requestUrl, {
       method: 'POST',
       headers,
       body: bodyString,
       signal: AbortSignal.timeout(6000)
     });
+
+    // Retry with reverse-engineer route if primary route 404s
+    if (response.status === 404) {
+      const fallbackPath = '/v1/vision/reverse-engineer';
+      const fallbackUrl = `${normalizedBase}${fallbackPath}`;
+      const fallbackSig = generateHMACSignature(fallbackPath, bodyString, timestamp, nonce, AG_ROUTER_HMAC_SECRET);
+      response = await fetch(fallbackUrl, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'X-Prizom-Signature': fallbackSig
+        },
+        body: bodyString,
+        signal: AbortSignal.timeout(6000)
+      });
+    }
 
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
