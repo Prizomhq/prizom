@@ -259,15 +259,6 @@ export default function Navbar() {
                   )}
 
                   <Link 
-                    href="/studio" 
-                    className="flex items-center space-x-1.5 px-3.5 py-2 lg:px-4 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition-all hover:scale-105 cursor-pointer border border-purple-500/30"
-                    aria-label="AI Studio"
-                  >
-                    <PrizomLogo size={15} />
-                    <span>AI Studio</span>
-                  </Link>
-
-                  <Link 
                     href="/create" 
                     className="flex items-center space-x-1.5 px-3 py-2 lg:px-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-900 text-sm font-bold border border-zinc-200 transition-all hover:border-neon-purple shadow-sm"
                     aria-label="Create Prompt"
@@ -392,7 +383,7 @@ export default function Navbar() {
                 {user ? (
                   <>
                     <Link 
-                      href="/create/studio" 
+                      href="/studio" 
                       onClick={() => setIsOpen(false)} 
                       className="px-4 py-3 rounded-xl text-base font-extrabold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-3 cursor-pointer"
                     >

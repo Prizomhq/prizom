@@ -5,11 +5,17 @@ import { createStudioSession, getStudioSession } from '@/lib/ai-studio/session';
 import { deductCreditsAtomic, refundCreditsAtomic, getUserCreditBalance } from '@/lib/ai-studio/credits';
 import { assertNotSuspendedOrBanned } from './moderation';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 
 /**
  * Server action to check user credit balance.
  */
 export async function getCreditBalanceAction() {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -35,27 +41,16 @@ export async function createStudioSessionAction(
   requestId: string,
   turnstileToken?: string
 ) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    // Guest demo mode: Create a guest studio session draft without database persistence
-    return {
-      success: true,
-      session: {
-        id: `guest_${requestId}`,
-        user_id: '00000000-0000-0000-0000-000000000000',
-        status: 'pending',
-        cloudinary_url: cloudinaryUrl,
-        cloudinary_public_id: cloudinaryPublicId,
-        request_id: requestId,
-        active_version: 1,
-        credits_deducted: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 86400000).toISOString()
-      }
-    };
+    return { success: false, error: 'Unauthorized: Authentication required for AI Studio.' };
   }
 
   try {
@@ -92,7 +87,7 @@ export async function createStudioSessionAction(
       return { success: true, session };
     } catch (sessionErr: any) {
       // Refund the debited credit if session initialization fails
-      await refundCreditsAtomic(user.id, 1, 'refund_session_init_failure', null);
+      await refundCreditsAtomic(user.id, cost, 'refund_session_init_failure', null);
       throw sessionErr;
     }
   } catch (err: any) {
@@ -105,6 +100,11 @@ export async function createStudioSessionAction(
  * Server action to fetch studio session detail and version chain.
  */
 export async function getStudioSessionAction(sessionId: string) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -137,6 +137,11 @@ export async function refundStudioCreditsAction(
   amount: number,
   reason: string
 ) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -184,6 +189,11 @@ export async function recordFeedbackDeltaAction(
   userModifiedPrompt: string,
   modifiedFields: string[] = ['prompt_text']
 ) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -222,6 +232,11 @@ export async function logStudioTelemetryAction(input: {
   qualityScore?: number | null;
   status: 'success' | 'failed_safety' | 'failed_timeout' | 'failed_api';
 }) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -248,6 +263,11 @@ export async function analyzeImageStudioAction(
   imageUrl: string,
   options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
 ) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
   try {
     const { generatePromptFromImage } = await import('@/lib/ai-studio/client');
     const response = await generatePromptFromImage(imageUrl, options);
@@ -257,4 +277,3 @@ export async function analyzeImageStudioAction(
     return { success: false, error: err.message || 'Image analysis failed.' };
   }
 }
-

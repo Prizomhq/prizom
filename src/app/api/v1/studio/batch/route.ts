@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkEnterpriseRateLimit } from '@/lib/ai-studio/api-platform';
+import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 
 export async function POST(req: NextRequest) {
   try {
+    const access = await verifyAiStudioAccessServer();
+    if (!access.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Prizom AI Studio API is currently in private beta testing.' },
+        { status: 403 }
+      );
+    }
+
     const authHeader = req.headers.get('authorization');
     const apiKey = authHeader?.replace('Bearer ', '');
     const rateLimit = checkEnterpriseRateLimit(apiKey);
@@ -34,8 +43,6 @@ export async function POST(req: NextRequest) {
     // Acknowledge the batch job immediately
     const jobId = 'batch_' + Math.random().toString(36).substring(2, 15);
 
-    // In a real implementation, this would push to a Redis/RabbitMQ queue
-    // For now, we simulate the async kickoff
     console.log(`[Batch Job ${jobId}] Queued ${images.length} images for processing. Webhook: ${webhookUrl}`);
 
     return NextResponse.json({

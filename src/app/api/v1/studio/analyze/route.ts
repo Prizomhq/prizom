@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generatePromptFromImage } from '@/lib/ai-studio/client';
 import { checkEnterpriseRateLimit, packageEnterpriseApiBundle } from '@/lib/ai-studio/api-platform';
+import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 
 /**
  * Prizom AI Studio Public REST API Endpoint (Phase 9)
@@ -9,6 +10,14 @@ import { checkEnterpriseRateLimit, packageEnterpriseApiBundle } from '@/lib/ai-s
  */
 export async function POST(req: Request) {
   try {
+    const access = await verifyAiStudioAccessServer();
+    if (!access.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Prizom AI Studio API is currently in private beta testing.' },
+        { status: 403 }
+      );
+    }
+
     const authHeader = req.headers.get('authorization') || '';
     const apiKey = authHeader.replace(/^Bearer\s+/i, '') || 'demo_guest_key';
 

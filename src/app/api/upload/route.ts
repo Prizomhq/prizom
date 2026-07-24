@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cloudinary } from '@/lib/cloudinary';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 
 const ENABLE_PAID_AI_MODERATION = false; // TODO: Enable AWS Rekognition AI moderation when scale justifies the cost
 
@@ -39,6 +40,17 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const folderType = formData.get('folder') as string || 'prompts';
+
+    // Feature gate check for AI Studio uploads
+    if (folderType.includes('studio')) {
+      const access = await verifyAiStudioAccessServer();
+      if (!access.allowed) {
+        return NextResponse.json(
+          { error: 'AI Studio uploads are restricted during private beta.' },
+          { status: 403 }
+        );
+      }
+    }
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
