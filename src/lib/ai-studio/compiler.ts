@@ -224,9 +224,99 @@ export function compileToVideo(data: Partial<AGRouterPromptResponse>): CompilerT
   };
 }
 
+export function compileToImagen3(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
+  const main = data.prompt?.main || '';
+  const style = data.prompt?.style || '';
+  const lighting = data.prompt?.lighting || '';
+  const optics = data.optics?.focalLength ? `Shot on ${data.optics.focalLength} lens at ${data.optics.aperture}` : '';
+
+  const promptText = `A crisp, highly realistic photograph of ${main}. Style: ${style}. Lighting: ${lighting}. Optics: ${optics}. Natural colors, realistic photorealistic texture representation, true-to-life details.`;
+
+  return {
+    target: 'flux',
+    modelName: 'Google Imagen 3',
+    promptText,
+    parameters: {
+      aspectRatio: data.metadata?.aspectRatio || '1:1',
+      mode: 'photorealism'
+    }
+  };
+}
+
+export function compileToIdeogram(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
+  const main = data.prompt?.main || '';
+  const typography = data.typography?.hasText ? `featuring bold text typography stating "${data.typography.detectedText.join(' ')}"` : '';
+
+  const promptText = `Graphic design art illustration of ${main} ${typography}. Dynamic typography alignment, crisp lettering, modern visual branding composition.`;
+
+  return {
+    target: 'flux',
+    modelName: 'Ideogram v2',
+    promptText,
+    parameters: {
+      renderingStyle: 'Design',
+      aspectRatio: data.metadata?.aspectRatio || '1:1'
+    }
+  };
+}
+
+export function compileToRecraft(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
+  const main = data.prompt?.main || '';
+  const style = data.prompt?.style || '';
+
+  const promptText = `Clean vector digital illustration and 3D icon visualization, ${main}. Aesthetic style: ${style}. Clean geometry, vibrant color palette, vector paths.`;
+
+  return {
+    target: 'flux',
+    modelName: 'Recraft V3',
+    promptText,
+    parameters: {
+      style: 'vector_illustration',
+      substyle: 'digital_art'
+    }
+  };
+}
+
+export function compileToLeonardo(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
+  const main = data.prompt?.main || '';
+  const style = data.prompt?.style || '';
+  const camera = data.prompt?.camera || '';
+
+  const promptText = `(${main}:1.2), (${style}:1.1), ${camera}, masterpiece, trending on artstation, cinematic lighting, 8k resolution`;
+
+  return {
+    target: 'sdxl',
+    modelName: 'Leonardo Phoenix',
+    promptText,
+    negativePrompt: data.prompt?.negative || 'blurry, low quality, deformed, watermark',
+    parameters: {
+      presetStyle: 'Cinematic Kino',
+      promptMagic: 3.0
+    }
+  };
+}
+
+export function compileToFirefly(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
+  const main = data.prompt?.main || '';
+  const lighting = data.prompt?.lighting || '';
+  const optics = data.optics?.focalLength ? `${data.optics.shotType}, ${data.optics.focalLength}` : '';
+
+  const promptText = `Commercial photograph of ${main}. Lighting: ${lighting}. Camera lens: ${optics}. Professional studio quality, pristine depth of field.`;
+
+  return {
+    target: 'flux',
+    modelName: 'Adobe Firefly 3',
+    promptText,
+    parameters: {
+      contentType: 'photo',
+      lightingStyle: 'dramatic'
+    }
+  };
+}
+
 /**
  * Main AST Compiler entry point.
- * Compiles intermediate representation into all target architectures.
+ * Compiles intermediate representation into all 10 target architectures.
  */
 export function compileAllTargets(data: Partial<AGRouterPromptResponse>): Record<string, CompilerTargetOutput> {
   return {
@@ -235,6 +325,11 @@ export function compileAllTargets(data: Partial<AGRouterPromptResponse>): Record
     sdxl: compileToSDXL(data),
     comfyui: compileToComfyUI(data),
     dalle3: compileToDalle3(data),
+    imagen3: compileToImagen3(data),
+    ideogram: compileToIdeogram(data),
+    recraft: compileToRecraft(data),
+    leonardo: compileToLeonardo(data),
+    firefly: compileToFirefly(data),
     video: compileToVideo(data)
   };
 }

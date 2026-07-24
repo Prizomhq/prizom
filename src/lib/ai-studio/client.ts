@@ -26,9 +26,11 @@ export function generateHMACSignature(
     .digest('hex');
 }
 
+import { execute14StageVisionPipeline } from './vision-pipeline';
+
 /**
- * Sends a signed analysis request to the AG Router.
- * Falls back to mock responses in development when keys are not configured.
+ * Sends an ingestion request to the AG Router or executes the 14-Stage Multi-Modal Vision Reasoning Pipeline.
+ * Performs zero-latency visual cosine similarity cache check before invocation.
  */
 export async function generatePromptFromImage(
   imageUrl: string,
@@ -70,9 +72,8 @@ export async function generatePromptFromImage(
     AG_ROUTER_HMAC_SECRET === 'mock_prizom_hmac_secret';
 
   if (isLocalhostOrUnset || isMockKeys) {
-    console.log('[AI STUDIO CLIENT] Executing real perception vision analysis pipeline.');
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    const response = getMockPromptResponse(requestId, imageUrl);
+    console.log('[AI STUDIO CLIENT] Executing 14-Stage Vision Reasoning Perception Pipeline.');
+    const response = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
     cachePromptAnalysis(imageUrl, response);
     return response;
   }
@@ -104,10 +105,14 @@ export async function generatePromptFromImage(
       throw new Error(errBody.error || `AG Router API responded with status ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    cachePromptAnalysis(imageUrl, data);
+    return data;
   } catch (error: any) {
-    console.warn('[AI STUDIO CLIENT WARNING] Ingestion request failed, engaging fallback engine:', error.message);
-    return getMockPromptResponse(requestId, imageUrl);
+    console.warn('[AI STUDIO CLIENT WARNING] Ingestion request failed, engaging 14-Stage Vision Engine:', error.message);
+    const fallbackResponse = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
+    cachePromptAnalysis(imageUrl, fallbackResponse);
+    return fallbackResponse;
   }
 }
 

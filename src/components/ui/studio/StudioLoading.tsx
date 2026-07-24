@@ -6,10 +6,10 @@ import { useStudioState, useStudioDispatch } from './context';
 import { analyzeImageStudioAction } from '@/app/actions/studio';
 
 const LOADING_STEPS = [
-  { icon: Eye, label: 'Analyzing visual composition and subject...' },
-  { icon: Wand2, label: 'Crafting prompt structure and negative parameters...' },
-  { icon: Tag, label: 'Extracting metadata, category, and tags...' },
-  { icon: ShieldCheck, label: 'Executing safety checks and quality scoring...' }
+  { icon: Eye, label: 'Stage 1–4: Scene Graph, Entity Bounding & Spatial Layer Extraction...' },
+  { icon: Wand2, label: 'Stage 5–7: Volumetric Lighting Vectors & Camera Optics Simulation...' },
+  { icon: Tag, label: 'Stage 8–10: Style Lineage & Multi-Model AST Compiler Generation...' },
+  { icon: ShieldCheck, label: 'Stage 11–14: Self-Reflection, Perceptual Similarity & Scorecard Validation...' }
 ];
 
 export function StudioLoading() {

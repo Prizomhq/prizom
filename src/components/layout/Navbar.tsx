@@ -229,9 +229,10 @@ export default function Navbar() {
               <div className="hidden lg:flex space-x-6 items-center">
                 <Link href="/discover" className={`text-sm transition-colors hover:text-[var(--color-electric-blue)] ${pathname === '/discover' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Discover</Link>
                 <Link href="/trending" className={`text-sm transition-colors hover:text-[var(--color-neon-purple)] ${pathname === '/trending' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Trending</Link>
-                <Link href="/create/studio" className={`text-sm transition-colors flex items-center gap-1.5 hover:text-purple-600 ${pathname?.startsWith('/create/studio') ? 'text-purple-600 font-bold' : 'text-zinc-500 font-medium'}`}>
+                <Link href="/studio" className={`text-sm transition-colors flex items-center gap-1.5 hover:text-purple-600 ${pathname?.startsWith('/studio') || pathname?.startsWith('/create/studio') ? 'text-purple-600 font-bold' : 'text-zinc-500 font-medium'}`}>
                   <PrizomLogo size={14} />
                   <span>AI Studio</span>
+                  <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[9px] font-black uppercase">V2</span>
                 </Link>
               </div>
             </div>
@@ -258,7 +259,7 @@ export default function Navbar() {
                   )}
 
                   <Link 
-                    href="/create/studio" 
+                    href="/studio" 
                     className="flex items-center space-x-1.5 px-3.5 py-2 lg:px-4 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition-all hover:scale-105 cursor-pointer border border-purple-500/30"
                     aria-label="AI Studio"
                   >

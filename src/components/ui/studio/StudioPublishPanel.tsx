@@ -177,7 +177,7 @@ export function StudioPublishPanel() {
             </div>
 
             {/* Target Model Tabs */}
-            <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-full border border-zinc-800 overflow-x-auto">
+            <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
               {(['midjourney', 'flux', 'sdxl', 'comfyui', 'dalle3', 'video'] as const).map((t) => (
                 <button
                   key={t}

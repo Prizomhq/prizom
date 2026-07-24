@@ -37,8 +37,8 @@ export async function createPromptAction(promptData: {
   if (!promptData.title || promptData.title.trim().length < 3 || promptData.title.trim().length > 100) {
     return { success: false, error: 'Title must be between 3 and 100 characters.' };
   }
-  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 5000) {
-    return { success: false, error: 'Prompt text must be between 10 and 5000 characters.' };
+  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 10000) {
+    return { success: false, error: 'Prompt text must be between 10 and 10000 characters.' };
   }
   if (promptData.tags && promptData.tags.some(t => t.length > 25)) {
     return { success: false, error: 'Tags cannot exceed 25 characters each.' };
@@ -215,8 +215,8 @@ export async function updatePromptAction(
   if (!promptData.title || promptData.title.trim().length < 3 || promptData.title.trim().length > 100) {
     return { success: false, error: 'Title must be between 3 and 100 characters.' };
   }
-  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 5000) {
-    return { success: false, error: 'Prompt text must be between 10 and 5000 characters.' };
+  if (!promptData.prompt_text || promptData.prompt_text.trim().length < 10 || promptData.prompt_text.trim().length > 10000) {
+    return { success: false, error: 'Prompt text must be between 10 and 10000 characters.' };
   }
   if (promptData.tags && promptData.tags.some(t => t.length > 25)) {
     return { success: false, error: 'Tags cannot exceed 25 characters each.' };

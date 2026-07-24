@@ -70,10 +70,11 @@ export async function createStudioSessionAction(
       }
     }
 
-    // 2. Perform atomic credit debit (1 credit per generation)
-    const deductRes = await deductCreditsAtomic(user.id, 1, 'studio_generation', null);
+    // 2. Perform atomic credit debit based on tier (Premium = 3 credits, Standard = 1 credit)
+    const cost = process.env.NEXT_PUBLIC_DEFAULT_TIER === 'premium' ? 3 : 1;
+    const deductRes = await deductCreditsAtomic(user.id, cost, 'studio_generation', null);
     if (!deductRes.success) {
-      return { success: false, error: deductRes.error || 'Insufficient credits.' };
+      return { success: false, error: deductRes.error || `Insufficient credits. This generation requires ${cost} credits.` };
     }
 
     // 3. Create session draft entry
