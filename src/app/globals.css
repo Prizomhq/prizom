@@ -36,7 +36,21 @@
     66% { transform: translate(-30px, 40px) scale(0.9); }
     100% { transform: translate(0px, 0px) scale(1); }
   }
+
+  --animate-scroll-up: scrollUp 35s linear infinite;
+  --animate-scroll-down: scrollDown 45s linear infinite;
+
+  @keyframes scrollUp {
+    0% { transform: translateY(0%); }
+    100% { transform: translateY(-50%); }
+  }
+
+  @keyframes scrollDown {
+    0% { transform: translateY(-50%); }
+    100% { transform: translateY(0%); }
+  }
 }
+
 
 :root {
   --background: #fcfcfc;

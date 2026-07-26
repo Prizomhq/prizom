@@ -5,36 +5,30 @@ import Link from 'next/link';
 import { 
   Users, 
   FileText, 
-  GitFork, 
   Heart, 
   ShieldAlert, 
   TrendingUp, 
   Clock, 
   ArrowUpRight, 
-  Bookmark, 
   Loader2,
   LayoutDashboard,
   ShieldCheck,
-  AlertCircle,
-  EyeOff,
-  UserCheck,
   FileWarning,
   Activity,
   ShieldX,
   Database,
   Mail,
-  History,
-  MousePointerClick,
-  Copy,
-  ExternalLink,
-  Search
+  MousePointerClick
 } from 'lucide-react';
 import { getAdminAnalytics } from '@/app/actions/adminActions';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
+import AdminStatCard from '@/components/admin/ui/AdminStatCard';
+import AdminStatusBadge from '@/components/admin/ui/AdminStatusBadge';
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'health' | 'moderation' | 'funnel' | 'security'>('health');
+  const [activeTab, setActiveTab] = useState<'overview' | 'moderation' | 'funnel' | 'security'>('overview');
 
   useEffect(() => {
     getAdminAnalytics().then(res => {
@@ -47,237 +41,254 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center text-zinc-650">
+      <div className="min-h-[60vh] flex items-center justify-center text-zinc-500">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-          <span className="text-xs font-black uppercase tracking-widest">Compiling Operations Telemetry...</span>
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Loading Telemetry Data...</span>
         </div>
       </div>
     );
   }
 
-  // Calculate quick summary metrics
+  // Summary Metrics
   const totalPendingModeration = (data?.reportedPromptsCount || 0) + (data?.reportedUsersCount || 0) + (data?.appeals?.pendingAccount || 0) + (data?.appeals?.pendingPrompt || 0);
   const resolutionRate = (totalPendingModeration + (data?.resolvedReportsCount || 0)) > 0 
     ? Math.round((data?.resolvedReportsCount / (totalPendingModeration + (data?.resolvedReportsCount || 0))) * 100) 
     : 100;
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-200">
       
-      {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 flex items-center gap-3">
-            <LayoutDashboard className="w-8 h-8 text-indigo-500" />
-            Platform Operations Dashboard
-          </h1>
-          <p className="text-zinc-700 text-xs font-bold uppercase tracking-widest mt-1">Live telemetry, system diagnostics, and conversion funnel monitoring</p>
-        </div>
-        <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-2xl">
-          <span className={`w-2.5 h-2.5 rounded-full ${data?.cronWarningAlert ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`} />
-          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-650">
-            {data?.cronWarningAlert ? 'Telemetry Warnings' : 'All Systems Nominal'}
-          </span>
-        </div>
-      </div>
+      {/* 1. Page Header */}
+      <AdminPageHeader
+        title="Platform Operations Control Center"
+        description="Real-time telemetry diagnostics, platform metrics, moderation queues, and conversion funnel monitoring."
+        icon={LayoutDashboard}
+        badge={{
+          text: data?.cronWarningAlert ? 'Warning Alert' : 'System Nominal',
+          variant: data?.cronWarningAlert ? 'rose' : 'emerald'
+        }}
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Dashboard' }]}
+      >
+        <Link
+          href="/admin/reports"
+          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-2"
+        >
+          <ShieldAlert className="w-4 h-4" />
+          Moderation Queue ({totalPendingModeration})
+        </Link>
+      </AdminPageHeader>
 
       {/* Warning Banners */}
       {data?.cronWarningAlert && (
-        <div className="bg-red-50 border border-red-200 rounded-3xl p-5 flex items-center gap-4 text-red-200">
-          <ShieldAlert className="w-6 h-6 text-red-500 shrink-0" />
+        <div className="bg-rose-50 border border-rose-200/80 rounded-2xl p-4 flex items-center gap-3 text-rose-800 text-xs font-medium">
+          <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
           <div className="flex-1">
-            <h4 className="font-extrabold text-xs uppercase tracking-wider">Cron Sweeper Health Alert</h4>
-            <p className="text-[11px] font-semibold text-zinc-650 mt-0.5">{data.cronWarningAlert}</p>
+            <h4 className="font-semibold text-rose-900">Cron Sweeper Diagnostic Alert</h4>
+            <p className="text-rose-700 text-[11px] mt-0.5">{data.cronWarningAlert}</p>
           </div>
         </div>
       )}
 
-      {/* 2. Operations Segmented Control Tabs */}
-      <div className="flex flex-wrap bg-zinc-100/60 p-1.5 rounded-2.5xl border border-zinc-200 gap-1.5">
+      {/* 2. Operational Metric Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <AdminStatCard
+          title="Total User Profiles"
+          value={data?.totalUsers?.toLocaleString() || '0'}
+          subtitle={`+${data?.recentSignups?.length || 0} recent signups online`}
+          icon={Users}
+          variant="indigo"
+          href="/admin/users"
+        />
+        <AdminStatCard
+          title="Active Prompt Catalog"
+          value={data?.activePromptsCount?.toLocaleString() || '0'}
+          subtitle={`${data?.removedPromptsCount || 0} removed in grace period`}
+          icon={FileText}
+          variant="emerald"
+          href="/admin/prompts"
+        />
+        <AdminStatCard
+          title="Pending Moderation Queue"
+          value={totalPendingModeration}
+          subtitle={`${resolutionRate}% resolution efficiency`}
+          icon={ShieldAlert}
+          variant={totalPendingModeration > 0 ? 'amber' : 'zinc'}
+          href="/admin/reports"
+        />
+        <AdminStatCard
+          title="Guest Funnel Visitors"
+          value={data?.guestFunnel?.visitors?.toLocaleString() || '0'}
+          subtitle={`${data?.guestFunnel?.conversionRate || 0}% funnel conversion rate`}
+          icon={TrendingUp}
+          variant="emerald"
+        />
+      </div>
+
+      {/* 3. Navigation Segmented Control */}
+      <div className="flex items-center gap-1 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/80 w-fit text-xs font-semibold text-zinc-600">
         <button
-          onClick={() => setActiveTab('health')}
-          className={`flex-1 min-w-[150px] text-center py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'health'
-              ? 'bg-zinc-100 text-zinc-900 shadow border border-zinc-200'
-              : 'text-zinc-650 hover:text-zinc-700'
+          onClick={() => setActiveTab('overview')}
+          aria-label="Overview & Health Tab"
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            activeTab === 'overview' ? 'bg-white text-zinc-900 shadow-2xs font-bold' : 'hover:text-zinc-900'
           }`}
         >
-          <Database className="w-4 h-4" />
+          <Database className="w-3.5 h-3.5" />
           System Health & Logs
         </button>
         <button
           onClick={() => setActiveTab('moderation')}
-          className={`flex-1 min-w-[150px] text-center py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'moderation'
-              ? 'bg-zinc-100 text-zinc-900 shadow border border-zinc-200'
-              : 'text-zinc-650 hover:text-zinc-700'
+          aria-label="Moderation & Appeals Queue Tab"
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            activeTab === 'moderation' ? 'bg-white text-zinc-900 shadow-2xs font-bold' : 'hover:text-zinc-900'
           }`}
         >
-          <ShieldAlert className="w-4 h-4" />
+          <ShieldAlert className="w-3.5 h-3.5" />
           Moderation & Appeals ({totalPendingModeration})
         </button>
         <button
           onClick={() => setActiveTab('funnel')}
-          className={`flex-1 min-w-[150px] text-center py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'funnel'
-              ? 'bg-zinc-100 text-zinc-900 shadow border border-zinc-200'
-              : 'text-zinc-650 hover:text-zinc-700'
+          aria-label="Guest Conversion Funnel Tab"
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            activeTab === 'funnel' ? 'bg-white text-zinc-900 shadow-2xs font-bold' : 'hover:text-zinc-900'
           }`}
         >
-          <TrendingUp className="w-4 h-4" />
+          <TrendingUp className="w-3.5 h-3.5" />
           Guest Conversion Funnel
         </button>
         <button
           onClick={() => setActiveTab('security')}
-          className={`flex-1 min-w-[150px] text-center py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'security'
-              ? 'bg-zinc-100 text-zinc-900 shadow border border-zinc-200'
-              : 'text-zinc-650 hover:text-zinc-700'
+          aria-label="Security & Shield Tab"
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            activeTab === 'security' ? 'bg-white text-zinc-900 shadow-2xs font-bold' : 'hover:text-zinc-900'
           }`}
         >
-          <ShieldX className="w-4 h-4" />
-          Security & Spam Shield
+          <ShieldX className="w-3.5 h-3.5" />
+          Security Shield
         </button>
       </div>
 
-      {/* 3. Render Dashboard Sections */}
-
-      {/* Tab 1: System Health & Logs */}
-      {activeTab === 'health' && (
-        <div className="space-y-8 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Tab Content 1: Overview & System Health */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6 animate-in fade-in duration-150">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* Cron Health Diagnostics */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl space-y-5 flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-indigo-700 flex items-center gap-2 mb-4">
-                  <Clock className="w-4.5 h-4.5" />
-                  Cron Sweeper Diagnostics
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase">Last Job Executed</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.cron?.lastJobName || 'None'}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase">Execution Status</span>
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                      data?.cron?.lastJobStatus === 'success' 
-                        ? 'bg-emerald-50 text-emerald-700' 
-                        : data?.cron?.lastJobStatus === 'failure' 
-                          ? 'bg-red-500/10 text-red-700'
-                          : 'bg-amber-500/10 text-amber-400'
-                    }`}>
-                      {data?.cron?.lastJobStatus}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase">Runtime Duration</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.cron?.lastJobDuration || 0} ms</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase">Records Swept</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.cron?.lastJobProcessed || 0} records</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase">Failed Runs (24h)</span>
-                    <span className={`text-xs font-black ${data?.cron?.failedCount24h > 0 ? 'text-red-700' : 'text-zinc-700'}`}>
-                      {data?.cron?.failedCount24h}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {data?.cron?.lastJobError && (
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-[10px] font-mono whitespace-pre-wrap break-all mt-4">
-                  Error: {data.cron.lastJobError}
-                </div>
-              )}
-            </div>
-
-            {/* Centralized Email Delivery */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl space-y-5">
-              <h3 className="text-xs font-black uppercase tracking-widest text-indigo-700 flex items-center gap-2">
-                <Mail className="w-4.5 h-4.5" />
-                Email Logs & Delivery
+            {/* Cron Diagnostics */}
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-indigo-600" />
+                Cron Sweeper Diagnostics
               </h3>
-              <div className="space-y-4">
-                <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl text-center">
-                  <span className="text-[9px] font-black uppercase text-zinc-650 tracking-wider">Total Dispatches</span>
-                  <p className="text-3xl font-black text-zinc-900 mt-1">{data?.emails?.total || 0}</p>
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Last Sweeper Job</span>
+                  <span className="font-semibold text-zinc-900">{data?.cron?.lastJobName || 'None'}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-center">
-                    <span className="block text-[8px] text-zinc-650 font-black uppercase">Delivered</span>
-                    <span className="block text-sm font-black text-emerald-700 mt-1">{data?.emails?.sent || 0}</span>
-                  </div>
-                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-center">
-                    <span className="block text-[8px] text-zinc-650 font-black uppercase">Queued / Retry</span>
-                    <span className="block text-sm font-black text-amber-400 mt-1">{data?.emails?.failed || 0}</span>
-                  </div>
-                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-center">
-                    <span className="block text-[8px] text-zinc-650 font-black uppercase">Pending</span>
-                    <span className="block text-sm font-black text-zinc-650 mt-1">{data?.emails?.pending || 0}</span>
-                  </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Execution Status</span>
+                  <AdminStatusBadge 
+                    status={data?.cron?.lastJobStatus === 'success' ? 'active' : 'suspended'}
+                    label={data?.cron?.lastJobStatus || 'unknown'}
+                  />
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Runtime Duration</span>
+                  <span className="font-semibold text-zinc-900">{data?.cron?.lastJobDuration || 0} ms</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Records Processed</span>
+                  <span className="font-semibold text-zinc-900">{data?.cron?.lastJobProcessed || 0} items</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-zinc-500">Failed Runs (24h)</span>
+                  <span className={`font-semibold ${data?.cron?.failedCount24h > 0 ? 'text-rose-600' : 'text-zinc-900'}`}>
+                    {data?.cron?.failedCount24h || 0}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Database Node Metrics */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl space-y-5">
-              <h3 className="text-xs font-black uppercase tracking-widest text-indigo-700 flex items-center gap-2">
-                <Database className="w-4.5 h-4.5" />
-                Database Nodes Statistics
+            {/* Email Dispatch Logs */}
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Mail className="w-4 h-4 text-indigo-600" />
+                Email Delivery Telemetry
               </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-650 uppercase">Profiles</span>
-                  <span className="text-xs font-black text-zinc-900">{data?.totalUsers}</span>
+              <div className="p-4 bg-zinc-50 border border-zinc-200/60 rounded-xl text-center">
+                <span className="text-xs text-zinc-500 font-medium">Total Email Dispatches</span>
+                <p className="text-3xl font-bold text-zinc-900 mt-1">{data?.emails?.total || 0}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="p-2.5 bg-emerald-50/60 border border-emerald-100 rounded-xl">
+                  <span className="block text-[10px] text-emerald-700 font-semibold uppercase">Sent</span>
+                  <span className="font-bold text-emerald-800 text-base">{data?.emails?.sent || 0}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-650 uppercase">Active Prompts</span>
-                  <span className="text-xs font-black text-zinc-900">{data?.activePromptsCount}</span>
+                <div className="p-2.5 bg-amber-50/60 border border-amber-100 rounded-xl">
+                  <span className="block text-[10px] text-amber-700 font-semibold uppercase">Retrying</span>
+                  <span className="font-bold text-amber-800 text-base">{data?.emails?.failed || 0}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-650 uppercase">Removed (Grace Period)</span>
-                  <span className="text-xs font-black text-zinc-900">{data?.removedPromptsCount}</span>
+                <div className="p-2.5 bg-zinc-100 border border-zinc-200/60 rounded-xl">
+                  <span className="block text-[10px] text-zinc-600 font-semibold uppercase">Pending</span>
+                  <span className="font-bold text-zinc-800 text-base">{data?.emails?.pending || 0}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-650 uppercase">Archived Prompts</span>
-                  <span className="text-xs font-black text-zinc-900">{data?.archivedPromptsCount}</span>
+              </div>
+            </div>
+
+            {/* Database Node Stats */}
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Database className="w-4 h-4 text-indigo-600" />
+                Database Catalog Metrics
+              </h3>
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Registered Creator Profiles</span>
+                  <span className="font-semibold text-zinc-900">{data?.totalUsers}</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-[10px] font-bold text-zinc-650 uppercase">Hard-Deleted Prompts</span>
-                  <span className="text-xs font-black text-zinc-900">{data?.deletedPromptsCount}</span>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Active Prompt Templates</span>
+                  <span className="font-semibold text-zinc-900">{data?.activePromptsCount}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Grace Period Removals</span>
+                  <span className="font-semibold text-zinc-900">{data?.removedPromptsCount}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Archived Records</span>
+                  <span className="font-semibold text-zinc-900">{data?.archivedPromptsCount}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-zinc-500">Hard-Deleted Records</span>
+                  <span className="font-semibold text-zinc-900">{data?.deletedPromptsCount}</span>
                 </div>
               </div>
             </div>
 
           </div>
 
-          {/* Category breakdowns micro-tables */}
-          <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl">
-            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-6">Prompts Categories Segmentations</h3>
+          {/* Category Breakdown Table */}
+          <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs">
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Category Catalog Segmentation</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left text-zinc-650 font-semibold border-collapse">
-                <thead>
-                  <tr className="border-b border-zinc-200 text-[10px] font-black uppercase text-zinc-700 tracking-wider">
-                    <th className="pb-3.5">Category Name</th>
-                    <th className="pb-3.5">Slug</th>
-                    <th className="pb-3.5">Active Catalog</th>
-                    <th className="pb-3.5">Removed</th>
-                    <th className="pb-3.5 text-right">Archived</th>
+              <table className="w-full text-xs text-left text-zinc-700">
+                <thead className="bg-zinc-50 border-b border-zinc-200/80 text-zinc-500 uppercase text-[10px] font-semibold tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Slug</th>
+                    <th className="px-4 py-3">Active Prompts</th>
+                    <th className="px-4 py-3">Removed</th>
+                    <th className="px-4 py-3 text-right">Archived</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-850">
+                <tbody className="divide-y divide-zinc-100 font-medium">
                   {Object.entries(data?.categoryBreakdown || {}).map(([slug, values]: any) => (
-                    <tr key={slug} className="hover:bg-zinc-100/40 transition-colors">
-                      <td className="py-3.5 text-zinc-800 font-bold">{values.name}</td>
-                      <td className="py-3.5 font-mono text-[10px] text-zinc-700">{slug}</td>
-                      <td className="py-3.5 text-emerald-700">{values.active}</td>
-                      <td className="py-3.5 text-red-700">{values.removed}</td>
-                      <td className="py-3.5 text-right text-zinc-650">{values.archived}</td>
+                    <tr key={slug} className="hover:bg-zinc-50/50 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-zinc-900">{values.name}</td>
+                      <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">{slug}</td>
+                      <td className="px-4 py-3 text-emerald-700 font-semibold">{values.active}</td>
+                      <td className="px-4 py-3 text-rose-600">{values.removed}</td>
+                      <td className="px-4 py-3 text-right text-zinc-500">{values.archived}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -287,326 +298,209 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Tab 2: Moderation & Appeals */}
+      {/* Tab Content 2: Moderation & Appeals */}
       {activeTab === 'moderation' && (
-        <div className="space-y-8 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            {/* Prompt Reports */}
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Open Prompt Reports</span>
-              <p className="text-3xl font-black text-zinc-900 mt-2">{data?.reportedPromptsCount || 0}</p>
-              <Link href="/admin/reports" className="text-[10px] text-indigo-700 hover:text-indigo-650 font-bold uppercase mt-3 inline-block">
-                Manage Queue &rarr;
+        <div className="space-y-6 animate-in fade-in duration-150">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-2">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Open Prompt Reports</span>
+              <p className="text-3xl font-bold text-zinc-900">{data?.reportedPromptsCount || 0}</p>
+              <Link href="/admin/reports" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                Review Queue <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-
-            {/* Creator Reports */}
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Open User Reports</span>
-              <p className="text-3xl font-black text-zinc-900 mt-2">{data?.reportedUsersCount || 0}</p>
-              <Link href="/admin/reports" className="text-[10px] text-indigo-700 hover:text-indigo-650 font-bold uppercase mt-3 inline-block">
-                Manage Queue &rarr;
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-2">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Open User Reports</span>
+              <p className="text-3xl font-bold text-zinc-900">{data?.reportedUsersCount || 0}</p>
+              <Link href="/admin/reports" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                Review Queue <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-
-            {/* Account Appeals */}
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Pending User Appeals</span>
-              <p className="text-3xl font-black text-zinc-900 mt-2">{data?.appeals?.pendingAccount || 0}</p>
-              <Link href="/admin/reports" className="text-[10px] text-indigo-700 hover:text-indigo-650 font-bold uppercase mt-3 inline-block">
-                Review Appeals &rarr;
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-2">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Pending Account Appeals</span>
+              <p className="text-3xl font-bold text-zinc-900">{data?.appeals?.pendingAccount || 0}</p>
+              <Link href="/admin/reports" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                Process Appeals <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-
-            {/* Prompt Appeals */}
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Pending Prompt Appeals</span>
-              <p className="text-3xl font-black text-zinc-900 mt-2">{data?.appeals?.pendingPrompt || 0}</p>
-              <Link href="/admin/reports" className="text-[10px] text-indigo-700 hover:text-indigo-650 font-bold uppercase mt-3 inline-block">
-                Review Appeals &rarr;
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-2">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Pending Prompt Appeals</span>
+              <p className="text-3xl font-bold text-zinc-900">{data?.appeals?.pendingPrompt || 0}</p>
+              <Link href="/admin/reports" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                Process Appeals <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Safety Telemetry details */}
-            <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-6">Safety Telemetry Audit</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Hidden Content (Grace Period)</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.removedPromptsCount || 0} items</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Verified Creators</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.verifiedCreatorsCount || 0} nodes</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Reports Raised (7d)</span>
-                    <span className="text-xs font-black text-zinc-900">{data?.reportsWeekly || 0} logs</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider">Clearing Efficiency</span>
-                    <span className="text-xs font-black text-emerald-450">{resolutionRate}%</span>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Safety Telemetry Audit</h3>
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Hidden Items (Grace Period)</span>
+                  <span className="font-semibold text-zinc-900">{data?.removedPromptsCount || 0} items</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Verified Creator Badges</span>
+                  <span className="font-semibold text-zinc-900">{data?.verifiedCreatorsCount || 0} creators</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-zinc-100">
+                  <span className="text-zinc-500">Weekly Complaints</span>
+                  <span className="font-semibold text-zinc-900">{data?.reportsWeekly || 0} reports</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-zinc-500">Moderation Efficiency</span>
+                  <span className="font-bold text-emerald-600">{resolutionRate}%</span>
                 </div>
               </div>
             </div>
 
-            {/* Most Reported Prompt card */}
-            <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
               <div>
-                <span className="px-2.5 py-0.5 border border-red-200 bg-red-50 text-red-700 text-[8px] font-black uppercase tracking-widest rounded-md">
-                  Most Reported Prompt
-                </span>
-                <div className="flex items-start gap-3 mt-4 mb-6">
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl shrink-0">
-                    <FileWarning className="w-6 h-6 animate-pulse" />
+                <AdminStatusBadge status="warned" label="Most Reported Prompt" className="mb-3" />
+                <div className="flex items-start gap-3 my-3">
+                  <div className="p-2.5 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl shrink-0">
+                    <FileWarning className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-zinc-800 font-extrabold text-sm leading-snug">
+                    <h4 className="font-semibold text-zinc-900 text-xs leading-snug">
                       {data?.mostReportedPrompt?.title !== 'None' ? `"${data?.mostReportedPrompt?.title}"` : 'No reported prompts'}
                     </h4>
-                    <p className="text-[10px] text-zinc-700 font-bold uppercase tracking-widest mt-1">
-                      Accumulated {data?.mostReportedPrompt?.count || 0} alerts
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      {data?.mostReportedPrompt?.count || 0} reports accumulated
                     </p>
                   </div>
                 </div>
               </div>
-              {data?.mostReportedPrompt?.id && (
-                <Link 
-                  href={`/admin/reports`}
-                  className="w-full py-3.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-center text-[10px] font-black uppercase tracking-wider text-zinc-700 transition-all flex items-center justify-center gap-1.5"
-                >
-                  Audit Content
-                  <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              )}
+              <Link href="/admin/reports" className="w-full py-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-center text-xs font-semibold text-zinc-700 transition-colors">
+                Audit Queue &rarr;
+              </Link>
             </div>
 
-            {/* Most Reported Creator card */}
-            <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
               <div>
-                <span className="px-2.5 py-0.5 border border-red-200 bg-red-50 text-red-700 text-[8px] font-black uppercase tracking-widest rounded-md">
-                  Most Reported Creator
-                </span>
-                <div className="flex items-start gap-3 mt-4 mb-6">
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl shrink-0">
-                    <Users className="w-6 h-6 animate-pulse" />
+                <AdminStatusBadge status="warned" label="Most Reported Creator" className="mb-3" />
+                <div className="flex items-start gap-3 my-3">
+                  <div className="p-2.5 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl shrink-0">
+                    <Users className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-zinc-800 font-extrabold text-sm leading-snug">
+                    <h4 className="font-semibold text-zinc-900 text-xs leading-snug">
                       {data?.mostReportedCreator?.username !== 'None' ? `@${data?.mostReportedCreator?.username}` : 'No reported creators'}
                     </h4>
-                    <p className="text-[10px] text-zinc-650 font-bold uppercase tracking-widest mt-1">
-                      Accumulated {data?.mostReportedCreator?.count || 0} complaints
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      {data?.mostReportedCreator?.count || 0} complaints accumulated
                     </p>
                   </div>
                 </div>
               </div>
-              {data?.mostReportedCreator?.username !== 'None' && (
-                <Link 
-                  href={`/admin/reports`}
-                  className="w-full py-3.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-center text-[10px] font-black uppercase tracking-wider text-zinc-700 transition-all flex items-center justify-center gap-1.5"
-                >
-                  Audit Creator
-                  <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              )}
+              <Link href="/admin/reports" className="w-full py-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-center text-xs font-semibold text-zinc-700 transition-colors">
+                Audit Creator &rarr;
+              </Link>
             </div>
-
           </div>
         </div>
       )}
 
-      {/* Tab 3: Guest Conversion Funnel */}
+      {/* Tab Content 3: Guest Conversion Funnel */}
       {activeTab === 'funnel' && (
-        <div className="space-y-8 animate-in fade-in duration-200">
-          
-          {/* Key Funnel Conversions */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Total Guest Visitors</span>
-              <p className="text-3xl font-black text-zinc-900 mt-2">{data?.guestFunnel?.visitors || 0}</p>
+        <div className="space-y-6 animate-in fade-in duration-150">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Guest Visitors</span>
+              <p className="text-3xl font-bold text-zinc-900">{data?.guestFunnel?.visitors || 0}</p>
             </div>
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Funnel Conversion Rate</span>
-              <p className="text-3xl font-black text-emerald-700 mt-2">{data?.guestFunnel?.conversionRate || 0}%</p>
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Overall Funnel Conversion</span>
+              <p className="text-3xl font-bold text-emerald-600">{data?.guestFunnel?.conversionRate || 0}%</p>
             </div>
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Copy to Signup Rate</span>
-              <p className="text-3xl font-black text-cyan-400 mt-2">{data?.guestFunnel?.copyConversionRate || 0}%</p>
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Copy to Signup</span>
+              <p className="text-3xl font-bold text-indigo-600">{data?.guestFunnel?.copyConversionRate || 0}%</p>
             </div>
-            <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow text-center">
-              <span className="text-zinc-700 text-[9px] font-black uppercase tracking-wider block">Search to Signup Rate</span>
-              <p className="text-3xl font-black text-indigo-700 mt-2">{data?.guestFunnel?.searchConversionRate || 0}%</p>
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs text-center space-y-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Search to Signup</span>
+              <p className="text-3xl font-bold text-indigo-600">{data?.guestFunnel?.searchConversionRate || 0}%</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Top Landing Entry Pages */}
-            <div className="lg:col-span-2 bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl">
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-6 flex items-center gap-2">
-                <MousePointerClick className="w-4.5 h-4.5 text-cyan-450" />
-                Popular Guest Landing Entry Pages
-              </h3>
-              <div className="space-y-4">
-                {(data?.guestFunnel?.entryPages || []).length === 0 ? (
-                  <p className="text-zinc-650 text-[10px] uppercase font-bold tracking-wide">No landing entries recorded yet.</p>
-                ) : (
-                  data.guestFunnel.entryPages.map((ep: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-200 rounded-2xl">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="px-2 py-0.5 bg-zinc-100 border border-zinc-200 rounded font-mono text-[9px] text-zinc-650 shrink-0">
-                          #{idx + 1}
-                        </span>
-                        <span className="font-mono text-zinc-250 truncate text-xs">{ep.page}</span>
-                      </div>
-                      <span className="text-xs font-black text-zinc-900 shrink-0">{ep.count} visitors</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Retention rates card */}
-            <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Activity className="w-4.5 h-4.5 text-indigo-700 animate-pulse" />
-                  Guest Cohort Retention
-                </h3>
-                <p className="text-[11px] text-zinc-650 leading-relaxed mb-6">
-                  Calculated based on visitors returning to the platform on a different calendar day.
-                </p>
-                
-                <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-3xl text-center">
-                  <span className="text-[9px] font-black uppercase text-zinc-650 tracking-wider">Returning Guests Rate</span>
-                  <p className="text-4xl font-black text-zinc-900 mt-2">{data?.guestFunnel?.retentionRate || 0}%</p>
-                </div>
-              </div>
-
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl text-[9px] font-bold text-zinc-650 uppercase tracking-wider leading-relaxed mt-6">
-                Cohort tracking uses SHA-256 hashed IP identifiers to respect privacy.
-              </div>
-            </div>
-          </div>
-
         </div>
       )}
 
-      {/* Tab 4: Security & Spam Shield */}
+      {/* Tab Content 4: Security Shield */}
       {activeTab === 'security' && (
-        <div className="space-y-8 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
-            {/* Blocked request card */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl flex flex-col justify-between items-center text-center">
-              <div className="w-full text-left border-b border-zinc-200 pb-3">
-                <h3 className="text-xs font-black uppercase tracking-widest text-red-700 flex items-center gap-2">
-                  <ShieldX className="w-4.5 h-4.5" />
-                  Rate-Limiter Blocked Attacks
-                </h3>
-              </div>
-              <p className="text-zinc-700 text-[10px] font-black uppercase tracking-wider mt-6">Suspicious Activities Blocked</p>
-              <p className="text-5xl font-black text-red-500 mt-2 tracking-tight">
-                {data?.security?.blockedSpamCount || 0}
+        <div className="space-y-6 animate-in fade-in duration-150">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs text-center space-y-3">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider text-left">Blocked Spam Requests</h3>
+              <p className="text-5xl font-bold text-rose-600 tracking-tight">{data?.security?.blockedSpamCount || 0}</p>
+              <p className="text-xs text-zinc-500 text-left leading-relaxed">
+                Unique rate-limiter triggers for IP and user keys exceeding rate thresholds.
               </p>
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[9px] font-bold text-zinc-650 uppercase leading-relaxed mt-6 text-left">
-                Counts unique IP/user keys exceeding window limits for auth or forms submissions.
-              </div>
             </div>
 
-            {/* Curation Telemetry aspect ratios */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl">
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-6">Curation Aspect Ratios</h3>
-              {(!data?.topAspectRatios || data.topAspectRatios.length === 0) ? (
-                <p className="text-[10px] font-black text-zinc-650 uppercase">No aspect ratio data compiled.</p>
-              ) : (
-                <div className="space-y-3">
-                  {data.topAspectRatios.map((item: any, idx: number) => (
-                    <div key={idx} className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl space-y-2">
-                      <div className="flex justify-between items-center text-[9px] font-bold text-zinc-700 uppercase">
-                        <span className="font-mono text-zinc-700">{item.ratio}</span>
-                        <span className="font-black text-zinc-900">{item.percentage}%</span>
-                      </div>
-                      <div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden">
-                        <div 
-                          style={{ width: `${item.percentage}%` }}
-                          className="bg-indigo-500 h-full rounded-full"
-                        />
-                      </div>
-                    </div>
-                  ))}
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-3">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Rate Limit Policy Rules</h3>
+              <div className="space-y-2 text-xs font-medium text-zinc-700">
+                <div className="flex justify-between py-1 border-b border-zinc-100">
+                  <span>Auth Endpoint</span>
+                  <span className="font-semibold text-zinc-900">5 req / 5 min</span>
                 </div>
-              )}
-            </div>
-
-            {/* Security summary */}
-            <div className="bg-white border border-zinc-200 rounded-[2.2rem] p-6 shadow-xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-4">Security Rules Configuration</h3>
-                <div className="space-y-3.5 text-xs text-zinc-650 font-bold uppercase tracking-wider">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-red-500" />
-                    <span>Login/Signup limit: 5 / 5m</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    <span>Report Form limit: 10 / hr</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span>Appeal Form limit: 5 / hr</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                    <span>Contact Form limit: 3 / hr</span>
-                  </div>
+                <div className="flex justify-between py-1 border-b border-zinc-100">
+                  <span>Report Endpoint</span>
+                  <span className="font-semibold text-zinc-900">10 req / hour</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-zinc-100">
+                  <span>Appeal Endpoint</span>
+                  <span className="font-semibold text-zinc-900">5 req / hour</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>Prompt Creation</span>
+                  <span className="font-semibold text-zinc-900">5 req / hour</span>
                 </div>
               </div>
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[9px] font-bold text-zinc-650 uppercase leading-relaxed mt-6">
-                All limits are enforced at the Edge database server layer for maximum safety.
-              </div>
             </div>
 
+            <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-3">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cloudflare Turnstile Verification</h3>
+              <div className="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                Active on Appeals & Messages
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                CAPTCHA tokens verified on server actions before inserting records into Postgres.
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 4. Recent Performers & Signups Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Recent signups list */}
-        <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl">
-          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-6 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-zinc-700" />
-            Recent Users Online
+      {/* 4. Bottom Activity Lists */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Signups */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+            <Clock className="w-4 h-4 text-zinc-500" />
+            Recent Registered Creators
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left text-zinc-650 font-semibold border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-200 text-[10px] font-black uppercase text-zinc-700 tracking-wider">
-                  <th className="pb-3.5">Username</th>
-                  <th className="pb-3.5">Clearance</th>
-                  <th className="pb-3.5 text-right">Node ID</th>
+            <table className="w-full text-xs text-left text-zinc-700">
+              <thead className="bg-zinc-50 border-b border-zinc-200/80 text-zinc-500 uppercase text-[10px] font-semibold tracking-wider">
+                <tr>
+                  <th className="px-3 py-2.5">Username</th>
+                  <th className="px-3 py-2.5">Clearance Role</th>
+                  <th className="px-3 py-2.5 text-right">Node ID</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-850">
+              <tbody className="divide-y divide-zinc-100 font-medium">
                 {(data?.recentSignups || []).map((user: any, i: number) => (
-                  <tr key={i} className="hover:bg-zinc-100/40 transition-colors">
-                    <td className="py-3.5 text-zinc-800 font-bold">{user.username}</td>
-                    <td className="py-3.5">
-                      <span className={`inline-flex px-2 py-0.5 border rounded-md text-[9px] font-black uppercase tracking-wider ${
-                        user.role === 'super_admin' ? 'text-red-700 bg-red-50 border-red-200' : 'text-zinc-700 bg-zinc-100/50 border-zinc-200'
-                      }`}>
-                        {user.role === 'super_admin' ? 'Sys Admin' : 'Creator'}
-                      </span>
+                  <tr key={i} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-3 py-2.5 font-bold text-zinc-900">{user.username}</td>
+                    <td className="px-3 py-2.5">
+                      <AdminStatusBadge status={user.role} />
                     </td>
-                    <td className="py-3.5 text-right text-zinc-650 font-mono text-[10px]">...{user.id.substring(user.id.length - 8)}</td>
+                    <td className="px-3 py-2.5 text-right text-zinc-400 font-mono text-[10px]">
+                      ...{user.id.substring(user.id.length - 8)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -614,34 +508,33 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Trending prompts list */}
-        <div className="bg-white border border-zinc-200 p-8 rounded-[2.5rem] shadow-xl">
-          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-650 mb-6 flex items-center gap-2">
-            <Heart className="w-4 h-4 text-zinc-650" />
-            Top Performers Catalog
+        {/* Top Performing Catalog */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+            <Heart className="w-4 h-4 text-zinc-500" />
+            Top Performing Prompt Templates
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left text-zinc-650 font-semibold border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-200 text-[10px] font-black uppercase text-zinc-700 tracking-wider">
-                  <th className="pb-3.5">Title</th>
-                  <th className="pb-3.5">Creator</th>
-                  <th className="pb-3.5 text-right">Engagement</th>
+            <table className="w-full text-xs text-left text-zinc-700">
+              <thead className="bg-zinc-50 border-b border-zinc-200/80 text-zinc-500 uppercase text-[10px] font-semibold tracking-wider">
+                <tr>
+                  <th className="px-3 py-2.5">Title</th>
+                  <th className="px-3 py-2.5">Creator</th>
+                  <th className="px-3 py-2.5 text-right">Engagement</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-850">
+              <tbody className="divide-y divide-zinc-100 font-medium">
                 {(data?.trendingPrompts || []).map((prompt: any, i: number) => (
-                  <tr key={i} className="hover:bg-zinc-100/40 transition-colors">
-                    <td className="py-3.5 text-zinc-800 font-bold truncate max-w-[150px]">{prompt.title}</td>
-                    <td className="py-3.5 text-indigo-700">@{prompt.creator}</td>
-                    <td className="py-3.5 text-right text-zinc-700 font-mono">{prompt.likesCount} ★ / {prompt.copiesCount} copies</td>
+                  <tr key={i} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-3 py-2.5 font-semibold text-zinc-900 truncate max-w-[160px]">{prompt.title}</td>
+                    <td className="px-3 py-2.5 text-indigo-600 font-medium">@{prompt.creator}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-zinc-500">{prompt.likesCount} ★ / {prompt.copiesCount} copies</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
 
     </div>

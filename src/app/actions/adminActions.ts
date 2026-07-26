@@ -205,6 +205,19 @@ async function revalidateModerationTargets({
       }
     }
   }
+
+  // 5. Purge stale trending_prompts_cache entries and trigger refresh
+  try {
+    if (promptId) {
+      await supabase.from('trending_prompts_cache').delete().eq('prompt_id', promptId);
+    }
+    if (userId) {
+      await supabase.from('trending_prompts_cache').delete().eq('user_id', userId);
+    }
+    await supabase.rpc('refresh_trending_prompts_cache');
+  } catch (err) {
+    console.warn('[MODERATION CACHE CLEANUP WARN] Failed to sync trending_prompts_cache:', err);
+  }
 }
 
 // 2. Admin Analytics
@@ -1287,6 +1300,18 @@ export async function resolvePromptAppealAction(appealId: string, action: 'appro
       });
     }
 
+    // Update prompt_appeals record in PostgreSQL database
+    const { error: appealUpdateErr } = await supabase
+      .from('prompt_appeals')
+      .update({
+        status: action === 'approve' ? 'approved' : 'rejected',
+        reviewed_by: adminUser.id,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', appealId);
+
+    if (appealUpdateErr) throw appealUpdateErr;
+
     await revalidateModerationTargets({ promptId: appeal.prompt_id, userId: appeal.user_id, username: appeal.creator?.username });
     return { success: true };
   } catch (err: any) {
@@ -1797,6 +1822,16 @@ export async function updateReportStatus(
             } catch (e) {
               console.error('Failed to send warning email:', e);
             }
+            await supabaseAdmin
+              .from('moderation_logs')
+              .insert([{
+                moderator_id: adminUser.id,
+                moderator_email: adminUser.email || 'moderator@prizom.com',
+                action: 'PROMPT_WARNED',
+                target_id: reportData.prompt_id,
+                reason: finalReason
+              }]);
+            await store.addModerationLog(adminUser.email!, 'PROMPT_WARNED', reportData.prompt_id, finalReason);
           }
         }
       } else {
@@ -2144,6 +2179,38 @@ export async function getPublicCMS() {
     exploreSections: data.exploreSections
   };
 }
+
+export async function updateHomepageCMSAction(homepageData: any) {
+  const { user: adminUser } = await assertAdminOrAbove();
+  const currentStore = await store.getStore();
+  currentStore.homepage_settings = { ...currentStore.homepage_settings, ...homepageData };
+  const saved = await store.saveStore(currentStore);
+  if (!saved) return { success: false, error: 'Failed to update homepage settings.' };
+  await store.addModerationLog(adminUser.email!, 'update_homepage_cms', 'homepage', 'Updated homepage hero copy & announcements');
+  revalidateCMS();
+  revalidatePath('/');
+  return { success: true };
+}
+
+export async function getAdminTeamAction() {
+  await assertAdminOrAbove();
+  const currentStore = await store.getStore();
+  return { success: true, team: currentStore.admin_users || [] };
+}
+
+export async function addAdminTeamMemberAction(email: string, role: 'super_admin' | 'admin' | 'moderator') {
+  const { user: adminUser } = await assertSuperAdmin();
+  if (!email || !email.includes('@')) return { success: false, error: 'Valid email address required.' };
+  const success = await store.addAdminUser(email, role);
+  if (!success) return { success: false, error: 'Failed to add admin user to whitelist.' };
+  await store.addModerationLog(adminUser.email!, 'add_admin_team', email, `Granted ${role} role.`);
+  return { success: true };
+}
+
+export async function removeAdminTeamMemberAction(email: string) {
+  return removeAdminUserAction(email);
+}
+
 
 // 10. Contact Us Message Actions (Public & Admin management)
 export async function submitContactMessageAction(email: string, message: string, turnstileToken?: string) {

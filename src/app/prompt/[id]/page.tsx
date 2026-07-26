@@ -180,13 +180,18 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
   await recordPromptViewAction(prompt.id);
 
   // Fetch downstream remixes of this prompt using parent_prompt_id to survive deletion
-  const remixesQuery = supabase
+  let remixesQuery = supabase
     .from('prompts')
     .select('*, profiles!user_id(username, full_name, avatar_url, role, badges)')
     .eq('parent_prompt_id', prompt.id)
     .order('created_at', { ascending: false });
 
-  // hiddenPrompts filter removed (handled by RLS)
+  if (!isCurrentUserAdmin) {
+    remixesQuery = remixesQuery
+      .eq('moderation_status', 'active')
+      .eq('is_hidden', false);
+  }
+
   const { data: remixes } = await remixesQuery;
 
   // Fetch user interaction state

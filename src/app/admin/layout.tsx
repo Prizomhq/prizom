@@ -15,20 +15,23 @@ import {
   Loader2, 
   Activity, 
   ChevronRight,
-  Bell,
   Home,
   Mail,
-  Tags,
-  Clock
+  Clock,
+  Search,
+  Command
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
+import CommandPalette from '@/components/admin/ui/CommandPalette';
+import AdminStatusBadge from '@/components/admin/ui/AdminStatusBadge';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [adminUser, setAdminUser] = useState<any>(null);
   const supabase = createClient();
@@ -74,6 +77,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkSession();
   }, [router, supabase, isPublicPage]);
 
+  // Command + K and Sequential Hotkeys listener
+  useEffect(() => {
+    let lastKey = '';
+    let lastKeyTime = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore hotkeys when typing in form inputs or textareas
+      const target = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName)) return;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      const now = Date.now();
+      const key = e.key.toLowerCase();
+
+      if (lastKey === 'g' && now - lastKeyTime < 1000) {
+        if (key === 'd') {
+          e.preventDefault();
+          router.push('/admin');
+        } else if (key === 'u') {
+          e.preventDefault();
+          router.push('/admin/users');
+        } else if (key === 'p') {
+          e.preventDefault();
+          router.push('/admin/prompts');
+        } else if (key === 'r') {
+          e.preventDefault();
+          router.push('/admin/reports');
+        } else if (key === 'c') {
+          e.preventDefault();
+          router.push('/admin/content?tab=homepage');
+        }
+        lastKey = '';
+        return;
+      }
+
+      if (key === 'g') {
+        lastKey = 'g';
+        lastKeyTime = now;
+      } else {
+        lastKey = '';
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
+
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/admin/login');
@@ -86,88 +142,60 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center text-zinc-600">
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center text-zinc-600">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[var(--color-neon-purple)]" />
-          <span className="text-xs font-black uppercase tracking-widest">Validating Clearance...</span>
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Validating Clearance...</span>
         </div>
       </div>
     );
   }
 
-  const navItems = [
+  const navSections = [
     {
-      label: 'Dashboard',
-      path: '/admin',
-      icon: LayoutDashboard,
-      roles: ['super_admin', 'admin', 'moderator']
+      title: 'OVERVIEW',
+      items: [
+        { label: 'Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'moderator'] }
+      ]
     },
     {
-      label: 'Users',
-      path: '/admin/users',
-      icon: Users,
-      roles: ['super_admin', 'admin']
+      title: 'MODERATION',
+      items: [
+        { label: 'Reports & Appeals', path: '/admin/reports', icon: ShieldAlert, roles: ['super_admin', 'admin', 'moderator'] },
+        { label: 'Prompts Catalog', path: '/admin/prompts', icon: FileText, roles: ['super_admin', 'admin', 'moderator'] },
+        { label: 'User Directory', path: '/admin/users', icon: Users, roles: ['super_admin', 'admin'] }
+      ]
     },
     {
-      label: 'Lifecycle',
-      path: '/admin/lifecycle',
-      icon: Clock,
-      roles: ['super_admin', 'admin']
+      title: 'CONTENT & CMS',
+      items: [
+        { label: 'Content Management', path: '/admin/content?tab=homepage', icon: Home, roles: ['super_admin', 'admin'] },
+        { label: 'Messages & Mail', path: '/admin/messages', icon: Mail, roles: ['super_admin', 'admin', 'moderator'] }
+      ]
     },
     {
-      label: 'Prompts',
-      path: '/admin/prompts',
-      icon: FileText,
-      roles: ['super_admin', 'admin', 'moderator']
-    },
-    {
-      label: 'Reports',
-      path: '/admin/reports',
-      icon: ShieldAlert,
-      roles: ['super_admin', 'admin', 'moderator']
-    },
-    {
-      label: 'Messages',
-      path: '/admin/messages',
-      icon: Mail,
-      roles: ['super_admin', 'admin', 'moderator']
-    },
-    {
-      label: 'Content Management',
-      path: '/admin/content?tab=homepage',
-      icon: Home,
-      roles: ['super_admin', 'admin']
-    },
-    {
-      label: 'Settings',
-      path: '/admin/content?tab=team',
-      icon: Settings,
-      roles: ['super_admin']
+      title: 'OPERATIONS',
+      items: [
+        { label: 'Account Lifecycle', path: '/admin/lifecycle', icon: Clock, roles: ['super_admin', 'admin'] },
+        { label: 'Team Clearance', path: '/admin/content?tab=team', icon: Settings, roles: ['super_admin'] }
+      ]
     }
   ];
 
-  const roleLabels: Record<string, string> = {
-    super_admin: 'Super Admin',
-    admin: 'Administrator',
-    moderator: 'Moderator'
-  };
-
-  const roleColors: Record<string, string> = {
-    super_admin: 'text-red-400 bg-red-950/40 border-red-900/40',
-    admin: 'text-indigo-400 bg-indigo-950/40 border-indigo-900/40',
-    moderator: 'text-teal-400 bg-teal-950/40 border-teal-900/40'
-  };
-
-  const filteredNav = navItems.filter(item => item.roles.includes(adminUser.role));
-
   return (
-    <div className="h-screen overflow-hidden bg-[#fcfcfc] text-zinc-800 flex flex-col md:flex-row font-sans">
+    <div className="h-screen overflow-hidden bg-zinc-50/60 text-zinc-800 flex flex-col md:flex-row font-sans">
       
+      {/* Global Command Palette */}
+      <CommandPalette 
+        isOpen={commandPaletteOpen} 
+        onClose={() => setCommandPaletteOpen(false)} 
+      />
+
       {/* Mobile Top Navigation Header */}
-      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-zinc-200 shrink-0 z-40 relative">
+      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-zinc-200/80 shrink-0 z-40 relative">
         <Link href="/admin" className="flex items-center space-x-2.5">
           <PrizomLogo size={36} />
-          <span className="font-black text-lg tracking-tight text-zinc-900">Prizom Admin</span>
+          <span className="font-bold text-lg tracking-tight text-zinc-900">Prizom Admin</span>
         </Link>
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -181,100 +209,149 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)}
-          className="md:hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-30 pointer-events-auto transition-opacity" 
+          className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-30 pointer-events-auto transition-opacity" 
         />
       )}
 
-      {/* Admin Panel Sidebar Shell */}
+      {/* Enterprise Admin Sidebar */}
       <aside className={`
-        fixed md:sticky top-0 left-0 bottom-0 w-64 h-full bg-white border-r border-zinc-200 z-35 flex flex-col justify-between shrink-0 p-6 transition-transform duration-300 backdrop-blur-xl md:translate-x-0
+        fixed md:sticky top-0 left-0 bottom-0 w-64 h-full bg-white border-r border-zinc-200/80 z-35 flex flex-col justify-between shrink-0 p-5 transition-transform duration-300 md:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="flex flex-col space-y-8 overflow-y-auto no-scrollbar flex-1 mb-6">
-          {/* Logo & Header */}
-          <Link href="/admin" className="hidden md:flex items-center space-x-3 w-fit group">
-            <PrizomLogo size={40} className="transition-transform group-hover:scale-105 duration-300" />
-            <span className="font-black text-xl tracking-tight text-zinc-900">
-              Prizom
-            </span>
-            <span className="text-[9px] font-black tracking-widest text-zinc-550 uppercase">ctrl</span>
+        <div className="flex flex-col space-y-6 overflow-y-auto no-scrollbar flex-1 mb-4">
+          
+          {/* Brand Header */}
+          <Link href="/admin" className="hidden md:flex items-center space-x-3 w-fit group py-1">
+            <PrizomLogo size={36} className="transition-transform group-hover:scale-105 duration-200" />
+            <div className="flex flex-col">
+              <span className="font-bold text-lg tracking-tight text-zinc-900 leading-tight">
+                Prizom
+              </span>
+              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest leading-none">Enterprise</span>
+            </div>
           </Link>
 
-          {/* Admin Info Badge */}
-          <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center gap-3 animate-in fade-in duration-200">
+          {/* Quick Command Bar Trigger */}
+          <button
+            onClick={() => setCommandPaletteOpen(true)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200/80 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100/60 transition-all text-xs font-medium"
+          >
+            <span className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5" />
+              Quick search...
+            </span>
+            <kbd className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white border border-zinc-200 text-zinc-500 shadow-2xs">
+              ⌘K
+            </kbd>
+          </button>
+
+          {/* Admin User Card */}
+          <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 flex items-center gap-3">
             {adminUser.avatarUrl ? (
               <img 
                 src={getOptimizedImageUrl(adminUser.avatarUrl, 'avatar')} 
                 alt={adminUser.username || 'Admin'}
-                className="w-9 h-9 object-cover rounded-xl bg-zinc-100 animate-in zoom-in-95 duration-200"
+                className="w-8 h-8 object-cover rounded-lg bg-zinc-200"
               />
             ) : (
-              <div className="w-9 h-9 rounded-xl bg-zinc-200 flex items-center justify-center text-xs font-black uppercase text-zinc-650 animate-in zoom-in-95 duration-200">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
                 {adminUser.username?.[0] || adminUser.email?.[0] || 'A'}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-zinc-800 truncate">{adminUser.username || 'System Node'}</p>
-              <span className={`inline-flex px-2 py-0.5 mt-1 border rounded-md text-[9px] font-black uppercase tracking-wider ${roleColors[adminUser.role]}`}>
-                {roleLabels[adminUser.role]}
-              </span>
+              <p className="text-xs font-bold text-zinc-900 truncate">{adminUser.username || 'System Admin'}</p>
+              <AdminStatusBadge status={adminUser.role} className="mt-0.5" />
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="flex flex-col space-y-1.5 pb-8">
-            {filteredNav.map((item, i) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.path || (
-                pathname === '/admin/content' && item.path.includes(`tab=${new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('tab') || 'homepage'}`)
-              );
+          {/* Sectioned Navigation Links */}
+          <nav className="flex flex-col space-y-5">
+            {navSections.map((sec, idx) => {
+              const items = sec.items.filter(i => i.roles.includes(adminUser.role));
+              if (items.length === 0) return null;
+
               return (
-                <Link
-                  key={i}
-                  href={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all duration-200 group/nav
-                    ${isActive 
-                      ? 'bg-[var(--color-neon-purple)] text-white shadow-md' 
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'}
-                  `}
-                >
-                  <span className="flex items-center gap-3">
-                    <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-zinc-500 group-hover/nav:text-zinc-700 transition-colors'}`} />
-                    {item.label}
+                <div key={idx} className="space-y-1">
+                  <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    {sec.title}
                   </span>
-                  <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover/nav:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-zinc-650'}`} />
-                </Link>
+                  <div className="space-y-0.5 pt-1">
+                    {items.map((item, i) => {
+                      const Icon = item.icon;
+                      const isActive = pathname === item.path || (
+                        pathname === '/admin/content' && item.path.includes(`tab=${new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('tab') || 'homepage'}`)
+                      );
+                      return (
+                        <Link
+                          key={i}
+                          href={item.path}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`
+                            flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors
+                            ${isActive 
+                              ? 'bg-indigo-50 text-indigo-700 font-semibold' 
+                              : 'text-zinc-650 hover:text-zinc-900 hover:bg-zinc-100/60'}
+                          `}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-zinc-400'}`} />
+                            {item.label}
+                          </span>
+                          {isActive && <ChevronRight className="w-3.5 h-3.5 text-indigo-600" />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </nav>
         </div>
 
-        {/* Footer Actions - Bottom Locked */}
-        <div className="space-y-4 pt-6 border-t border-zinc-200 shrink-0">
+        {/* Footer Actions */}
+        <div className="space-y-2 pt-4 border-t border-zinc-200/80 shrink-0">
           <Link 
             href="/" 
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 text-zinc-700 hover:text-zinc-900 text-xs font-black uppercase tracking-wider transition-all duration-200"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/60 text-xs font-medium transition-colors"
           >
-            <Activity className="w-4 h-4 text-[var(--color-electric-blue)]" />
-            Return to Main Site
+            <Activity className="w-4 h-4 text-emerald-600" />
+            Main Application
           </Link>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-50 hover:bg-red-50 border border-zinc-200 hover:border-red-200 text-zinc-600 hover:text-red-650 text-xs font-black uppercase tracking-wider transition-all duration-200"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-zinc-600 hover:text-rose-600 hover:bg-rose-50 text-xs font-medium transition-colors"
           >
-            <span className="flex items-center gap-3">
-              <LogOut className="w-4.5 h-4.5" />
-              Sign Out
-            </span>
+            <LogOut className="w-4 h-4 text-zinc-400 hover:text-rose-600" />
+            Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main Admin Workspace Area - Independently Scrollable */}
+      {/* Main Admin Workspace Container */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
-        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+        {/* Top Operational Header */}
+        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-white border-b border-zinc-200/80 shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200/80 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/60 transition-all text-xs font-medium"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Search control center...</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-bold text-zinc-400 bg-white rounded border border-zinc-200 ml-2">⌘K</kbd>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Operational
+            </span>
+          </div>
+        </header>
+
+        {/* Scrollable Main Area */}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
           {children}
         </main>
       </div>

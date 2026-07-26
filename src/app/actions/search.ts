@@ -54,6 +54,8 @@ export async function searchPrizom(query: string) {
 
   if (!isAdmin) {
     promptsQuery = promptsQuery
+      .eq('moderation_status', 'active')
+      .eq('is_hidden', false)
       .not('profiles.role', 'in', '(suspended,banned,permanently_banned,disabled)')
       .eq('profiles.is_deactivated', false)
       .eq('profiles.pending_deletion', false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   FileText, 
   Search, 
@@ -12,7 +13,8 @@ import {
   GitFork, 
   Loader2,
   ArrowUpRight,
-  ListPlus
+  ListPlus,
+  ExternalLink
 } from 'lucide-react';
 import { 
   getAdminPromptsList, 
@@ -23,17 +25,32 @@ import {
   getExploreSectionsAction,
   assignPromptToSectionAction
 } from '@/app/actions/adminActions';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
+import AdminDataTable, { Column } from '@/components/admin/ui/AdminDataTable';
+import AdminStatusBadge from '@/components/admin/ui/AdminStatusBadge';
+import AdminSlideOver from '@/components/admin/ui/AdminSlideOver';
+import AdminConfirmDialog from '@/components/admin/ui/AdminConfirmDialog';
 
 export default function AdminPromptsPage() {
   const [prompts, setPrompts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Inspection side-drawer states
   const [selectedPrompt, setSelectedPrompt] = useState<any>(null);
+  const [isInspectionOpen, setIsInspectionOpen] = useState(false);
+
+  // Moderation removal modal states
   const [hideReason, setHideReason] = useState('');
   const [showHideModal, setShowHideModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [targetPromptForHide, setTargetPromptForHide] = useState<any>(null);
+
+  // Boost modal states
   const [showBoostModal, setShowBoostModal] = useState(false);
   const [boostWeight, setBoostWeight] = useState(1.0);
+
+  // Section assignment modal states
   const [showSectionsModal, setShowSectionsModal] = useState(false);
   const [curatedSections, setCuratedSections] = useState<any[]>([]);
 
@@ -45,25 +62,6 @@ export default function AdminPromptsPage() {
       }
     });
   }, []);
-
-  const handleToggleSectionAssignment = async (sectionId: string, assigned: boolean) => {
-    if (!selectedPrompt) return;
-    const res = await assignPromptToSectionAction(selectedPrompt.id, sectionId, assigned);
-    if (res.success) {
-      loadPrompts(searchQuery);
-      
-      const updatedAssigned = assigned 
-        ? [...(selectedPrompt.assignedSections || []), sectionId]
-        : (selectedPrompt.assignedSections || []).filter((id: string) => id !== sectionId);
-      
-      setSelectedPrompt({
-        ...selectedPrompt,
-        assignedSections: updatedAssigned
-      });
-    } else {
-      alert(res.error || 'Failed to update section assignment.');
-    }
-  };
 
   const loadPrompts = (query: string = '') => {
     setLoading(true);
@@ -84,8 +82,8 @@ export default function AdminPromptsPage() {
     loadPrompts(searchQuery);
   };
 
-  const handleToggleHide = async (promptToToggle?: any) => {
-    const target = promptToToggle || selectedPrompt;
+  const handleToggleHide = async () => {
+    const target = targetPromptForHide || selectedPrompt;
     if (!target) return;
     setSubmitting(true);
 
@@ -93,437 +91,395 @@ export default function AdminPromptsPage() {
       ? await restorePromptAction(target.id)
       : await removePromptAction(target.id, hideReason);
 
+    setSubmitting(false);
+
     if (res.success) {
       setShowHideModal(false);
       setHideReason('');
-      setSelectedPrompt(null);
+      setTargetPromptForHide(null);
       loadPrompts(searchQuery);
     } else {
-      alert(res.error || 'Failed to update prompt status.');
+      alert(res.error || 'Failed to update prompt moderation status.');
     }
-    setSubmitting(false);
   };
 
   const handleToggleFeature = async (promptId: string) => {
+    setSubmitting(true);
     const res = await togglePromptFeature(promptId);
+    setSubmitting(false);
     if (res.success) {
       loadPrompts(searchQuery);
     } else {
-      alert(res.error || 'Failed to toggle featured status.');
+      alert(res.error || 'Failed to toggle feature status.');
     }
   };
 
-  const handleApplyBoost = async () => {
+  const handleSaveBoost = async () => {
     if (!selectedPrompt) return;
     setSubmitting(true);
-
     const res = await updatePromptBoost(selectedPrompt.id, boostWeight);
+    setSubmitting(false);
     if (res.success) {
       setShowBoostModal(false);
-      setSelectedPrompt(null);
       loadPrompts(searchQuery);
     } else {
-      alert(res.error || 'Failed to apply boost weight.');
+      alert(res.error || 'Failed to update prompt boost weight.');
     }
-    setSubmitting(false);
   };
 
-  return (
-    <div className="space-y-10 animate-in fade-in duration-300">
+  const handleToggleSectionAssignment = async (sectionId: string, assigned: boolean) => {
+    if (!selectedPrompt) return;
+    const res = await assignPromptToSectionAction(selectedPrompt.id, sectionId, assigned);
+    if (res.success) {
+      loadPrompts(searchQuery);
+      const updatedAssigned = assigned 
+        ? [...(selectedPrompt.assignedSections || []), sectionId]
+        : (selectedPrompt.assignedSections || []).filter((id: string) => id !== sectionId);
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
-            <FileText className="w-8 h-8 text-indigo-500" />
-            Prompt Catalog Control
-          </h1>
-          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Audit platform prompts, trigger star highlights, and configure manual search boosts</p>
-        </div>
-      </div>
+      setSelectedPrompt({
+        ...selectedPrompt,
+        assignedSections: updatedAssigned
+      });
+    } else {
+      alert(res.error || 'Failed to update section assignment.');
+    }
+  };
 
-      {/* Search Filter Bar */}
-      <form onSubmit={handleSearchSubmit} className="flex gap-4 max-w-xl">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-4.5 w-4.5 text-zinc-600" />
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-11 pr-4 py-3.5 border border-zinc-800 rounded-2xl bg-zinc-950/30 text-white placeholder-zinc-600 focus:outline-none focus:bg-[#0c0c0e] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-xs font-bold shadow-inner"
-            placeholder="Search prompt by title..."
-          />
-        </div>
-        <button
-          type="submit"
-          className="px-6 py-3.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all"
-        >
-          Filter
-        </button>
-      </form>
-
-      {/* Prompts Catalog Table */}
-      {loading ? (
-        <div className="min-h-[50vh] flex items-center justify-center text-zinc-400">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-            <span className="text-xs font-black uppercase tracking-widest">Loading Catalog...</span>
+  // Table Columns Setup
+  const columns: Column<any>[] = [
+    {
+      key: 'title',
+      header: 'Prompt Template',
+      render: (p) => (
+        <div className="flex items-center gap-3">
+          {p.imageUrl ? (
+            <img src={p.imageUrl} alt={p.title} className="w-10 h-10 rounded-lg object-cover bg-zinc-100 shrink-0" />
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 shrink-0">
+              <FileText className="w-5 h-5" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="font-bold text-zinc-900 truncate max-w-xs">{p.title}</div>
+            <div className="text-[11px] text-zinc-400 flex items-center gap-2">
+              <span className="font-semibold text-indigo-600">@{p.creatorUsername}</span>
+              <span>•</span>
+              <span>{p.aiTool}</span>
+              <span>•</span>
+              <span>{p.category}</span>
+            </div>
           </div>
         </div>
-      ) : prompts.length === 0 ? (
-        <div className="bg-[#121215]/60 border border-zinc-800 p-16 rounded-[2.5rem] text-center max-w-2xl mx-auto">
-          <FileText className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-          <h3 className="text-lg font-black text-zinc-300 uppercase">No Prompts Found</h3>
-          <p className="text-zinc-500 text-xs font-semibold mt-1">Try adjusting your filters or query strings.</p>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Moderation State',
+      render: (p) => (
+        <AdminStatusBadge
+          status={p.isHidden ? 'pending_deletion' : 'active'}
+          label={p.isHidden ? 'Hidden / Removed' : 'Active'}
+        />
+      )
+    },
+    {
+      key: 'engagement',
+      header: 'Engagement',
+      render: (p) => (
+        <div className="font-mono text-[11px] text-zinc-600">
+          <div>{p.likesCount || 0} ★ / {p.copiesCount || 0} copies</div>
+          <div className="text-zinc-400">{p.remixCount || 0} remixes</div>
         </div>
-      ) : (
-        <div className="bg-[#121215]/60 border border-zinc-800 rounded-[2.5rem] shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left text-zinc-400 font-semibold border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800/80 text-[10px] font-black uppercase text-zinc-500 tracking-wider bg-zinc-950/20">
-                  <th className="px-6 py-4.5">Prompt Details</th>
-                  <th className="px-6 py-4.5">Creator ID</th>
-                  <th className="px-6 py-4.5">Remix Ancestry</th>
-                  <th className="px-6 py-4.5">Stats Index</th>
-                  <th className="px-6 py-4.5">Trending Overrides</th>
-                  <th className="px-6 py-4.5 text-right">Moderator Control Panel</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/40">
-                {prompts.map((prompt) => (
-                  <tr key={prompt.id} className={`hover:bg-zinc-850/5 transition-colors ${prompt.isHidden ? 'bg-red-950/5' : ''}`}>
-                    
-                    {/* Prompt Title & Image */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3.5">
-                        {prompt.imageUrl ? (
-                          <img 
-                            src={prompt.imageUrl} 
-                            alt={prompt.title}
-                            className="w-12 h-12 object-cover rounded-xl bg-zinc-800 shrink-0 border border-zinc-800"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-xs font-black uppercase text-zinc-500 shrink-0">
-                            {prompt.aiTool?.[0] || 'AI'}
-                          </div>
-                        )}
-                        <div className="min-w-0 max-w-xs">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-sm font-black text-zinc-200 truncate">{prompt.title}</span>
-                            {prompt.isFeatured && (
-                              <span className="p-0.5 rounded-md bg-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase" title="Featured Showcase">
-                                FEATURED
-                              </span>
-                            )}
-                            {prompt.isHidden ? (
-                              <span className="px-1.5 py-0.5 rounded-md bg-red-950/40 text-red-400 border border-red-900/30 text-[8px] font-black uppercase tracking-wider">
-                                REMOVED
-                              </span>
-                            ) : (
-                              <span className="px-1.5 py-0.5 rounded-md bg-emerald-950/40 text-emerald-450 border border-emerald-900/30 text-[8px] font-black uppercase tracking-wider">
-                                ACTIVE
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[10px] text-zinc-500 font-bold block truncate mt-0.5">{prompt.promptText}</span>
-                        </div>
-                      </div>
-                    </td>
+      )
+    },
+    {
+      key: 'boostWeight',
+      header: 'Boost Weight',
+      render: (p) => (
+        <span className="font-mono font-bold text-indigo-600">
+          {p.boostWeight}x
+        </span>
+      )
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      render: (p) => <span className="text-zinc-500 font-medium">{new Date(p.createdAt).toLocaleDateString()}</span>
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (p) => (
+        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedPrompt(p);
+              setIsInspectionOpen(true);
+            }}
+            title="Inspect Details"
+            className="p-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 text-zinc-600 transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleToggleFeature(p.id)}
+            disabled={submitting}
+            title={p.isFeatured ? 'Unfeature Prompt' : 'Feature Prompt'}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              p.isFeatured 
+                ? 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100' 
+                : 'border-zinc-200 hover:border-zinc-300 text-zinc-400 hover:text-amber-500'
+            }`}
+          >
+            <Star className="w-3.5 h-3.5 fill-current" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (p.isHidden) {
+                setTargetPromptForHide(p);
+                handleToggleHide();
+              } else {
+                setTargetPromptForHide(p);
+                setHideReason('');
+                setShowHideModal(true);
+              }
+            }}
+            disabled={submitting}
+            title={p.isHidden ? 'Restore Prompt' : 'Hide / Remove Prompt'}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              p.isHidden 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100' 
+                : 'border-zinc-200 hover:border-rose-200 text-zinc-400 hover:text-rose-600'
+            }`}
+          >
+            {p.isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+      )
+    }
+  ];
 
-                    {/* Creator Handle */}
-                    <td className="px-6 py-4">
-                      <div className="min-w-0">
-                        <span className="text-indigo-400 font-bold text-xs">@{prompt.creatorUsername}</span>
-                        <span className="text-[10px] text-zinc-500 font-bold block mt-0.5">{prompt.creatorFullName || 'Creator'}</span>
-                      </div>
-                    </td>
-
-                    {/* Remix Info */}
-                    <td className="px-6 py-4">
-                      {prompt.remixCount > 0 ? (
-                        <div className="flex items-center gap-1.5 text-zinc-300">
-                          <GitFork className="w-4 h-4 text-purple-400 shrink-0" />
-                          <span className="text-xs font-bold">{prompt.remixCount} Remix Branches</span>
-                        </div>
-                      ) : (
-                        <span className="text-zinc-600 font-bold">Terminal Prompt</span>
-                      )}
-                    </td>
-
-                    {/* Stats Metrics */}
-                    <td className="px-6 py-4 text-zinc-500">
-                      <div className="flex flex-col gap-0.5 font-mono text-[11px]">
-                        <span className="text-zinc-300">{prompt.likesCount} ★ Star Likes</span>
-                        <span>{prompt.copiesCount} copies triggered</span>
-                      </div>
-                    </td>
-
-                    {/* Boost details */}
-                    <td className="px-6 py-4">
-                      {prompt.boostWeight > 1.0 ? (
-                        <div className="flex items-center gap-1.5 text-cyan-400">
-                          <TrendingUp className="w-4 h-4 shrink-0" />
-                          <span className="text-xs font-black">{prompt.boostWeight}x Manual Boost</span>
-                        </div>
-                      ) : (
-                        <span className="text-zinc-600 font-bold">Default Flow</span>
-                      )}
-                    </td>
-
-                    {/* Actions Panel */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="inline-flex items-center gap-2">
-                        {/* Toggle Featured */}
-                        <button
-                          onClick={() => handleToggleFeature(prompt.id)}
-                          disabled={prompt.isHidden}
-                          className={`
-                            p-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all disabled:opacity-30 disabled:pointer-events-none
-                            ${prompt.isFeatured
-                              ? 'bg-indigo-950/30 text-indigo-400 border-indigo-900/40 hover:bg-indigo-950/50'
-                              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:bg-zinc-800'}
-                          `}
-                          title={prompt.isFeatured ? 'Unfeature Showcase' : 'Feature Showcase'}
-                        >
-                          <Star className={`w-4.5 h-4.5 ${prompt.isFeatured ? 'fill-indigo-400 stroke-indigo-400' : ''}`} />
-                        </button>
-
-                        {/* Toggle Sections Assignment */}
-                        <button
-                          onClick={() => {
-                            setSelectedPrompt(prompt);
-                            setShowSectionsModal(true);
-                          }}
-                          disabled={prompt.isHidden}
-                          className="p-2 rounded-xl border text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:bg-zinc-800 transition-all disabled:opacity-30 disabled:pointer-events-none"
-                          title="Assign to Curated Sections"
-                        >
-                          <ListPlus className="w-4.5 h-4.5" />
-                        </button>
-
-                        {/* Adjust Manual Boost */}
-                        <button
-                          onClick={() => {
-                            setSelectedPrompt(prompt);
-                            setBoostWeight(prompt.boostWeight);
-                            setShowBoostModal(true);
-                          }}
-                          disabled={prompt.isHidden}
-                          className={`
-                            p-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all disabled:opacity-30 disabled:pointer-events-none
-                            ${prompt.boostWeight > 1.0
-                              ? 'bg-cyan-950/30 text-cyan-400 border-cyan-900/40 hover:bg-cyan-950/50'
-                              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:bg-zinc-800'}
-                          `}
-                          title="Configure Trending Boost Weight"
-                        >
-                          <TrendingUp className="w-4.5 h-4.5" />
-                        </button>
-
-                        {/* Toggle Visibility Hide/Show */}
-                        <button
-                          onClick={() => {
-                            if (prompt.isHidden) {
-                              handleToggleHide(prompt);
-                            } else {
-                              setSelectedPrompt(prompt);
-                              setShowHideModal(true);
-                            }
-                          }}
-                          className={`
-                            p-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all
-                            ${prompt.isHidden
-                              ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/40 hover:bg-emerald-950/50'
-                              : 'bg-red-950/30 text-red-400 border-red-900/40 hover:bg-red-950/50'}
-                          `}
-                          title={prompt.isHidden ? 'Restore Prompt' : 'Remove Prompt content'}
-                        >
-                          {prompt.isHidden ? <Eye className="w-4.5 h-4.5" /> : <EyeOff className="w-4.5 h-4.5" />}
-                        </button>
-                      </div>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200">
+      
+      {/* Page Header */}
+      <AdminPageHeader
+        title="Prompt Template Catalog & Moderation"
+        description="Inspect prompt source text, manage feature rankings, boost weight multipliers, and execute removal policies."
+        icon={FileText}
+        badge={{ text: `${prompts.length} Prompts Cataloged`, variant: 'emerald' }}
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Prompts' }]}
+      >
+        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search title, creator, tool..."
+              className="pl-9 pr-4 py-2 rounded-xl bg-white border border-zinc-200/80 text-xs font-medium placeholder-zinc-400 focus:outline-none focus:border-indigo-500 w-64 shadow-2xs"
+            />
           </div>
-        </div>
-      )}
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold shadow-2xs transition-colors"
+          >
+            Search
+          </button>
+        </form>
+      </AdminPageHeader>
 
-      {/* Hide Safety Modal */}
-      {showHideModal && selectedPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in pointer-events-auto">
-          <div className="relative w-full max-w-md bg-[#121215] border border-zinc-800 rounded-[2rem] p-8 shadow-2xl animate-scale-up z-60">
-            <div className="flex items-center gap-3.5 mb-6 text-red-400">
-              <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 animate-pulse">
-                <EyeOff className="w-6 h-6" />
+      {/* Main Data Grid */}
+      <AdminDataTable
+        columns={columns}
+        data={prompts}
+        loading={loading}
+        keyExtractor={(p) => p.id}
+        emptyTitle="No prompts found"
+        emptyDescription="Try adjusting your search criteria or clear query filters."
+        onRowClick={(p) => {
+          setSelectedPrompt(p);
+          setIsInspectionOpen(true);
+        }}
+      />
+
+      {/* Slide-Over Inspection Drawer */}
+      <AdminSlideOver
+        isOpen={isInspectionOpen}
+        onClose={() => setIsInspectionOpen(false)}
+        title={selectedPrompt ? selectedPrompt.title : 'Prompt Inspection'}
+        description="Full text analysis, image preview, curation sections, and moderation status."
+      >
+        {selectedPrompt && (
+          <div className="space-y-6 text-xs text-zinc-700">
+            {/* Image Preview if exists */}
+            {selectedPrompt.imageUrl && (
+              <div className="rounded-xl overflow-hidden border border-zinc-200/80 bg-zinc-50 aspect-video relative">
+                <img src={selectedPrompt.imageUrl} alt={selectedPrompt.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            {/* Prompt Meta Badges */}
+            <div className="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl">
+              <div>
+                <span className="text-[10px] text-zinc-400 font-semibold uppercase block">Creator</span>
+                <span className="font-bold text-indigo-600">@{selectedPrompt.creatorUsername}</span>
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-wide">Remove Platform Content</h3>
-                <p className="text-[10px] text-red-400 font-bold uppercase">Confirm Action on: {selectedPrompt.title}</p>
+                <span className="text-[10px] text-zinc-400 font-semibold uppercase block">Tool / Category</span>
+                <span className="font-semibold text-zinc-800">{selectedPrompt.aiTool} • {selectedPrompt.category}</span>
+              </div>
+              <AdminStatusBadge
+                status={selectedPrompt.isHidden ? 'pending_deletion' : 'active'}
+              />
+            </div>
+
+            {/* Prompt Text Box */}
+            <div className="space-y-1.5">
+              <h4 className="font-bold text-zinc-900 uppercase text-[10px] tracking-wider">Prompt Source Text</h4>
+              <div className="p-3.5 bg-zinc-50 border border-zinc-200/80 rounded-xl font-mono text-[11px] leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">
+                {selectedPrompt.promptText}
               </div>
             </div>
 
-            <p className="text-zinc-500 font-semibold text-xs leading-relaxed mb-6">
-              Removing a prompt hides it from explore, trending leaderboards, collections, and public creator galleries. The author will be notified.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-2">Audit Action Reason</label>
-                <textarea
-                  value={hideReason}
-                  onChange={(e) => setHideReason(e.target.value)}
-                  required
-                  rows={3}
-                  className="block w-full px-4 py-3 border border-zinc-800 rounded-2xl bg-zinc-950/30 text-white placeholder-zinc-700 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10 transition-all text-xs font-bold shadow-inner"
-                  placeholder="Explain guidelines violation (will be sent to prompt author)..."
-                />
+            {/* Curation & Boost Controls */}
+            <div className="p-4 bg-zinc-50 border border-zinc-200/80 rounded-xl space-y-3">
+              <h4 className="font-bold text-zinc-900 uppercase text-[10px] tracking-wider">Algorithmic Boost Multiplier</h4>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-600">Current Multiplier Weight</span>
+                <span className="font-mono font-bold text-indigo-600 text-sm">{selectedPrompt.boostWeight}x</span>
               </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  onClick={() => {
-                    setShowHideModal(false);
-                    setHideReason('');
-                    setSelectedPrompt(null);
-                  }}
-                  className="flex-1 px-6 py-3.5 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full text-xs font-black uppercase tracking-wider transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleToggleHide()}
-                  disabled={submitting || !hideReason.trim()}
-                  className="flex-1 px-6 py-3.5 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-red-950/20 hover:shadow-red-950/40 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                >
-                  {submitting ? 'Auditing...' : 'Remove Content'}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setBoostWeight(selectedPrompt.boostWeight || 1.0);
+                  setShowBoostModal(true);
+                }}
+                className="w-full py-2 rounded-lg border border-zinc-200 hover:border-zinc-300 bg-white font-semibold text-zinc-700 transition-colors"
+              >
+                Adjust Multiplier Weight
+              </button>
             </div>
 
-          </div>
-        </div>
-      )}
-
-      {/* Manual Boost Override Modal */}
-      {showBoostModal && selectedPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in pointer-events-auto">
-          <div className="relative w-full max-w-md bg-[#121215] border border-zinc-800 rounded-[2rem] p-8 shadow-2xl animate-scale-up z-60">
-            <div className="flex items-center gap-3.5 mb-6 text-cyan-400">
-              <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-wide">Adjust Trending Boost</h3>
-                <p className="text-[10px] text-cyan-400 font-bold uppercase">Manual weight boost: {selectedPrompt.title}</p>
-              </div>
-            </div>
-
-            <p className="text-zinc-500 font-semibold text-xs leading-relaxed mb-6">
-              Manually multiplies the like velocity ranking scores in trending feeds. Enter 1.0 to clear overrides and restore automatic algorithmic flows.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-2">Manual Boost Multiplier Weight</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="1.0"
-                  max="10.0"
-                  value={boostWeight}
-                  onChange={(e) => setBoostWeight(parseFloat(e.target.value) || 1.0)}
-                  required
-                  className="block w-full px-4 py-3.5 border border-zinc-800 rounded-2xl bg-zinc-950/30 text-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all text-xs font-bold shadow-inner"
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  onClick={() => {
-                    setShowBoostModal(false);
-                    setSelectedPrompt(null);
-                  }}
-                  className="flex-1 px-6 py-3.5 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-full text-xs font-black uppercase tracking-wider transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleApplyBoost}
-                  disabled={submitting}
-                  className="flex-1 px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 text-white rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-cyan-950/20 hover:shadow-cyan-950/40 transition-all"
-                >
-                  {submitting ? 'Applying...' : 'Apply Boost'}
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* Explore Section Assignments Modal */}
-      {showSectionsModal && selectedPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in pointer-events-auto">
-          <div className="relative w-full max-w-md bg-[#121215] border border-zinc-800 rounded-[2rem] p-8 shadow-2xl animate-scale-up z-60">
-            <div className="flex items-center gap-3.5 mb-6 text-indigo-400">
-              <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                <ListPlus className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-wide">Assign Explore Sections</h3>
-                <p className="text-[10px] text-indigo-400 font-bold uppercase">Section curation: {selectedPrompt.title}</p>
-              </div>
-            </div>
-
-            <p className="text-zinc-500 font-semibold text-xs leading-relaxed mb-6">
-              Select which curated explore sections this prompt should appear in. A single prompt can be assigned to multiple sections.
-            </p>
-
-            <div className="space-y-3.5 max-h-60 overflow-y-auto pr-2 no-scrollbar mb-6">
+            {/* Explore Section Assignments */}
+            <div className="p-4 bg-zinc-50 border border-zinc-200/80 rounded-xl space-y-3">
+              <h4 className="font-bold text-zinc-900 uppercase text-[10px] tracking-wider">Curated Explore Sections</h4>
               {curatedSections.length === 0 ? (
-                <p className="text-zinc-600 text-xs font-bold uppercase">No curated sections defined.</p>
+                <p className="text-zinc-400">No curated sections created yet.</p>
               ) : (
-                curatedSections.map((sec) => {
-                  const isAssigned = (selectedPrompt.assignedSections || []).includes(sec.id);
-                  return (
-                    <label 
-                      key={sec.id} 
-                      className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-850 hover:border-zinc-700 bg-zinc-950/20 hover:bg-zinc-950/40 cursor-pointer select-none transition-all duration-200"
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-zinc-200">{sec.title}</span>
-                        <span className="text-[9px] font-black uppercase tracking-wider text-zinc-550 mt-0.5">Curated list</span>
+                <div className="space-y-2">
+                  {curatedSections.map((sec) => {
+                    const isAssigned = (selectedPrompt.assignedSections || []).includes(sec.id);
+                    return (
+                      <div key={sec.id} className="flex items-center justify-between py-1 border-b border-zinc-200/60">
+                        <span className="font-semibold text-zinc-800">{sec.title}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSectionAssignment(sec.id, !isAssigned)}
+                          className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                            isAssigned 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                              : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                          }`}
+                        >
+                          {isAssigned ? 'Assigned' : 'Assign'}
+                        </button>
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={isAssigned}
-                        onChange={(e) => handleToggleSectionAssignment(sec.id, e.target.checked)}
-                        className="w-5 h-5 rounded border-zinc-800 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-950"
-                      />
-                    </label>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            <button
-              onClick={() => {
-                setShowSectionsModal(false);
-                setSelectedPrompt(null);
-              }}
-              className="w-full px-6 py-3.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full text-xs font-black uppercase tracking-wider transition-all"
-            >
-              Close Curation Panel
-            </button>
+            {/* Drawer Quick Action Footer */}
+            <div className="space-y-2 pt-4 border-t border-zinc-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setTargetPromptForHide(selectedPrompt);
+                  if (selectedPrompt.isHidden) {
+                    handleToggleHide();
+                  } else {
+                    setHideReason('');
+                    setShowHideModal(true);
+                  }
+                }}
+                disabled={submitting}
+                className={`w-full py-2.5 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 ${
+                  selectedPrompt.isHidden 
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                    : 'bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100'
+                }`}
+              >
+                {selectedPrompt.isHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                {selectedPrompt.isHidden ? 'Restore Prompt Template' : 'Hide / Remove Template'}
+              </button>
+
+              <Link
+                href={`/prompt/${selectedPrompt.id}`}
+                target="_blank"
+                className="w-full py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 text-zinc-700 font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Public Template Page
+              </Link>
+            </div>
           </div>
+        )}
+      </AdminSlideOver>
+
+      {/* Confirm Dialog for Prompt Removal */}
+      <AdminConfirmDialog
+        isOpen={showHideModal}
+        onClose={() => setShowHideModal(false)}
+        onConfirm={handleToggleHide}
+        title="Hide / Remove Prompt Template"
+        description={`Specify a policy removal reason for prompt "${targetPromptForHide?.title}".`}
+        confirmText="Execute Removal"
+        variant="danger"
+        isSubmitting={submitting}
+      >
+        <div>
+          <label className="block text-xs font-semibold text-zinc-700 mb-1">Policy Violation Reason</label>
+          <textarea
+            value={hideReason}
+            onChange={(e) => setHideReason(e.target.value)}
+            placeholder="Enter reason for prompt removal..."
+            rows={3}
+            className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200 text-xs font-medium text-zinc-900 placeholder-zinc-400 focus:outline-none"
+          />
         </div>
-      )}
+      </AdminConfirmDialog>
+
+      {/* Confirm Dialog for Boost Multiplier */}
+      <AdminConfirmDialog
+        isOpen={showBoostModal}
+        onClose={() => setShowBoostModal(false)}
+        onConfirm={handleSaveBoost}
+        title="Adjust Algorithmic Boost Multiplier"
+        description={`Set multiplier weight for prompt "${selectedPrompt?.title}".`}
+        confirmText="Save Multiplier"
+        variant="info"
+        isSubmitting={submitting}
+      >
+        <div>
+          <label className="block text-xs font-semibold text-zinc-700 mb-1">Multiplier Weight (1.0x - 5.0x)</label>
+          <input
+            type="number"
+            step="0.1"
+            min="0.1"
+            max="10.0"
+            value={boostWeight}
+            onChange={(e) => setBoostWeight(parseFloat(e.target.value) || 1.0)}
+            className="w-full px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200 text-xs font-mono text-zinc-900 focus:outline-none"
+          />
+        </div>
+      </AdminConfirmDialog>
 
     </div>
   );
