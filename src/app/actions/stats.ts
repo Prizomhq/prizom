@@ -72,20 +72,21 @@ export async function getPlatformStats() {
     };
   } catch (err: any) {
     console.error('Error fetching platform stats:', err);
-    // Graceful fallback to default mock stats if database is empty or offline
+    // Real data integrity: return 0 when no data is available
     return {
       success: false,
       stats: {
-        totalPrompts: 142,
-        activeCreators: 28,
-        remixCount: 45,
-        dailyUploads: 12,
-        totalCollections: 18,
-        totalLikes: 890
+        totalPrompts: 0,
+        activeCreators: 0,
+        remixCount: 0,
+        dailyUploads: 0,
+        totalCollections: 0,
+        totalLikes: 0
       }
     };
   }
 }
+
 
 export async function getPromptLineageStats(promptId: string) {
   const supabase = await createClient();

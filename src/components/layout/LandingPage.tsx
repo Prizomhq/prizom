@@ -19,23 +19,16 @@ import {
   FileText,
   ShieldCheck,
   Zap,
-  ArrowUpRight
+  ArrowUpRight,
+  Activity
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { getPlatformStats } from '@/app/actions/stats';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 import PromptWall from '@/components/landing/PromptWall';
 import TrendingCatalogSection from '@/components/landing/TrendingCatalogSection';
 import CreatorSpotlightSection from '@/components/landing/CreatorSpotlightSection';
 import LandingFAQSection from '@/components/landing/LandingFAQSection';
-
-
-
-
-interface WhyCard {
-  id: string;
-  title: string;
-  description: string;
-}
 
 interface LandingPageProps {
   cmsData: {
@@ -64,35 +57,82 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
   const heroCtaLink = homepage.hero_cta_link || '/signup';
 
   const [realPrompts, setRealPrompts] = useState<any[]>([]);
+  const [realCreators, setRealCreators] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalPrompts: 0,
+    activeCreators: 0,
+    remixCount: 0,
+    dailyUploads: 0
+  });
 
-  // Fetch real prompts from Supabase for PromptWall
+  // Fetch real production data & statistics from Supabase
   useEffect(() => {
-    async function fetchRealPrompts() {
+    async function loadData() {
       try {
         const supabase = createClient();
-        const { data } = await supabase
+        
+        // 1. Fetch live production stats
+        const statsRes = await getPlatformStats();
+        if (statsRes.success && statsRes.stats) {
+          setStats({
+            totalPrompts: statsRes.stats.totalPrompts || 0,
+            activeCreators: statsRes.stats.activeCreators || 0,
+            remixCount: statsRes.stats.remixCount || 0,
+            dailyUploads: statsRes.stats.dailyUploads || 0
+          });
+        }
+
+        // 2. Fetch real active prompts for PromptWall & Trending
+        const { data: promptsData } = await supabase
           .from('prompts')
-          .select('id, title, image_url, ai_tool, likes_count, profiles!user_id(username, avatar_url)')
+          .select('id, title, image_url, ai_tool, likes_count, remix_count, category, profiles!user_id(username, avatar_url)')
           .eq('moderation_status', 'active')
           .order('created_at', { ascending: false })
           .limit(16);
 
-        if (data && data.length >= 4) {
-          const formatted = data.map((p: any) => ({
+        if (promptsData && promptsData.length > 0) {
+          const formatted = promptsData.map((p: any) => ({
             id: p.id,
             title: p.title,
-            image: p.image_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop',
+            image: p.image_url || '',
+            image_url: p.image_url || '',
+            ai_tool: p.ai_tool || 'Midjourney',
+            category: p.category || 'General',
             tool: p.ai_tool || 'Midjourney',
             creator: p.profiles?.username || 'creator',
-            likesCount: p.likes_count || 0
+            likes_count: p.likes_count || 0,
+            remix_count: p.remix_count || 0,
+            profiles: p.profiles
           }));
           setRealPrompts(formatted);
         }
+
+        // 3. Fetch real active creators for Creator Spotlight
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, avatar_url, is_verified')
+          .order('created_at', { ascending: false })
+          .limit(8);
+
+        if (profilesData && profilesData.length > 0) {
+          const formattedCreators = profilesData.map((pr: any) => ({
+            id: pr.id,
+            username: pr.username || 'creator',
+            fullName: pr.full_name || pr.username,
+            avatarUrl: pr.avatar_url,
+            isVerified: pr.is_verified || false,
+            promptsCount: 0,
+            followersCount: 0
+          }));
+          setRealCreators(formattedCreators);
+        }
+
       } catch (err) {
-        console.error('Failed to query real prompts:', err);
+        console.error('Failed to load live landing page data:', err);
       }
     }
-    fetchRealPrompts();
+
+    loadData();
   }, []);
 
   return (
@@ -187,15 +227,15 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
               </Link>
             </div>
 
-            {/* Live Trust Badges */}
+            {/* Real Production Live Trust Badges */}
             <div className="pt-6 border-t border-zinc-200/80 flex items-center gap-6 text-xs text-zinc-500 font-medium flex-wrap">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-indigo-600" />
-                <span><strong className="font-bold text-zinc-900">14,000+</strong> Creators</span>
+                <span><strong className="font-bold text-zinc-900">{stats.activeCreators.toLocaleString()}</strong> Active Creators</span>
               </div>
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-indigo-600" />
-                <span><strong className="font-bold text-zinc-900">85,000+</strong> Prompts Cataloged</span>
+                <span><strong className="font-bold text-zinc-900">{stats.totalPrompts.toLocaleString()}</strong> Prompts Cataloged</span>
               </div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -272,28 +312,35 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
       <TrendingCatalogSection prompts={realPrompts} />
 
       {/* SECTION 4: Top Creators & Lineage Trees Showcase */}
-      <CreatorSpotlightSection />
+      <CreatorSpotlightSection creators={realCreators} />
 
-      {/* SECTION 5: Community Telemetry Counter */}
-
-
+      {/* SECTION 5: Real Production Live Telemetry Counter */}
       <section className="py-16 bg-zinc-900 text-white border-y border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
-            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-indigo-400">14,250+</span>
+            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-indigo-400">
+              {stats.activeCreators.toLocaleString()}
+            </span>
             <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Registered Creators</p>
           </div>
           <div className="space-y-1">
-            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-400">85,900+</span>
+            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-400">
+              {stats.totalPrompts.toLocaleString()}
+            </span>
             <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Prompts Cataloged</p>
           </div>
           <div className="space-y-1">
-            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-indigo-400">210,000+</span>
-            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Prompt Remixes Crafted</p>
+            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-indigo-400">
+              {stats.remixCount.toLocaleString()}
+            </span>
+            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Prompt Remixes</p>
           </div>
           <div className="space-y-1">
-            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-400">99.98%</span>
-            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Platform Availability</p>
+            <span className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-400 flex items-center justify-center gap-1.5">
+              <Activity className="w-6 h-6 text-emerald-400 shrink-0" />
+              {stats.dailyUploads.toLocaleString()}
+            </span>
+            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">New Uploads Today</p>
           </div>
         </div>
       </section>
@@ -302,7 +349,6 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
       <LandingFAQSection />
 
       {/* SECTION 7: Final Call to Action */}
-
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
         <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto">
           <Zap className="w-6 h-6" />
