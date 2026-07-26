@@ -27,7 +27,6 @@ import { getPlatformStats } from '@/app/actions/stats';
 import PrizomLogo from '@/components/ui/PrizomLogo';
 import PromptWall from '@/components/landing/PromptWall';
 import TrendingCatalogSection from '@/components/landing/TrendingCatalogSection';
-import CreatorSpotlightSection from '@/components/landing/CreatorSpotlightSection';
 import LandingFAQSection from '@/components/landing/LandingFAQSection';
 
 interface LandingPageProps {
@@ -57,7 +56,6 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
   const heroCtaLink = homepage.hero_cta_link || '/signup';
 
   const [realPrompts, setRealPrompts] = useState<any[]>([]);
-  const [realCreators, setRealCreators] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalPrompts: 0,
     activeCreators: 0,
@@ -82,10 +80,10 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
           });
         }
 
-        // 2. Fetch real active prompts for PromptWall & Trending
+        // 2. Fetch real active prompts for PromptWall & Unified PromptCard Catalog
         const { data: promptsData } = await supabase
           .from('prompts')
-          .select('id, title, image_url, ai_tool, likes_count, remix_count, category, profiles!user_id(username, avatar_url)')
+          .select('id, title, image_url, ai_tool, likes_count, saves_count, remix_count, remix_of, description, tags, aspect_ratio, category, profiles!user_id(username, full_name, avatar_url, badges)')
           .eq('moderation_status', 'active')
           .order('created_at', { ascending: false })
           .limit(16);
@@ -101,30 +99,15 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
             tool: p.ai_tool || 'Midjourney',
             creator: p.profiles?.username || 'creator',
             likes_count: p.likes_count || 0,
+            saves_count: p.saves_count || 0,
             remix_count: p.remix_count || 0,
+            remix_of: p.remix_of,
+            description: p.description,
+            tags: p.tags,
+            aspect_ratio: p.aspect_ratio || '1:1',
             profiles: p.profiles
           }));
           setRealPrompts(formatted);
-        }
-
-        // 3. Fetch real active creators for Creator Spotlight
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, username, full_name, avatar_url, is_verified')
-          .order('created_at', { ascending: false })
-          .limit(8);
-
-        if (profilesData && profilesData.length > 0) {
-          const formattedCreators = profilesData.map((pr: any) => ({
-            id: pr.id,
-            username: pr.username || 'creator',
-            fullName: pr.full_name || pr.username,
-            avatarUrl: pr.avatar_url,
-            isVerified: pr.is_verified || false,
-            promptsCount: 0,
-            followersCount: 0
-          }));
-          setRealCreators(formattedCreators);
         }
 
       } catch (err) {
@@ -308,13 +291,10 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
         </div>
       </section>
 
-      {/* SECTION 3: Trending Prompt Formulas Catalog */}
+      {/* SECTION 3: Popular AI Prompt Formulas Catalog (Unified PromptCard Masonry Grid) */}
       <TrendingCatalogSection prompts={realPrompts} />
 
-      {/* SECTION 4: Top Creators & Lineage Trees Showcase */}
-      <CreatorSpotlightSection creators={realCreators} />
-
-      {/* SECTION 5: Real Production Live Telemetry Counter */}
+      {/* SECTION 4: Real Production Live Telemetry Counter */}
       <section className="py-16 bg-zinc-900 text-white border-y border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
@@ -345,10 +325,10 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
         </div>
       </section>
 
-      {/* SECTION 6: Interactive FAQ Accordion */}
+      {/* SECTION 5: Interactive FAQ Accordion */}
       <LandingFAQSection />
 
-      {/* SECTION 7: Final Call to Action */}
+      {/* SECTION 6: Final Call to Action */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
         <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto">
           <Zap className="w-6 h-6" />
