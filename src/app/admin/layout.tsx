@@ -279,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     {items.map((item, i) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.path || (
-                        pathname === '/admin/content' && item.path.includes(`tab=${new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('tab') || 'homepage'}`)
+                        pathname?.startsWith('/admin/content') && item.path.startsWith('/admin/content')
                       );
                       return (
                         <Link

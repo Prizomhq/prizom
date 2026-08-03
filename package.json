@@ -24,6 +24,7 @@
     "next": "^15.1.0",
     "next-cloudinary": "^6.17.5",
     "pg": "^8.21.0",
+    "razorpay": "^2.9.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.6.0"

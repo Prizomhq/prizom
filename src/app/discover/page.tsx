@@ -1,10 +1,28 @@
 import ExploreClient from '@/components/explore/ExploreClient';
 import { createClient } from '@/lib/supabase/server';
 import { getPlatformCategoriesAndTools } from '@/app/actions/adminActions';
+import { SITE_CONFIG } from '@/lib/site-config';
 
 export const metadata = {
-  title: 'Prizom | AI Prompt Discovery Platform',
-  description: 'Discover visual prompts by category and model, with infinite scroll discovery.',
+  title: 'Discover AI Prompts | Prizom',
+  description: 'Explore visual prompts by category and model (Midjourney, DALL-E 3, Flux, Stable Diffusion) with interactive parameter deconstruction.',
+  alternates: {
+    canonical: `${SITE_CONFIG.canonicalBase}/discover`,
+  },
+  openGraph: {
+    type: 'website',
+    url: `${SITE_CONFIG.canonicalBase}/discover`,
+    title: 'Discover AI Prompts | Prizom',
+    description: 'Explore visual prompts by category and model with interactive parameter deconstruction.',
+    siteName: SITE_CONFIG.name,
+    images: [{ url: `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`, width: 1200, height: 630, alt: 'Prizom Discover' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Discover AI Prompts | Prizom',
+    description: 'Explore visual prompts by category and model with interactive parameter deconstruction.',
+    images: [`${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`],
+  },
 };
 
 export default async function DiscoverPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {

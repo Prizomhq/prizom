@@ -40,6 +40,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  openGraph: {
+    type: 'website',
+    url: SITE_CONFIG.canonicalBase,
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    siteName: SITE_CONFIG.name,
+    images: [{ url: `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`, width: 1200, height: 630, alt: SITE_CONFIG.name }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    images: [`${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`],
+  },
   icons: {
     apple: SITE_CONFIG.logo,
   },

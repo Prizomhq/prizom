@@ -3,11 +3,12 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MoreHorizontal, AlertTriangle, Slash, Link2, EyeOff, Activity } from 'lucide-react';
+import { MoreHorizontal, AlertTriangle, Slash, Link2, EyeOff, Activity, Heart } from 'lucide-react';
 import FollowButton from '@/components/ui/FollowButton';
 import ReportModal from '@/components/ui/ReportModal';
 import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
 import DynamicDialog from '@/components/ui/DynamicDialog';
+import RazorpayCheckoutModal from '@/components/shared/RazorpayCheckoutModal';
 import { blockUser } from '@/app/actions/moderation';
 
 interface CreatorProfileActionsProps {
@@ -30,6 +31,7 @@ export default function CreatorProfileActions({
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isLoginRequiredOpen, setIsLoginRequiredOpen] = useState(false);
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
+  const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -101,6 +103,17 @@ export default function CreatorProfileActions({
         cancelLabel="Cancel"
         onConfirm={executeBlockUser}
       />
+      <RazorpayCheckoutModal
+        isOpen={isTipModalOpen}
+        onClose={() => setIsTipModalOpen(false)}
+        title={`Tip @${creatorName}`}
+        description={`Send a direct creator tip to support @${creatorName}'s work.`}
+        amount={100}
+        type="tip"
+        creatorId={creatorId}
+        creatorName={creatorName}
+        onSuccess={() => showToast(`Thank you! Your tip to @${creatorName} was sent successfully.`)}
+      />
 
       {toastMessage && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] bg-zinc-900 text-white px-6 py-3 rounded-full shadow-xl font-medium text-sm animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
@@ -163,6 +176,20 @@ export default function CreatorProfileActions({
               initialIsFollowing={initialIsFollowing} 
               isLoggedIn={isLoggedIn} 
             />
+
+            <button
+              onClick={() => {
+                if (!isLoggedIn) {
+                  setIsLoginRequiredOpen(true);
+                } else {
+                  setIsTipModalOpen(true);
+                }
+              }}
+              className="h-11 px-4 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold transition-all text-xs border border-rose-200/80 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+              Tip Creator
+            </button>
 
             {/* 3-Dot Action Menu Dropdown */}
             <div className="relative">

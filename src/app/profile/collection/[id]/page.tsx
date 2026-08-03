@@ -35,6 +35,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     .from('collections')
     .select(`
       *,
+      profiles!user_id ( username, full_name, avatar_url ),
       saved_prompts (
         prompt_id,
         prompts (
@@ -80,13 +81,20 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     .filter((p: any) => p !== null && !hiddenIds.includes(p.id))
     .filter((p: any) => isCurrentUserAdmin || !['suspended', 'banned', 'permanently_banned', 'disabled'].includes(p.profiles?.role || 'user'));
 
+  const ownerUsername = collection.profiles?.username;
+  const backHref = user && user.id === collection.user_id 
+    ? '/profile' 
+    : ownerUsername 
+      ? `/creator/${ownerUsername}?tab=collections` 
+      : '/discover';
+
   return (
     <div className="min-h-screen pb-6 md:pb-20 pt-8 bg-[#fcfcfc]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <Link href="/profile" className="inline-flex items-center text-zinc-500 hover:text-zinc-900 font-medium transition-colors mb-8">
+        <Link href={backHref} className="inline-flex items-center text-zinc-500 hover:text-zinc-900 font-medium transition-colors mb-8">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Profile
+          Back to {user && user.id === collection.user_id ? 'Profile' : ownerUsername ? `@${ownerUsername}'s Collections` : 'Explore'}
         </Link>
  
         {user && user.id === collection.user_id ? (

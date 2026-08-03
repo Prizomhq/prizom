@@ -235,8 +235,8 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
               "name": creator.full_name || creator.username,
               "username": creator.username,
               "description": creator.bio || `View prompt collections and remixes from creator ${creator.full_name || creator.username} on Prizom.`,
-              "image": creator.avatar_url || "https://www.prizom.in/default-avatar.png",
-              "url": `https://www.prizom.in/creator/${creator.username}`
+              "image": creator.avatar_url || `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.logo}`,
+              "url": `${SITE_CONFIG.canonicalBase}/creator/${creator.username}`
             }
           ])
         }}

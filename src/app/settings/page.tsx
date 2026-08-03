@@ -711,7 +711,7 @@ function SettingsContent() {
                         href: '/cookie-policy',
                       },
                     ].map((policy) => (
-                      <a
+                      <Link
                         key={policy.title}
                         href={policy.href}
                         target="_blank"
@@ -730,7 +730,7 @@ function SettingsContent() {
                           Open Official Page
                           <ArrowUpRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>

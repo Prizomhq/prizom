@@ -377,16 +377,16 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
               "name": prompt.title,
               "description": prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`,
               "text": prompt.prompt_text,
-              "image": prompt.image_url || "https://www.prizom.in/og-image.png",
+              "image": prompt.image_url || `${SITE_CONFIG.canonicalBase}${SITE_CONFIG.ogImage}`,
               "author": {
                 "@type": "Person",
                 "name": prompt.profiles?.username ? `@${prompt.profiles.username}` : 'unknown',
-                "url": prompt.profiles?.username ? `https://www.prizom.in/creator/${prompt.profiles.username}` : 'https://www.prizom.in'
+                "url": prompt.profiles?.username ? `${SITE_CONFIG.canonicalBase}/creator/${prompt.profiles.username}` : SITE_CONFIG.canonicalBase
               },
               "provider": {
                 "@type": "Organization",
-                "name": "Prizom",
-                "url": "https://www.prizom.in"
+                "name": SITE_CONFIG.name,
+                "url": SITE_CONFIG.canonicalBase
               }
             }
           ])
@@ -746,28 +746,6 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             creatorUsername={prompt.profiles?.username || ''}
           />
         </div>
-
-        {/* Dynamic JSON-LD Structured Data for SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "CreativeWork",
-              "name": prompt.title,
-              "description": prompt.description || `Discover "${prompt.title}" on Prizom, the collaborative AI prompt registry.`,
-              "image": prompt.image_url,
-              "author": {
-                "@type": "Person",
-                "name": prompt.profiles?.full_name || prompt.profiles?.username || "Prizom Creator"
-              },
-              "dateCreated": prompt.created_at,
-              "keywords": prompt.tags ? prompt.tags.join(', ') : "",
-              "genre": prompt.category
-            })
-          }}
-        />
-
       </div>
     </div>
   );
