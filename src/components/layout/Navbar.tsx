@@ -21,7 +21,11 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const supabase = createClient();
+  const supabaseRef = useRef<any>(null);
+  if (!supabaseRef.current) {
+    supabaseRef.current = createClient();
+  }
+  const supabase = supabaseRef.current;
   const pathname = usePathname();
   const router = useRouter();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -42,52 +46,9 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  // Accessibility: Trap keyboard focus inside mobile menu when open
   useEffect(() => {
-    if (!isOpen || !mobileMenuRef.current) return;
-
-    const menuEl = mobileMenuRef.current;
-    const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-    const trapFocus = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        return;
-      }
-      if (e.key !== 'Tab') return;
-
-      const focusableEls = menuEl.querySelectorAll<HTMLElement>(focusableSelector);
-      if (focusableEls.length === 0) return;
-
-      const firstEl = focusableEls[0];
-      const lastEl = focusableEls[focusableEls.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstEl) {
-          e.preventDefault();
-          lastEl.focus();
-        }
-      } else {
-        if (document.activeElement === lastEl) {
-          e.preventDefault();
-          firstEl.focus();
-        }
-      }
-    };
-
-    // Focus first element in menu on open
-    const focusableEls = menuEl.querySelectorAll<HTMLElement>(focusableSelector);
-    if (focusableEls.length > 0) {
-      focusableEls[0].focus();
-    }
-
-    document.addEventListener('keydown', trapFocus);
-    return () => document.removeEventListener('keydown', trapFocus);
-  }, [isOpen]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
+    document.body.style.overflow = '';
   }, [pathname]);
 
   useEffect(() => {

@@ -148,7 +148,9 @@ body {
   #turnstile-appeal-container,
   #turnstile-contact-container {
     transform: scale(0.85);
-    transform-origin: center;
+    transform-origin: center top;
+    max-width: 100%;
+    overflow: hidden;
   }
 }
 

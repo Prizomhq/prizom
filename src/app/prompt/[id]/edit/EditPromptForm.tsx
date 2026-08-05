@@ -259,8 +259,9 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInput.trim() !== '') {
       e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
+      const cleanTag = tagInput.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!tags.some(t => t.toLowerCase() === cleanTag)) {
+        setTags([...tags, cleanTag]);
       }
       setTagInput('');
     }
@@ -601,6 +602,7 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
             <input
               type="text"
               required
+              maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="block w-full px-4 py-3.5 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-sm shadow-2xs"
@@ -615,6 +617,7 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
             </label>
             <textarea
               value={description}
+              maxLength={500}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               className="block w-full px-4 py-3 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-sm shadow-2xs"

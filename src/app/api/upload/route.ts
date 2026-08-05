@@ -52,6 +52,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Origin / CSRF Header Verification
+    const origin = req.headers.get('origin');
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (origin && siteUrl && !origin.includes(new URL(siteUrl).hostname) && !origin.includes('localhost')) {
+      return NextResponse.json({ error: 'Forbidden: Invalid request origin.' }, { status: 403 });
+    }
+
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
@@ -71,6 +78,16 @@ export async function POST(req: NextRequest) {
     // Convert file to buffer for Node stream upload
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // 3. Magic Byte Buffer Signature Inspection
+    const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+    const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+    const isWebp = buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+                   buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+
+    if (!isJpeg && !isPng && !isWebp) {
+      return NextResponse.json({ error: 'Invalid file payload. File content signature does not match allowed image formats.' }, { status: 400 });
+    }
 
     // 3. Upload to Cloudinary inside organized folders
     const result = await uploadToCloudinary(buffer, folderType);

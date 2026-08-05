@@ -263,11 +263,8 @@ export async function updatePromptAction(
       }
     }
 
-    // 5. Revalidate cache
-    revalidateTag('prompts-pool');
-    revalidatePath('/');
-    revalidatePath('/discover');
-    revalidatePath('/trending');
+    // 5. Revalidate target prompt cache efficiently
+    revalidateTag(`prompt-${promptId}`);
     revalidatePath(`/prompt/${promptId}`);
 
     return { success: true };
