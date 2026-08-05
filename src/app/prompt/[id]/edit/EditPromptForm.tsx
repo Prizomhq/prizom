@@ -15,12 +15,10 @@ import {
   Eye, 
   EyeOff, 
   Sparkles,
-  Sliders,
   Tag as TagIcon,
   Layers,
   Terminal,
   ShieldAlert,
-  ExternalLink,
   Save
 } from 'lucide-react';
 import Link from 'next/link';
@@ -188,13 +186,10 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
   const [aspectRatio, setAspectRatio] = useState(prompt.aspect_ratio || '1:1');
   const [isHidden, setIsHidden] = useState(prompt.is_hidden || false);
 
-  // AI Launcher Advanced States
-  const [primaryAiPlatform, setPrimaryAiPlatform] = useState(prompt.primary_ai_platform || '');
-  const [supportedModels, setSupportedModels] = useState<string[]>(prompt.supported_models || []);
-  const [modelInput, setModelInput] = useState('');
-  const [launchUrl, setLaunchUrl] = useState(prompt.launch_url || '');
-  const [promptType, setPromptType] = useState(prompt.prompt_type || 'text');
-  const [showAdvancedLauncher, setShowAdvancedLauncher] = useState(false);
+  const [primaryAiPlatform] = useState(prompt.primary_ai_platform || '');
+  const [supportedModels] = useState<string[]>(prompt.supported_models || []);
+  const [launchUrl] = useState(prompt.launch_url || '');
+  const [promptType] = useState(prompt.prompt_type || 'text');
 
   // Loading/Error states
   const [loading, setLoading] = useState(false);
@@ -875,104 +870,7 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
           </div>
         </div>
 
-        {/* SECTION 5: ADVANCED LAUNCHER SETTINGS */}
-        <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/80 rounded-[2.5rem] p-6 sm:p-8 shadow-xs">
-          <button
-            type="button"
-            onClick={() => setShowAdvancedLauncher(!showAdvancedLauncher)}
-            className="w-full flex items-center justify-between font-black text-xs text-zinc-700 uppercase tracking-wider cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-indigo-600" />
-              Advanced Launcher Settings <span className="text-[10px] text-zinc-400 font-bold bg-zinc-100 px-2 py-0.5 rounded-full">(Optional)</span>
-            </span>
-            <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform duration-300 ${showAdvancedLauncher ? 'rotate-180 text-indigo-600' : ''}`} />
-          </button>
-          
-          {showAdvancedLauncher && (
-            <div className="mt-6 pt-6 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in duration-200">
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">Primary AI Platform Override</label>
-                <input
-                  type="text"
-                  value={primaryAiPlatform}
-                  onChange={(e) => setPrimaryAiPlatform(e.target.value)}
-                  className="block w-full px-4 py-3 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-xs font-bold shadow-2xs"
-                  placeholder="e.g. Midjourney v6, ChatGPT Plus"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">Launcher URL Override</label>
-                <input
-                  type="url"
-                  value={launchUrl}
-                  onChange={(e) => setLaunchUrl(e.target.value)}
-                  className="block w-full px-4 py-3 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-xs font-bold shadow-2xs"
-                  placeholder="e.g. https://chatgpt.com/g/g-xxxxx"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">Prompt Type</label>
-                <select
-                  value={promptType}
-                  onChange={(e) => setPromptType(e.target.value)}
-                  className="block w-full px-4 py-3 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-xs font-bold shadow-2xs cursor-pointer"
-                >
-                  <option value="text">Text Generation</option>
-                  <option value="image">Image Generation</option>
-                  <option value="video">Video Generation</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">Supported Models</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={modelInput}
-                    onChange={(e) => setModelInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
-                          setSupportedModels([...supportedModels, modelInput.trim()]);
-                          setModelInput('');
-                        }
-                      }
-                    }}
-                    className="block flex-1 px-4 py-3 border border-zinc-200/90 rounded-2xl bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-xs font-bold shadow-2xs"
-                    placeholder="e.g. gpt-4o, flux-1.1"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (modelInput.trim() && !supportedModels.includes(modelInput.trim())) {
-                        setSupportedModels([...supportedModels, modelInput.trim()]);
-                        setModelInput('');
-                      }
-                    }}
-                    className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 rounded-2xl text-xs font-extrabold text-zinc-700 transition-all cursor-pointer"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {supportedModels.map(m => (
-                    <span key={m} className="inline-flex items-center px-2.5 py-1 rounded-xl bg-zinc-100 text-zinc-700 text-xs font-bold border border-zinc-200">
-                      {m}
-                      <button
-                        type="button"
-                        onClick={() => setSupportedModels(supportedModels.filter(x => x !== m))}
-                        className="ml-1.5 text-zinc-400 hover:text-zinc-700"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+
 
         {/* FLOATING ACTION BAR */}
         <div className="sticky bottom-6 z-40 bg-white/90 backdrop-blur-2xl border border-zinc-200/90 rounded-full px-6 py-4 shadow-xl flex items-center justify-between gap-4">
