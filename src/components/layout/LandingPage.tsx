@@ -265,8 +265,8 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
             },
             {
               icon: Sparkles,
-              title: 'Integrated AI Studio',
-              desc: 'Analyze visual style DNA, test prompts across multiple AI generators, and optimize parameters.'
+              title: 'Prompt Formulas & Catalog',
+              desc: 'Organize visual prompt formulas, test parameters across AI generators, and discover top community prompts.'
             },
             {
               icon: Users,

@@ -102,7 +102,7 @@ export async function signUpAction(
   password: string,
   username: string,
   turnstileToken: string,
-  inviteKey: string
+  inviteKey?: string
 ) {
   // 1. Validate password strength server-side (min 8 chars, uppercase, lowercase, number, special char)
   const isStrong = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password);
@@ -129,28 +129,27 @@ export async function signUpAction(
     return { success: false, error: availability.error || 'Username is not available.' };
   }
 
-  // 5. Invite Key validation
-  if (!inviteKey || !inviteKey.trim()) {
-    return { success: false, error: 'Invite key is required.' };
+  // 5. Optional Invite Key validation (if provided)
+  const trimmedKey = inviteKey ? inviteKey.trim() : '';
+  if (trimmedKey) {
+    const adminSupabase = await createAdminClient();
+    const { data: keyData, error: keyError } = await adminSupabase
+      .from('invite_keys')
+      .select('*')
+      .ilike('key', trimmedKey)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (keyError || !keyData) {
+      return { success: false, error: 'Invalid or inactive invite key.' };
+    }
+
+    if (keyData.uses >= keyData.max_uses) {
+      return { success: false, error: 'This invite key has reached its maximum usage limit.' };
+    }
   }
 
-  const adminSupabase = await createAdminClient();
-  const { data: keyData, error: keyError } = await adminSupabase
-    .from('invite_keys')
-    .select('*')
-    .ilike('key', inviteKey.trim())
-    .eq('is_active', true)
-    .maybeSingle();
-
-  if (keyError || !keyData) {
-    return { success: false, error: 'Invalid or inactive invite key.' };
-  }
-
-  if (keyData.uses >= keyData.max_uses) {
-    return { success: false, error: 'This invite key has reached its maximum usage limit.' };
-  }
-
-  // 5. Supabase Auth signup call
+  // 6. Supabase Auth signup call
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -158,7 +157,7 @@ export async function signUpAction(
     options: {
       data: {
         username: username.toLowerCase().trim(),
-        invite_key: inviteKey.trim(),
+        invite_key: trimmedKey || null,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in'}/auth/callback`,
     },

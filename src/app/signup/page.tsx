@@ -115,7 +115,7 @@ export default function SignupPage() {
     setError(null);
     setMessage(null);
 
-    const res = await signUpAction(email, password, username, turnstileToken, inviteKey);
+    const res = await signUpAction(email, password, username, turnstileToken);
 
     if (!res.success) {
       setError(res.error || 'Failed to sign up.');
@@ -175,10 +175,10 @@ export default function SignupPage() {
           </Link>
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">Create an account</h1>
           <p className="text-zinc-500">Join the ultimate AI image prompt community</p>
-          <div className="mt-3.5 inline-flex items-center space-x-2 bg-amber-50/80 border border-amber-100/50 rounded-full px-4 py-1.5 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-[10px] font-black text-amber-950 uppercase tracking-widest leading-none">
-              Invite-Only Beta — Access Key Required
+          <div className="mt-3.5 inline-flex items-center space-x-2 bg-indigo-50/80 border border-indigo-100/50 rounded-full px-4 py-1.5 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="text-[10px] font-black text-indigo-950 uppercase tracking-widest leading-none">
+              Public Beta — Open Registry
             </span>
           </div>
         </div>
@@ -246,23 +246,6 @@ export default function SignupPage() {
                       'border-zinc-200 focus:border-[var(--color-electric-blue)] focus:ring-[var(--color-electric-blue)]/20'}
                   `}
                   placeholder="creator123"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-zinc-700 mb-2">Invite Key</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Key className="h-5 w-5 text-zinc-400" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={inviteKey}
-                  onChange={(e) => setInviteKey(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 border border-zinc-200 rounded-2xl bg-zinc-50/50 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:bg-white focus:border-[var(--color-electric-blue)] focus:ring-2 focus:ring-[var(--color-electric-blue)]/20 text-base sm:text-sm transition-all shadow-inner"
-                  placeholder="prizom-beta-xxxx"
                 />
               </div>
             </div>
@@ -406,7 +389,7 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              disabled={loading || usernameStatus !== 'available' || !isPasswordStrong || !passwordsMatch || !turnstileToken || !inviteKey.trim() || !agreeToTerms || !agreeToAge}
+              disabled={loading || usernameStatus !== 'available' || !isPasswordStrong || !passwordsMatch || !turnstileToken || !agreeToTerms || !agreeToAge}
               className="w-full flex items-center justify-center py-4 px-4 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[var(--color-electric-blue)] to-[var(--color-neon-purple)] hover:shadow-[0_8px_25px_rgba(0,240,255,0.4)] transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:shadow-none disabled:transform-none mt-6"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}

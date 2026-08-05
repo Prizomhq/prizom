@@ -59,8 +59,14 @@ export default async function EditPromptPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] py-12 px-4 sm:px-6 lg:px-8">
-      <EditPromptForm prompt={prompt} />
+    <div className="min-h-screen bg-[#fcfcfc] py-8 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Decorative Ambient Glows */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent rounded-full blur-[140px] pointer-events-none -translate-y-1/2" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-purple-500/10 via-pink-500/5 to-transparent rounded-full blur-[140px] pointer-events-none translate-y-1/2" />
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        <EditPromptForm prompt={prompt} />
+      </div>
     </div>
   );
 }

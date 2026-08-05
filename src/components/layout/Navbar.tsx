@@ -229,11 +229,13 @@ export default function Navbar() {
               <div className="hidden lg:flex space-x-6 items-center">
                 <Link href="/discover" className={`text-sm transition-colors hover:text-[var(--color-electric-blue)] ${pathname === '/discover' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Discover</Link>
                 <Link href="/trending" className={`text-sm transition-colors hover:text-[var(--color-neon-purple)] ${pathname === '/trending' ? 'text-zinc-900 font-bold' : 'text-zinc-500 font-medium'}`}>Trending</Link>
-                <Link href="/studio" className={`text-sm transition-colors flex items-center gap-1.5 hover:text-purple-600 ${pathname?.startsWith('/studio') || pathname?.startsWith('/create/studio') ? 'text-purple-600 font-bold' : 'text-zinc-500 font-medium'}`}>
-                  <PrizomLogo size={14} />
-                  <span>AI Studio</span>
-                  <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[9px] font-black uppercase">V2</span>
-                </Link>
+                {profile?.role === 'super_admin' && (
+                  <Link href="/studio" className={`text-sm transition-colors flex items-center gap-1.5 hover:text-purple-600 ${pathname?.startsWith('/studio') || pathname?.startsWith('/create/studio') ? 'text-purple-600 font-bold' : 'text-zinc-500 font-medium'}`}>
+                    <PrizomLogo size={14} />
+                    <span>AI Studio</span>
+                    <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[9px] font-black uppercase">Admin</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -382,14 +384,16 @@ export default function Navbar() {
               <div className="space-y-2">
                 {user ? (
                   <>
-                    <Link 
-                      href="/studio" 
-                      onClick={() => setIsOpen(false)} 
-                      className="px-4 py-3 rounded-xl text-base font-extrabold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-3 cursor-pointer"
-                    >
-                      <Sparkles className="w-5 h-5 text-purple-500" />
-                      AI Studio
-                    </Link>
+                    {profile?.role === 'super_admin' && (
+                      <Link 
+                        href="/studio" 
+                        onClick={() => setIsOpen(false)} 
+                        className="px-4 py-3 rounded-xl text-base font-extrabold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-3 cursor-pointer"
+                      >
+                        <Sparkles className="w-5 h-5 text-purple-500" />
+                        AI Studio
+                      </Link>
+                    )}
 
                     <Link 
                       href="/trending" 
