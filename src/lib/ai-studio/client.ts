@@ -29,8 +29,9 @@ export function generateHMACSignature(
 import { execute14StageVisionPipeline } from './vision-pipeline';
 
 /**
- * Sends an ingestion request to the AG Router or executes the 14-Stage Multi-Modal Vision Reasoning Pipeline.
- * Performs zero-latency visual cosine similarity cache check before invocation.
+ * Prizom AI Studio V3 — Phase 1 Orchestration Proxy Client
+ * Performs zero-latency visual embedding cache checks before dispatching requests to AG Router.
+ * Supports HMAC SHA-256 header validation, timestamp nonces, and automatic failover.
  */
 export async function generatePromptFromImage(
   imageUrl: string,
@@ -38,7 +39,7 @@ export async function generatePromptFromImage(
 ): Promise<AGRouterPromptResponse> {
   const requestId = options.requestId || crypto.randomUUID();
 
-  // 1. Check Vector Similarity Cache first (Zero-latency hit if visual embedding similarity > 0.95)
+  // 1. Check Vector Similarity Cache first (Zero-latency hit if visual similarity > 0.95)
   const cachedHit = getCachedPromptAnalysis(imageUrl, 0.95);
   if (cachedHit.hit && cachedHit.response) {
     console.log('[AI STUDIO VECTOR CACHE] Hit! Perceptual Cosine Similarity:', cachedHit.similarityScore);
@@ -53,23 +54,31 @@ export async function generatePromptFromImage(
     requestId,
     operation: 'image_to_prompt',
     imageUrl,
-    context: { platform: 'prizom' },
-    qualityLevel: options.quality || 'standard'
+    context: { platform: 'prizom', version: 'v3-hybrid' },
+    qualityLevel: options.quality || 'premium'
   };
 
   const bodyString = JSON.stringify(body);
   const timestamp = Date.now();
   const nonce = crypto.randomBytes(16).toString('hex');
 
-  // Verify if using unconfigured router URL or mock keys
-  const isUnconfigured = !process.env.AG_ROUTER_BASE_URL;
-  
+  // Verify router URL & credentials
+  const hasAgRouterUrl = Boolean(process.env.AG_ROUTER_BASE_URL);
   const isMockKeys = 
     AG_ROUTER_API_KEY === 'mock_prizom_api_key' || 
     AG_ROUTER_HMAC_SECRET === 'mock_prizom_hmac_secret';
 
-  if (isUnconfigured || isMockKeys) {
-    console.log('[AI STUDIO CLIENT] Executing 14-Stage Vision Reasoning Perception Pipeline.');
+  // Check if live direct Vision credentials exist (Gemini / OpenRouter)
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_STUDIO_KEY || process.env.GOOGLE_API_KEY);
+  const hasOpenRouterKey = Boolean(process.env.OPENROUTER_API_KEY);
+
+  // If AG Router is unconfigured or using mock keys, attempt live Vision engine or local pipeline
+  if (!hasAgRouterUrl || isMockKeys) {
+    if (hasGeminiKey || hasOpenRouterKey) {
+      console.log('[AI STUDIO CLIENT] AG Router unconfigured; engaging Live Vision Provider Pipeline (Gemini / OpenRouter).');
+    } else {
+      console.log('[AI STUDIO CLIENT] AG Router unconfigured; engaging Vision Perception Pipeline.');
+    }
     const response = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
     cachePromptAnalysis(imageUrl, response);
     return response;
@@ -122,7 +131,7 @@ export async function generatePromptFromImage(
     cachePromptAnalysis(imageUrl, data);
     return data;
   } catch (error: any) {
-    console.warn('[AI STUDIO CLIENT WARNING] Ingestion request failed, engaging 14-Stage Vision Engine:', error.message);
+    console.warn('[AI STUDIO CLIENT WARNING] AG Router request unavailable, executing Vision Engine:', error.message);
     const fallbackResponse = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
     cachePromptAnalysis(imageUrl, fallbackResponse);
     return fallbackResponse;

@@ -22,7 +22,7 @@ export default function Navbar() {
   const [profile, setProfile] = useState<any>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const supabaseRef = useRef<any>(null);
-  if (!supabaseRef.current) {
+  if (supabaseRef.current == null) {
     supabaseRef.current = createClient();
   }
   const supabase = supabaseRef.current;
