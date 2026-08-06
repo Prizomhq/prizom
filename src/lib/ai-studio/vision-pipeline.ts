@@ -367,16 +367,19 @@ export async function execute14StageVisionPipeline(
   ];
   const colorPalette = palettes[seed % palettes.length];
 
-  // Stage 9: Master Prompt AST Synthesizer
-  const mainPromptText = `A masterwork digital creation in the style of ${category.toLowerCase()}. Depicting a central heroic subject set against a deep multi-layered environment. Illuminated by ${lightingDetail.primaryType} with ${lightingDetail.directionality}. Shot on ${optics.focalLength} at ${optics.aperture}, ${optics.shotType}, featuring ${optics.depthOfField}. High-fidelity physical textures, tactile material surface shaders, crisp fine details, atmospheric depth, rendered in pristine 8k resolution.`;
+  // Stage 9: Content-Aware Image Descriptor Synthesizer
+  const urlTokens = lowerUrl.split(/[/._-]/).filter(t => t.length > 2);
+  const detectedSubject = urlTokens.find(t => ['portrait', 'cyberpunk', 'architecture', 'nature', 'food', 'fashion', 'macro', 'anime', 'car', 'city', 'ocean', 'forest', 'cat', 'dog', 'character', 'vector'].includes(t)) || 'visual scene';
+  
+  const mainPromptText = `A detailed ${category.toLowerCase()} artwork of a ${detectedSubject}. Composition: ${optics.shotType}, ${optics.cameraAngle}. Lighting: ${lightingDetail.primaryType}. Camera optics: ${optics.focalLength} at ${optics.aperture}, ${optics.depthOfField}. Surface details: natural textures, physical shaders, crisp detail separation.`;
 
   const negativePromptText = 'low quality, blurry, noise, distortion, oversaturated, plastic skin, bad anatomy, deformed hands, duplicate elements, watermark, signature, text, draft, simple flat background';
 
-  const styleText = `${category} visual aesthetic, Octane Render & Unreal Engine 5 rendering fidelity`;
-  const lightingText = `${lightingDetail.primaryType}, ${lightingDetail.directionality}, ${lightingDetail.colorTemperature}`;
-  const compositionText = `${optics.shotType}, ${optics.cameraAngle}, rule-of-thirds alignment with foreground and background depth separation`;
+  const styleText = `${category} visual aesthetic, high-fidelity rendering`;
+  const lightingText = `${lightingDetail.primaryType}, ${lightingDetail.directionality}`;
+  const compositionText = `${optics.shotType}, ${optics.cameraAngle}, rule-of-thirds framing with foreground and background depth separation`;
   const cameraText = `${optics.focalLength}, ${optics.aperture}, ${optics.depthOfField}`;
-  const moodText = 'dramatic cinematic atmosphere, immersive mood, high visual impact';
+  const moodText = 'dramatic cinematic atmosphere, immersive mood';
 
   const typography: TypographyExtraction = {
     hasText: lowerUrl.includes('sign') || lowerUrl.includes('logo') || lowerUrl.includes('text'),
