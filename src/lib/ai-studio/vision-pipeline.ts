@@ -28,23 +28,21 @@ async function callLiveVisionProvider(
   if (!geminiKey && !openRouterKey) return null;
 
   const systemPrompt = `You are the master AI vision perception engine for Prizom AI Studio V3.
-Deconstruct the image into a high-precision structured JSON object for AI prompt reverse engineering.
+Deconstruct the image into a high-precision, production-ready AI image prompt for Midjourney v6.1 and Flux 1.1 Pro.
 Return ONLY valid JSON adhering strictly to this schema:
 {
   "title": "Short descriptive title of artwork/photo",
-  "description": "Comprehensive deconstruction of visual subject, depth layers, atmosphere, and lighting",
+  "mainPrompt": "Full visual prompt in continuous descriptive prose reverse-engineering the image for text-to-image generators. Detail the primary subject, apparel, posture, spatial environment, depth of field, exact lighting, surface textures, material shaders, camera lens optics, color grading, and artistic atmosphere. Do NOT include quality buzzwords like '8k', 'hyperrealistic', 'ultra detailed', or 'masterpiece'.",
   "category": "Photography | Concept Art | Architecture | Nature | 3D Render | Illustration | Fashion | Street Photography | Cyberpunk | Fantasy",
   "aspectRatio": "1:1 | 16:9 | 9:16 | 4:3 | 3:4",
-  "mainSubject": "Detailed physical description of primary subject, apparel, pose, textures",
-  "environment": "Deep spatial backdrop, depth layers, atmosphere, surrounding elements",
-  "style": "Exact visual aesthetic, art medium, rendering engine, or photography style",
-  "lighting": "Primary light type, key/fill/rim direction, color temperature, volumetric fog/flare",
-  "composition": "Framing, shot type, camera elevation, rule-of-thirds, depth separation",
-  "camera": "Lens focal length, aperture, depth of field, lens characteristics",
+  "style": "Exact visual style, art medium, or rendering engine",
+  "lighting": "Primary light type and directionality",
+  "composition": "Framing and camera shot type",
+  "camera": "Lens and focal length parameters",
   "colorPalette": ["#HEX1", "#HEX2", "#HEX3", "#HEX4", "#HEX5"],
   "mood": "Cinematic atmospheric mood descriptor",
   "negativePrompt": "low quality, blurry, noise, distortion, bad anatomy, deformed, watermark, signature",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "tags": ["tag1", "tag2", "tag3"],
   "hasText": false,
   "detectedText": []
 }`;
@@ -128,17 +126,24 @@ Return ONLY valid JSON adhering strictly to this schema:
       ? rawJson.colorPalette.slice(0, 5) 
       : ['#A855F7', '#06B6D4', '#0F172A', '#1E293B', '#F43F5E'];
 
-    const mainPromptText = `${rawJson.mainSubject || 'Subject'}. ${rawJson.environment || ''}. Style: ${rawJson.style || category}. Illuminated by ${rawJson.lighting || 'soft studio light'}. Shot on ${rawJson.camera || '50mm prime'}, ${rawJson.composition || 'centered framing'}. Pristine 8k resolution detail.`;
+    // High-fidelity continuous prompt synthesis
+    const mainPromptText = rawJson.mainPrompt || `${rawJson.mainSubject || 'Subject'}. ${rawJson.environment || ''}. Visual style: ${rawJson.style || category}. Illuminated by ${rawJson.lighting || 'soft studio light'}. Shot on ${rawJson.camera || '50mm prime'}, ${rawJson.composition || 'centered framing'}.`;
+    
+    // Clean any quality buzzwords
+    const cleanedMainPrompt = mainPromptText
+      .replace(/,?\s*(Pristine 8k resolution detail|8k resolution detail|hyper-realistic|masterpiece|ultra detailed|photorealistic rendering fidelity)/gi, '')
+      .trim();
+
     const negativePromptText = rawJson.negativePrompt || 'low quality, blurry, noise, distortion, plastic skin, bad anatomy, deformed hands, watermark, signature';
-    const styleText = `${rawJson.style || category}, photorealistic rendering fidelity`;
+    const styleText = rawJson.style || `${category} visual aesthetic`;
     const lightingText = rawJson.lighting || 'Soft studio lighting';
-    const compositionText = rawJson.composition || 'Centered rule-of-thirds framing';
+    const compositionText = rawJson.composition || 'Centered framing';
     const cameraText = rawJson.camera || '85mm f/1.4 prime lens';
     const moodText = rawJson.mood || 'Cinematic atmosphere';
 
-    const optics = analyzeCameraOptics(mainPromptText, styleText, compositionText);
-    const lightingDetail = analyzeLighting(mainPromptText, styleText, lightingText);
-    const spatialElements = extractSpatialLayout(mainPromptText, compositionText).elements;
+    const optics = analyzeCameraOptics(cleanedMainPrompt, styleText, compositionText);
+    const lightingDetail = analyzeLighting(cleanedMainPrompt, styleText, lightingText);
+    const spatialElements = extractSpatialLayout(cleanedMainPrompt, compositionText).elements;
 
     const typography: TypographyExtraction = {
       hasText: Boolean(rawJson.hasText),
@@ -147,14 +152,14 @@ Return ONLY valid JSON adhering strictly to this schema:
       placement: rawJson.hasText ? 'Centered text alignment' : 'None'
     };
 
-    const styleDNA = extractStyleDNA(mainPromptText, styleText, lightingText, colorPalette);
-    const characterIdentity = extractCharacterIdentity(mainPromptText, styleText);
-    const evaluation = evaluatePromptQuality(mainPromptText, styleText, negativePromptText);
+    const styleDNA = extractStyleDNA(cleanedMainPrompt, styleText, lightingText, colorPalette);
+    const characterIdentity = extractCharacterIdentity(cleanedMainPrompt, styleText);
+    const evaluation = evaluatePromptQuality(cleanedMainPrompt, styleText, negativePromptText);
 
     const basePartial: Partial<AGRouterPromptResponse> = {
       requestId,
       prompt: {
-        main: mainPromptText,
+        main: cleanedMainPrompt,
         negative: negativePromptText,
         style: styleText,
         lighting: lightingText,
@@ -166,8 +171,8 @@ Return ONLY valid JSON adhering strictly to this schema:
       optics,
       lightingDetail,
       metadata: {
-        title: rawJson.title || `${category} Visual Deconstruction`,
-        description: rawJson.description || `Reverse engineering spec for ${category.toLowerCase()} artwork.`,
+        title: rawJson.title || `${category} Reverse Engineering Spec`,
+        description: `High-fidelity prompt deconstruction for ${category.toLowerCase()} visual artwork.`,
         tags: Array.isArray(rawJson.tags) ? rawJson.tags : [category.toLowerCase(), 'prizom-v3'],
         category,
         aspectRatio,

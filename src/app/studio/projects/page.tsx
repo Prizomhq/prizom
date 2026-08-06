@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { StudioSubNav } from '@/components/ui/studio/StudioSubNav';
 import { getStudioProjects, togglePinStudioProject, deleteStudioProject, StudioProject } from '@/lib/ai-studio/projects-store';
 import { FolderKanban, Pin, Trash2, Search, Plus, Sparkles, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 
@@ -40,8 +39,6 @@ export default function StudioProjectsPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white pb-20">
-      <StudioSubNav creditBalance={10} />
-
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900 border border-zinc-800/80 rounded-3xl p-6 shadow-xl">

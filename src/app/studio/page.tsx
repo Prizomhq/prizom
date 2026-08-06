@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { StudioProvider, useStudioState } from '@/components/ui/studio/context';
-import { StudioSubNav } from '@/components/ui/studio/StudioSubNav';
 import { StudioUploader } from '@/components/ui/studio/StudioUploader';
 import { StudioLoading } from '@/components/ui/studio/StudioLoading';
 import { StudioEditor } from '@/components/ui/studio/StudioEditor';
@@ -42,8 +41,7 @@ export default function StudioSuitePage() {
   return (
     <StudioProvider initialCredits={initialCredits}>
       <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-600 selection:text-white pb-20">
-        <StudioSubNav creditBalance={initialCredits} />
-        <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <StudioContent />
         </main>
       </div>

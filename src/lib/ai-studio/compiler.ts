@@ -14,28 +14,16 @@ import { AGRouterPromptResponse, CompilerTargetOutput } from './schema';
  */
 export function compileToFlux(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
   const main = data.prompt?.main || '';
-  const style = data.prompt?.style || '';
-  const lighting = data.prompt?.lighting || '';
-  const optics = data.optics?.focalLength 
-    ? `${data.optics.shotType}, captured on a ${data.optics.focalLength} at ${data.optics.aperture} with ${data.optics.depthOfField}`
-    : '';
-  
   // Clean SD-style weighting syntax and parentheses for smooth Flux prose flow
-  const cleanMain = main.replace(/\(([^:]+):[\d.]+\)/g, '$1').replace(/[()]/g, '').trim();
-
-  const narrativeParts = [
-    cleanMain,
-    style ? `Visual style: ${style}.` : '',
-    lighting ? `Lighting: ${lighting}.` : '',
-    optics ? `Camera optics: ${optics}.` : ''
-  ].filter(Boolean);
-
-  const promptText = narrativeParts.join(' ');
+  let cleanMain = main.replace(/\(([^:]+):[\d.]+\)/g, '$1').replace(/[()]/g, '').trim();
+  cleanMain = cleanMain
+    .replace(/,?\s*(Pristine 8k resolution detail|8k resolution detail|hyper-realistic|masterpiece|ultra detailed|photorealistic rendering fidelity)/gi, '')
+    .trim();
 
   return {
     target: 'flux',
     modelName: 'Flux 1.1 Pro / Dev',
-    promptText,
+    promptText: cleanMain,
     negativePrompt: undefined, // Flux 1.1 Pro does not utilize negative prompts
     parameters: {
       guidanceScale: 3.5,
@@ -48,27 +36,22 @@ export function compileToFlux(data: Partial<AGRouterPromptResponse>): CompilerTa
 /**
  * Midjourney v6.1 Compiler
  * Formats concise visual aesthetic phrases followed by standard Midjourney parameter flags.
- * Uses --v 6.1 with --style raw for maximum optical fidelity.
+ * Dynamically applies --style raw based on image category.
  */
 export function compileToMidjourney(data: Partial<AGRouterPromptResponse>): CompilerTargetOutput {
   const main = data.prompt?.main || '';
-  const style = data.prompt?.style || '';
-  const lighting = data.prompt?.lighting || '';
-  const camera = data.prompt?.camera || '';
-  const mood = data.prompt?.mood || '';
+  const category = data.metadata?.category || 'Photography';
   const ar = data.metadata?.aspectRatio || '1:1';
 
-  // Format as comma-separated visual aesthetic phrases
-  const phraseParts = [
-    main.replace(/\(([^:]+):[\d.]+\)/g, '$1').replace(/[()]/g, ''),
-    style,
-    lighting,
-    camera,
-    mood
-  ].filter(Boolean);
+  let cleanMain = main.replace(/\(([^:]+):[\d.]+\)/g, '$1').replace(/[()]/g, '').trim();
+  cleanMain = cleanMain
+    .replace(/,?\s*(Pristine 8k resolution detail|8k resolution detail|hyper-realistic|masterpiece|ultra detailed|photorealistic rendering fidelity)/gi, '')
+    .trim();
 
-  // Midjourney v6.1 parameter flags
-  const promptText = `${phraseParts.join(', ')} --ar ${ar} --style raw --stylize 100 --v 6.1`;
+  const isPhotorealistic = ['Photography', 'Street Photography', 'Fashion', 'Architecture'].includes(category);
+  const styleFlag = isPhotorealistic ? ' --style raw' : '';
+
+  const promptText = `${cleanMain} --ar ${ar}${styleFlag} --v 6.1`;
 
   return {
     target: 'midjourney',
@@ -77,7 +60,7 @@ export function compileToMidjourney(data: Partial<AGRouterPromptResponse>): Comp
     negativePrompt: data.prompt?.negative ? `--no ${data.prompt.negative.replace(/,/g, ' ')}` : undefined,
     parameters: {
       aspectRatio: ar,
-      style: 'raw',
+      style: isPhotorealistic ? 'raw' : 'default',
       stylize: 100,
       version: '6.1'
     }

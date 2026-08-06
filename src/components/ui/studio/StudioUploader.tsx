@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { useImageCompressor } from './useImageCompressor';
 import { createStudioSessionAction } from '@/app/actions/studio';
@@ -17,7 +17,7 @@ export function StudioUploader() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (file: File) => {
+  const processAndUpload = useCallback(async (file: File) => {
     if (!file) return;
 
     // Check overdraft balance
@@ -92,7 +92,42 @@ export function StudioUploader() {
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [compressImage, dispatch, state.credits]);
+
+  const handleFileSelect = useCallback((file: File) => {
+    processAndUpload(file);
+  }, [processAndUpload]);
+
+  // Global Ctrl+V Clipboard Image Paste Listener
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!e.clipboardData || !e.clipboardData.files || e.clipboardData.files.length === 0) {
+        if (e.clipboardData?.items) {
+          for (let i = 0; i < e.clipboardData.items.length; i++) {
+            const item = e.clipboardData.items[i];
+            if (item.type.indexOf('image') !== -1) {
+              const pastedBlob = item.getAsFile();
+              if (pastedBlob) {
+                e.preventDefault();
+                handleFileSelect(pastedBlob);
+                return;
+              }
+            }
+          }
+        }
+        return;
+      }
+      
+      const file = e.clipboardData.files[0];
+      if (file && file.type.startsWith('image/')) {
+        e.preventDefault();
+        handleFileSelect(file);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [handleFileSelect]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -114,15 +149,16 @@ export function StudioUploader() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-8">
+      {/* V1 Hero Section */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-          <PrizomLogo size={16} /> Prizom Studio Engine
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-purple-400 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+          <PrizomLogo size={16} /> AI Studio V1
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
-          Transform Image into AI Prompt
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
+          Image to Prompt
         </h1>
-        <p className="text-zinc-500 font-medium text-sm sm:text-base max-w-lg mx-auto">
-          Upload any artwork or photo. AG Router will analyze visual composition, lighting, camera angles, and style to generate optimized prompt templates.
+        <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+          Upload any AI image to get a production-ready prompt instantly.
         </p>
       </div>
 
@@ -139,10 +175,10 @@ export function StudioUploader() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative border border-dashed rounded-[2rem] p-10 sm:p-14 text-center cursor-pointer transition-all duration-500 overflow-hidden ${
+        className={`relative border border-dashed rounded-[2.5rem] p-10 sm:p-14 text-center cursor-pointer transition-all duration-500 overflow-hidden ${
           isDragging
-            ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_40px_rgba(168,85,247,0.2)] scale-[1.02]'
-            : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-xl'
+            ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_50px_rgba(168,85,247,0.25)] scale-[1.02]'
+            : 'border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] backdrop-blur-xl'
         }`}
       >
         <input
@@ -154,47 +190,57 @@ export function StudioUploader() {
         />
 
         {/* Ambient Glow Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative z-10">
           {isCompressing || isUploading ? (
             <div className="flex flex-col items-center justify-center py-6">
               <div className="relative mb-6">
-                <div className="absolute inset-0 bg-purple-500 blur-xl opacity-20 rounded-full animate-pulse" />
+                <div className="absolute inset-0 bg-purple-500 blur-xl opacity-30 rounded-full animate-pulse" />
                 <Loader2 className="relative w-12 h-12 text-purple-400 animate-spin" />
               </div>
               <p className="text-white font-bold text-lg mb-1 tracking-tight">
-                {isCompressing ? 'Optimizing Image Canvas...' : 'Uploading Draft Image...'}
+                {isCompressing ? 'Optimizing Image...' : 'Analyzing Visual Data...'}
               </p>
-              <p className="text-zinc-400 text-xs font-medium">Preparing image for deep perception analysis</p>
+              <p className="text-zinc-400 text-xs font-medium">Generating your prompt instantly</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-20 h-20 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
                 <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <UploadCloud className="relative w-8 h-8 text-purple-400" />
+                <UploadCloud className="relative w-9 h-9 text-purple-400" />
               </div>
               
               <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight">
-                Drop your image here, or <span className="text-purple-400 underline decoration-purple-500/30 underline-offset-4">browse</span>
+                Drag & Drop image here, or <span className="text-purple-400 underline decoration-purple-500/40 underline-offset-4">browse file</span>
               </h3>
-              <p className="text-zinc-500 text-sm font-medium mb-6">
-                Supports JPG, PNG, and WebP up to 5MB
+              <p className="text-zinc-400 text-xs sm:text-sm font-medium mb-6">
+                Supports JPG, PNG, and WebP up to 5MB • <kbd className="px-2 py-0.5 rounded bg-zinc-800 text-purple-300 font-mono text-[11px] border border-zinc-700">Ctrl+V</kbd> paste enabled
               </p>
 
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 bg-zinc-950/80 border border-zinc-800/80 px-4 py-2.5 rounded-full shadow-inner">
-                <ImageIcon className="w-3.5 h-3.5 text-purple-500/70" />
-                Canvas optimized locally before upload
-              </div>
+              {/* Primary CTA Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-purple-200" />
+                <span>Generate Prompt ✨</span>
+              </button>
             </div>
           )}
         </div>
       </div>
 
       {/* Credit Status Indicator */}
-      <div className="mt-6 flex items-center justify-between text-xs font-medium text-zinc-400 px-2">
-        <span>1 Credit per AI Studio analysis</span>
-        <span className="font-bold text-purple-600">Available Credits: {state.credits}</span>
+      <div className="mt-6 flex items-center justify-between text-xs font-medium text-zinc-500 px-2">
+        <span className="flex items-center gap-1.5">
+          <ImageIcon className="w-3.5 h-3.5 text-purple-400/80" /> Auto-compressed for speed
+        </span>
+        <span className="font-bold text-purple-400">Available Credits: {state.credits}</span>
       </div>
     </div>
   );
