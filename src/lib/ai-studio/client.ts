@@ -177,7 +177,7 @@ export async function generatePromptFromImage(
       method: 'POST',
       headers,
       body: bodyString,
-      signal: AbortSignal.timeout(6000)
+      signal: AbortSignal.timeout(30000)
     });
 
     // Retry with reverse-engineer route if primary route 404s
@@ -192,7 +192,7 @@ export async function generatePromptFromImage(
           'X-Prizom-Signature': fallbackSig
         },
         body: bodyString,
-        signal: AbortSignal.timeout(6000)
+        signal: AbortSignal.timeout(30000)
       });
     }
 
@@ -209,7 +209,6 @@ export async function generatePromptFromImage(
   } catch (error: any) {
     console.warn('[AI STUDIO CLIENT WARNING] AG Router request unavailable, executing Vision Engine:', error.message);
     const fallbackResponse = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
-    cachePromptAnalysis(imageUrl, fallbackResponse);
     return fallbackResponse;
   }
 }
