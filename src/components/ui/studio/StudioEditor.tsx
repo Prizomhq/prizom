@@ -57,6 +57,30 @@ export function StudioEditor() {
     dispatch({ type: 'RESET_FLOW' });
   };
 
+  const [customVariables, setCustomVariables] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (state.aiResponse?.prompt.variables) {
+      setCustomVariables(state.aiResponse.prompt.variables);
+    }
+  }, [state.aiResponse]);
+
+  const handleVariableChange = (key: string, val: string) => {
+    const updated = { ...customVariables, [key]: val };
+    setCustomVariables(updated);
+
+    let template = state.aiResponse?.prompt.template || state.aiResponse?.prompt.main || '';
+    Object.entries(updated).forEach(([k, v]) => {
+      template = template.replaceAll(`{${k}}`, v);
+    });
+
+    dispatch({
+      type: 'EDIT_FIELD',
+      field: 'promptText',
+      value: template
+    });
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
       {/* V1 Streamlined 2-Column Grid */}
@@ -83,9 +107,36 @@ export function StudioEditor() {
 
             {/* Aspect Ratio Badge */}
             <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-zinc-950/80 backdrop-blur-md border border-purple-500/40 text-purple-300 text-xs font-black tracking-wide shadow-md">
-              {aspectRatio}
+              Aspect Ratio: {aspectRatio}
             </div>
           </div>
+
+          {/* Typography / Detected Text Details if available */}
+          {state.aiResponse?.typography?.hasText && (
+            <div className="p-4 rounded-2xl bg-zinc-950 border border-purple-500/30 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-purple-300">
+                <span>Detected Typography</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-200 border border-purple-800">
+                  {state.aiResponse.typography.fontStyle}
+                </span>
+              </div>
+              <div className="text-xs text-zinc-300 font-mono bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
+                {state.aiResponse.typography.detectedText.join(', ') || 'Text visible'}
+              </div>
+            </div>
+          )}
+
+          {/* Reference Image Guidance Card */}
+          {state.aiResponse?.prompt.referenceGuide && (
+            <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+                Composition Reference Guide
+              </span>
+              <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+                {state.aiResponse.prompt.referenceGuide}
+              </p>
+            </div>
+          )}
 
           {/* Reset / Create Another CTA Button */}
           <button
@@ -119,6 +170,35 @@ export function StudioEditor() {
                 Ready
               </span>
             </div>
+
+            {/* Editable Variables System */}
+            {state.aiResponse?.prompt.editableVariables && state.aiResponse.prompt.editableVariables.length > 0 && (
+              <div className="space-y-3 bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-purple-300 uppercase tracking-wider block">
+                    Editable Prompt Variables
+                  </label>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    Change variables to auto-update prompt text
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {state.aiResponse.prompt.editableVariables.map((variable) => (
+                    <div key={variable.key} className="space-y-1">
+                      <span className="text-[11px] font-mono text-zinc-400 font-bold block">
+                        {`{${variable.key}}`}
+                      </span>
+                      <input
+                        type="text"
+                        value={customVariables[variable.key] || variable.currentValue}
+                        onChange={(e) => handleVariableChange(variable.key, e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Clean Prompt Container Box */}
             <div className="space-y-2">

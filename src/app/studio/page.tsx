@@ -1,50 +1,65 @@
-'use client';
+import React from 'react';
+import { redirect } from 'next/navigation';
+import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
+import { createClient } from '@/lib/supabase/server';
+import { getUserCreditBalance } from '@/lib/ai-studio/credits';
+import { StudioClientWrapper } from '@/components/ui/studio/StudioClientWrapper';
+import { ShieldAlert, Lock, ArrowLeft } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
-import { StudioProvider, useStudioState } from '@/components/ui/studio/context';
-import { StudioUploader } from '@/components/ui/studio/StudioUploader';
-import { StudioLoading } from '@/components/ui/studio/StudioLoading';
-import { StudioEditor } from '@/components/ui/studio/StudioEditor';
+export const dynamic = 'force-dynamic';
 
-function StudioContent() {
-  const state = useStudioState();
+export default async function StudioSuitePage() {
+  const access = await verifyAiStudioAccessServer();
 
-  if (state.step === 'upload') {
-    return <StudioUploader />;
-  }
-
-  if (state.step === 'analyzing') {
-    return <StudioLoading />;
-  }
-
-  return <StudioEditor />;
-}
-
-export default function StudioSuitePage() {
-  const [initialCredits, setInitialCredits] = useState(10);
-
-  useEffect(() => {
-    async function loadCredits() {
-      try {
-        const { getCreditBalanceAction } = await import('@/app/actions/studio');
-        const res = await getCreditBalanceAction();
-        if (res.success && typeof res.balance === 'number') {
-          setInitialCredits(res.balance);
-        }
-      } catch (err) {
-        console.warn('Failed to load user credits:', err);
-      }
+  // Enforce Server-Side Super Admin authorization gate
+  if (!access.allowed) {
+    if (access.reason === 'unauthenticated') {
+      redirect('/login?next=/studio');
     }
-    loadCredits();
-  }, []);
 
-  return (
-    <StudioProvider initialCredits={initialCredits}>
-      <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-600 selection:text-white pb-20">
-        <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <StudioContent />
-        </main>
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400">
+            <Lock className="w-8 h-8" />
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="text-2xl font-extrabold tracking-tight text-white">
+              Super Admin Access Only
+            </h1>
+            <p className="text-sm text-zinc-400 font-medium leading-relaxed">
+              Prizom AI Studio V3 is currently in private experimental testing. Access is strictly restricted to Super Admin accounts.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-400 flex items-center justify-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-purple-400" />
+            <span>Authorization Status: {access.reason || 'restricted'}</span>
+          </div>
+
+          <a
+            href="/"
+            className="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" /> Return to Prizom Homepage
+          </a>
+        </div>
       </div>
-    </StudioProvider>
-  );
+    );
+  }
+
+  // Fetch authoritative user credit balance from database
+  let initialCredits = 10;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      initialCredits = await getUserCreditBalance(user.id, supabase);
+    }
+  } catch (err) {
+    console.warn('[STUDIO PAGE] Failed to fetch server credit balance:', err);
+  }
+
+  return <StudioClientWrapper initialCredits={initialCredits} />;
 }

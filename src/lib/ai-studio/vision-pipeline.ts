@@ -28,23 +28,32 @@ async function callLiveVisionProvider(
   if (!geminiKey && !openRouterKey) return null;
 
   const systemPrompt = `You are the master AI vision perception engine for Prizom AI Studio V3.
-Deconstruct the image into a high-precision, production-ready AI image prompt for Midjourney v6.1 and Flux 1.1 Pro.
+Deconstruct the image into a high-precision, production-ready AI image prompt for text-to-image generators (Midjourney v6.1, Flux 1.1 Pro, SDXL).
 Return ONLY valid JSON adhering strictly to this schema:
 {
   "title": "Short descriptive title of artwork/photo",
-  "mainPrompt": "Full visual prompt in continuous descriptive prose reverse-engineering the image for text-to-image generators. Detail the primary subject, apparel, posture, spatial environment, depth of field, exact lighting, surface textures, material shaders, camera lens optics, color grading, and artistic atmosphere. Do NOT include quality buzzwords like '8k', 'hyperrealistic', 'ultra detailed', or 'masterpiece'.",
-  "category": "Photography | Concept Art | Architecture | Nature | 3D Render | Illustration | Fashion | Street Photography | Cyberpunk | Fantasy",
-  "aspectRatio": "1:1 | 16:9 | 9:16 | 4:3 | 3:4",
+  "mainPrompt": "Full visual prompt in continuous descriptive prose reverse-engineering the image. Detail the primary subject, apparel, posture, spatial environment, depth of field, exact lighting, surface textures, material shaders, camera lens optics, color grading, and artistic atmosphere. Do NOT include quality buzzwords like '8k', 'hyperrealistic', 'ultra detailed', or 'masterpiece'.",
+  "category": "Photography | Concept Art | Architecture | Nature | 3D Render | Illustration | Fashion | Street Photography | Cyberpunk | Fantasy | Poster | Product",
+  "aspectRatio": "1:1 | 4:5 | 3:4 | 16:9 | 9:16 | 2:3 | 3:2",
   "style": "Exact visual style, art medium, or rendering engine",
   "lighting": "Primary light type and directionality",
-  "composition": "Framing and camera shot type",
-  "camera": "Lens and focal length parameters",
+  "composition": "Framing, shot type, visual hierarchy, and subject placement",
+  "camera": "Lens focal length, aperture, and depth of field parameters",
   "colorPalette": ["#HEX1", "#HEX2", "#HEX3", "#HEX4", "#HEX5"],
-  "mood": "Cinematic atmospheric mood descriptor",
+  "mood": "Atmospheric mood descriptor",
   "negativePrompt": "low quality, blurry, noise, distortion, bad anatomy, deformed, watermark, signature",
   "tags": ["tag1", "tag2", "tag3"],
   "hasText": false,
-  "detectedText": []
+  "detectedText": ["EXACT TEXT VISIBLE IN IMAGE"],
+  "typographyStyle": "Typography font style, weight, and color description if text is present",
+  "textPlacement": "Placement of text in the composition",
+  "templatePrompt": "Template prompt replacing key elements with {VARIABLE_NAME} brackets, e.g. 'A poster with headline \"{TITLE_TEXT}\" featuring {SUBJECT} in {ENVIRONMENT} with {LIGHTING}...'",
+  "editableVariables": [
+    { "key": "TITLE_TEXT", "currentValue": "PRIZOM", "category": "text", "description": "Headline text displayed in artwork" },
+    { "key": "SUBJECT", "currentValue": "futuristic warrior", "category": "subject", "description": "Primary focal subject" },
+    { "key": "BACKGROUND", "currentValue": "neon metropolis", "category": "environment", "description": "Background setting" }
+  ],
+  "referenceGuide": "Use this reference image as a composition guide. Preserve subject placement, framing, lighting direction, typography hierarchy, and overall color palette."
 }`;
 
   try {
@@ -156,10 +165,25 @@ Return ONLY valid JSON adhering strictly to this schema:
     const characterIdentity = extractCharacterIdentity(cleanedMainPrompt, styleText);
     const evaluation = evaluatePromptQuality(cleanedMainPrompt, styleText, negativePromptText);
 
+    const templatePrompt = rawJson.templatePrompt || cleanedMainPrompt;
+    const editableVariables = Array.isArray(rawJson.editableVariables) ? rawJson.editableVariables : [];
+    const variablesDict: Record<string, string> = {};
+    editableVariables.forEach((v: any) => {
+      if (v.key && v.currentValue) {
+        variablesDict[v.key] = v.currentValue;
+      }
+    });
+
+    const referenceGuide = rawJson.referenceGuide || `Use this image as a composition & style reference. Preserve the subject placement, framing, lighting direction, and color palette (${colorPalette.join(', ')}).`;
+
     const basePartial: Partial<AGRouterPromptResponse> = {
       requestId,
       prompt: {
         main: cleanedMainPrompt,
+        template: templatePrompt,
+        variables: variablesDict,
+        editableVariables,
+        referenceGuide,
         negative: negativePromptText,
         style: styleText,
         lighting: lightingText,
@@ -244,7 +268,16 @@ export async function execute14StageVisionPipeline(
     return liveResult;
   }
 
-  console.log('[AI STUDIO VISION PIPELINE] Running in Offline Synthetic Fallback Mode. Configure GEMINI_API_KEY or AG_ROUTER_BASE_URL for live vision analysis.');
+  const isDev = process.env.NODE_ENV === 'development';
+  const allowDevMocks = process.env.ENABLE_DEV_MOCKS === 'true';
+
+  if (!isDev || !allowDevMocks) {
+    throw new Error(
+      `AI Studio Perception Engine Error [Trace ID: ${requestId}]: Unable to execute vision analysis. No live AI Vision provider (Gemini / AG Router) responded successfully. Please verify API credentials.`
+    );
+  }
+
+  console.log('[AI STUDIO VISION PIPELINE] Running in Offline Synthetic Fallback Mode (Development only with ENABLE_DEV_MOCKS).');
 
   // Deterministic seed generation from image URL for offline reproducible hashing
   const hash = crypto.createHash('sha256').update(imageUrl || 'default_image').digest('hex');

@@ -42,10 +42,21 @@ export interface CompilerTargetOutput {
   comfyuiNodeGraph?: Record<string, any>;
 }
 
+export interface EditableVariable {
+  key: string;
+  currentValue: string;
+  category: 'text' | 'subject' | 'style' | 'color' | 'environment';
+  description: string;
+}
+
 export interface AGRouterPromptResponse {
   requestId: string;
   prompt: {
     main: string;
+    template?: string;
+    variables?: Record<string, string>;
+    editableVariables?: EditableVariable[];
+    referenceGuide?: string;
     negative: string;
     style: string;
     lighting: string;
