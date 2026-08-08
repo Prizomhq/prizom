@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 import { createClient } from '@/lib/supabase/server';
@@ -38,12 +39,12 @@ export default async function StudioSuitePage() {
             <span>Authorization Status: {access.reason || 'restricted'}</span>
           </div>
 
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm transition-all"
           >
             <ArrowLeft className="w-4 h-4" /> Return to Prizom Homepage
-          </a>
+          </Link>
         </div>
       </div>
     );
