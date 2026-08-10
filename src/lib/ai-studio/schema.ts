@@ -74,6 +74,12 @@ export interface AGRouterPromptResponse {
   typography?: TypographyExtraction;
   styleDNA?: StyleDNA;
   characterIdentity?: CharacterIdentityAnchor;
+  aiDetection?: {
+    confidenceCategory: 'HIGH_CONFIDENCE_AI' | 'LIKELY_AI' | 'UNCERTAIN' | 'LIKELY_REAL_PHOTOGRAPH' | 'NON_SUITABLE';
+    confidenceScore: number;
+    userGuidanceMessage: string;
+    isRealPhotograph: boolean;
+  };
   autonomousRefinement?: AutonomousRefinementResult;
   compilerTargets?: Record<string, CompilerTargetOutput>;
   metadata: {

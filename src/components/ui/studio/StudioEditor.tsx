@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useStudioState, useStudioDispatch } from './context';
 import { StudioPublishPanel } from './StudioPublishPanel';
 import { analyzeImageStudioAction } from '@/app/actions/studio';
-import { Sparkles, Copy, Check, ArrowLeft, Share2, X } from 'lucide-react';
+import { Sparkles, Copy, Check, ArrowLeft, Share2, X, Download } from 'lucide-react';
 
 export function StudioEditor() {
   const state = useStudioState();
@@ -43,8 +43,36 @@ export function StudioEditor() {
     }
   }, [state.step, state.uploadedImageUrl, state.aiResponse, dispatch]);
 
-  const activePromptText = (state.aiResponse?.prompt.main || state.userEdits.promptText || '').trim();
+  const [selectedTargetKey, setSelectedTargetKey] = useState<string>('flux');
+
+  const TARGET_MODELS = [
+    { id: 'flux', name: 'Flux 1.1 Pro' },
+    { id: 'midjourney', name: 'Midjourney v6.1' },
+    { id: 'sdxl', name: 'SDXL 1.0' },
+    { id: 'comfyui', name: 'ComfyUI Graph' },
+    { id: 'dalle3', name: 'DALL-E 3' }
+  ];
+
+  const targetOutput = state.aiResponse?.compilerTargets?.[selectedTargetKey];
+  const activePromptText = (
+    targetOutput?.promptText ||
+    state.aiResponse?.prompt.main ||
+    ''
+  ).trim();
+
+  const displayedPromptText = state.userEdits.promptText || activePromptText;
   const aspectRatio = state.userEdits.aspectRatio || state.aiResponse?.metadata.aspectRatio || '1:1';
+
+  const handleDownloadComfyUI = () => {
+    const jsonStr = JSON.stringify(targetOutput?.parameters || { nodes: [] }, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prizom-comfyui-graph-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleCopyPrompt = () => {
     if (!activePromptText) return;
@@ -200,14 +228,66 @@ export function StudioEditor() {
               </div>
             )}
 
-            {/* Clean Prompt Container Box */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
-                Prompt Text
-              </label>
-              <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-800/90 text-sm font-mono text-purple-200 leading-relaxed select-all whitespace-pre-wrap min-h-[140px] focus-within:border-purple-500/60 transition-colors shadow-inner">
-                {activePromptText || 'Generating production prompt...'}
+            {/* Real Photograph AI Perception Guidance Banner */}
+            {state.aiResponse?.aiDetection?.isRealPhotograph && (
+              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-medium space-y-1 animate-in fade-in">
+                <div className="font-bold flex items-center gap-1.5 text-amber-200">
+                  📷 Camera Photograph Perception Mode
+                </div>
+                <p className="leading-relaxed text-amber-300/90">
+                  {state.aiResponse.aiDetection.userGuidanceMessage}
+                </p>
               </div>
+            )}
+
+            {/* Model Target Compiler Tabs */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+                  Target AI Model Compiler
+                </label>
+                <span className="text-[10px] text-purple-400 font-mono">
+                  Compiled AST Prompt Syntax
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                {TARGET_MODELS.map((model) => {
+                  const isSelected = selectedTargetKey === model.id;
+                  return (
+                    <button
+                      key={model.id}
+                      type="button"
+                      onClick={() => setSelectedTargetKey(model.id)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer shrink-0 border ${
+                        isSelected
+                          ? 'bg-purple-600 text-white border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                          : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700'
+                      }`}
+                    >
+                      {model.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Interactive Prompt Textarea */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+                  {TARGET_MODELS.find(m => m.id === selectedTargetKey)?.name || 'Target'} Prompt (Editable)
+                </label>
+                <span className="text-[10px] text-purple-400 font-mono">
+                  Direct edit or variable sync enabled
+                </span>
+              </div>
+              <textarea
+                rows={5}
+                value={displayedPromptText}
+                onChange={(e) => dispatch({ type: 'EDIT_FIELD', field: 'promptText', value: e.target.value })}
+                placeholder="Generating production prompt..."
+                className="w-full p-5 bg-zinc-950 rounded-2xl border border-zinc-800/90 text-sm font-mono text-purple-200 leading-relaxed focus:outline-none focus:border-purple-500/80 transition-colors shadow-inner resize-y min-h-[140px]"
+              />
             </div>
 
             {/* Primary Action Buttons */}
@@ -219,8 +299,19 @@ export function StudioEditor() {
                 className="w-full sm:flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 {copied ? <Check className="w-5 h-5 text-emerald-300" /> : <Copy className="w-5 h-5" />}
-                <span>{copied ? 'Copied to Clipboard!' : 'Copy Prompt'}</span>
+                <span>{copied ? 'Copied to Clipboard!' : `Copy ${TARGET_MODELS.find(m => m.id === selectedTargetKey)?.name || 'Model'} Prompt`}</span>
               </button>
+
+              {/* ComfyUI Download Button if active */}
+              {selectedTargetKey === 'comfyui' && (
+                <button
+                  onClick={handleDownloadComfyUI}
+                  className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  <span>Download Workflow JSON</span>
+                </button>
+              )}
 
               {/* Share Card Button */}
               <button

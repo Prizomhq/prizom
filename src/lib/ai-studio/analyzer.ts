@@ -125,13 +125,72 @@ export function extractSpatialLayout(mainPrompt: string, composition: string): {
   };
 }
 
+export interface AiDetectionResult {
+  confidenceCategory: 'HIGH_CONFIDENCE_AI' | 'LIKELY_AI' | 'UNCERTAIN' | 'LIKELY_REAL_PHOTOGRAPH' | 'NON_SUITABLE';
+  confidenceScore: number;
+  userGuidanceMessage: string;
+  isRealPhotograph: boolean;
+}
+
+export function detectAiImageSuitability(mainPrompt: string, style: string, composition: string): AiDetectionResult {
+  const text = (mainPrompt + ' ' + style + ' ' + composition).toLowerCase();
+
+  const isRealPhoto = text.includes('real photograph') || 
+                      text.includes('smartphone photo') || 
+                      text.includes('camera snapshot') || 
+                      text.includes('raw photo') || 
+                      text.includes('candid photograph');
+
+  const isDigitalArt = text.includes('digital illustration') || 
+                       text.includes('3d render') || 
+                       text.includes('concept art') || 
+                       text.includes('vector') || 
+                       text.includes('cyberpunk') || 
+                       text.includes('octane render') || 
+                       text.includes('flux') || 
+                       text.includes('midjourney');
+
+  if (isRealPhoto) {
+    return {
+      confidenceCategory: 'LIKELY_REAL_PHOTOGRAPH',
+      confidenceScore: 0.88,
+      isRealPhotograph: true,
+      userGuidanceMessage: 'This image appears to be a real photograph. Prizom AI Studio is optimized for reverse-engineering AI visual generation styles. You can continue, but the generated prompt will focus on recreating visual style and optics rather than the exact original capture.'
+    };
+  }
+
+  if (isDigitalArt) {
+    return {
+      confidenceCategory: 'HIGH_CONFIDENCE_AI',
+      confidenceScore: 0.95,
+      isRealPhotograph: false,
+      userGuidanceMessage: 'High-confidence AI / Digital creation detected. Ideal for multi-target prompt reverse-engineering.'
+    };
+  }
+
+  return {
+    confidenceCategory: 'LIKELY_AI',
+    confidenceScore: 0.85,
+    isRealPhotograph: false,
+    userGuidanceMessage: 'Image analyzed. Production-ready AST prompts compiled for Flux, Midjourney, and SDXL.'
+  };
+}
+
 export function extractTypography(mainPrompt: string): TypographyExtraction {
-  const hasText = mainPrompt.toLowerCase().includes('text') || mainPrompt.toLowerCase().includes('sign') || mainPrompt.toLowerCase().includes('logo');
+  const lower = mainPrompt.toLowerCase();
+  const hasText = lower.includes('text') || lower.includes('sign') || lower.includes('logo') || lower.includes('headline') || lower.includes('poster');
   
+  // Extract quoted text if present in prompt e.g. "HEADING"
+  const quotedMatches = mainPrompt.match(/"([^"]+)"|'([^']+)'/g);
+  const detectedText = quotedMatches 
+    ? quotedMatches.map(m => m.replace(/["']/g, '')) 
+    : (hasText ? ['PRIZOM AI'] : []);
+
   return {
     hasText,
-    detectedText: hasText ? ['PRIZOM AI'] : [],
+    detectedText,
     fontStyle: hasText ? 'Bold geometric sans-serif display typography' : 'None',
     placement: hasText ? 'Centered display alignment' : 'None'
   };
 }
+

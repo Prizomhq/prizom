@@ -21,6 +21,7 @@ export function isAiStudioPublic(): boolean {
  * Server-side feature gate & authorization check for AI Studio.
  * - When AI_STUDIO_PUBLIC=true: Public access enabled for everyone.
  * - When AI_STUDIO_PUBLIC=false: ONLY Super Admin (role === 'super_admin') has access.
+ * Securely queries public.profiles database table (ignoring mutable client user_metadata).
  */
 export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult> {
   const isPublic = isAiStudioPublic();
@@ -36,13 +37,7 @@ export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult
       return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'unauthenticated' };
     }
 
-    // Check user_metadata role first for instant evaluation
-    const userMetaRole = user.user_metadata?.role;
-    if (userMetaRole === 'super_admin') {
-      return { allowed: true, isPublic: false, isSuperAdmin: true, reason: 'super_admin' };
-    }
-
-    // Fetch user profile role from database
+    // Fetch user profile role authoritatively from database
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -59,3 +54,4 @@ export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult
     return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'private_beta' };
   }
 }
+

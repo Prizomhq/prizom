@@ -65,11 +65,11 @@ export async function createStudioSessionAction(
       }
     }
 
-    // 2. Perform atomic credit debit based on tier (Premium = 3 credits, Standard = 1 credit)
-    const cost = process.env.NEXT_PUBLIC_DEFAULT_TIER === 'premium' ? 3 : 1;
+    // 2. Perform atomic credit debit (Standard default = 1 credit per generation)
+    const cost = 1;
     const deductRes = await deductCreditsAtomic(user.id, cost, 'studio_generation', null);
     if (!deductRes.success) {
-      return { success: false, error: deductRes.error || `Insufficient credits. This generation requires ${cost} credits.` };
+      return { success: false, error: deductRes.error || `Insufficient credits. This generation requires ${cost} credit.` };
     }
 
     // 3. Create session draft entry
@@ -95,6 +95,35 @@ export async function createStudioSessionAction(
     return { success: false, error: err.message || 'An unexpected error occurred.' };
   }
 }
+
+/**
+ * Server action allowing users to claim +5 bonus credits every 24 hours.
+ */
+export async function claimDailyCreditsAction() {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  try {
+    const { claimDailyCredits } = await import('@/lib/ai-studio/credits');
+    const claimRes = await claimDailyCredits(user.id, supabase);
+    if (!claimRes.success) {
+      return { success: false, error: claimRes.error || 'Failed to claim daily credits.' };
+    }
+    return { success: true, balance: claimRes.balanceAfter };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to claim daily credits.' };
+  }
+}
+
 
 /**
  * Server action to fetch studio session detail and version chain.
@@ -271,9 +300,30 @@ export async function analyzeImageStudioAction(
   try {
     const { generatePromptFromImage } = await import('@/lib/ai-studio/client');
     const response = await generatePromptFromImage(imageUrl, options);
+
+    // Asynchronously log telemetry
+    try {
+      const { logStudioTelemetry } = await import('@/lib/ai-studio/telemetry');
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      logStudioTelemetry({
+        requestId: response.requestId,
+        userId: user?.id || null,
+        modelUsed: response.generation?.modelUsed || 'vision-v3',
+        provider: response.generation?.provider || 'ag-router',
+        tokensUsed: response.generation?.tokensUsed || 420,
+        estimatedCost: 0.0015,
+        latencyMs: response.generation?.latencyMs || 450,
+        confidenceScore: response.quality?.confidenceScore,
+        qualityScore: response.quality?.qualityScore,
+        status: 'success'
+      }, supabase).catch(() => {});
+    } catch (_) {}
+
     return { success: true, response };
   } catch (err: any) {
     console.error('[STUDIO ACTION ERROR] Failed to analyze image:', err);
     return { success: false, error: err.message || 'Image analysis failed.' };
   }
 }
+

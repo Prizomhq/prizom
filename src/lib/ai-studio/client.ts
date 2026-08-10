@@ -41,6 +41,9 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   const styleDNA = extractStyleDNA(promptText, styleText, lightingText, colorPalette);
   const characterIdentity = extractCharacterIdentity(promptText, styleText);
   const evaluation = evaluatePromptQuality(promptText, styleText, 'blurry, low quality');
+  const { detectAiImageSuitability } = require('./analyzer');
+  const aiDetection = detectAiImageSuitability(promptText, styleText, compositionText);
+
   const basePartial: Partial<AGRouterPromptResponse> = {
     requestId,
     prompt: {
@@ -55,6 +58,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
     },
     optics,
     lightingDetail,
+    aiDetection,
     metadata: {
       title: data.analysis?.subject ? `${data.analysis.subject.slice(0, 30)} Spec` : 'Reverse Engineering Spec',
       description: 'High-fidelity prompt deconstruction.',

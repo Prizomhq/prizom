@@ -164,6 +164,8 @@ Return ONLY valid JSON adhering strictly to this schema:
     const styleDNA = extractStyleDNA(cleanedMainPrompt, styleText, lightingText, colorPalette);
     const characterIdentity = extractCharacterIdentity(cleanedMainPrompt, styleText);
     const evaluation = evaluatePromptQuality(cleanedMainPrompt, styleText, negativePromptText);
+    const { detectAiImageSuitability } = await import('./analyzer');
+    const aiDetection = detectAiImageSuitability(cleanedMainPrompt, styleText, compositionText);
 
     const templatePrompt = rawJson.templatePrompt || cleanedMainPrompt;
     const editableVariables = Array.isArray(rawJson.editableVariables) ? rawJson.editableVariables : [];
@@ -219,6 +221,7 @@ Return ONLY valid JSON adhering strictly to this schema:
       typography,
       styleDNA,
       characterIdentity,
+      aiDetection,
       compilerTargets,
       metadata: basePartial.metadata!,
       intelligence: {
@@ -465,6 +468,9 @@ export async function execute14StageVisionPipeline(
   const confidenceScore = 0.948 + ((seed % 35) / 1000);
   const qualityScore = 0.965 + ((seed % 25) / 1000);
 
+  const { detectAiImageSuitability } = require('./analyzer');
+  const aiDetection = detectAiImageSuitability(mainPromptText, styleText, compositionText);
+
   const fullResponse: AGRouterPromptResponse = {
     requestId,
     prompt: {
@@ -486,6 +492,7 @@ export async function execute14StageVisionPipeline(
     typography,
     styleDNA,
     characterIdentity,
+    aiDetection,
     compilerTargets,
     metadata: {
       title: `${category} Reverse Engineering Spec`,

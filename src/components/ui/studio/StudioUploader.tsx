@@ -5,7 +5,7 @@ import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles } from 
 import { useStudioState, useStudioDispatch } from './context';
 import { useImageCompressor } from './useImageCompressor';
 import { createStudioSessionAction } from '@/app/actions/studio';
-import PrizomLogo from '@/components/ui/PrizomLogo';
+import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
 
 export function StudioUploader() {
   const state = useStudioState();
@@ -43,9 +43,9 @@ export function StudioUploader() {
     setIsUploading(true);
 
     try {
-      // 1. Compress image client-side via canvas
-      const compressedBlob = await compressImage(file, 1024);
-      const compressedFile = new File([compressedBlob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
+      // 1. Compress image client-side via canvas & extract aspect ratio
+      const compressed = await compressImage(file, 1024);
+      const compressedFile = new File([compressed.blob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
         type: 'image/webp'
       });
 
@@ -77,12 +77,12 @@ export function StudioUploader() {
         throw new Error(sessionRes.error || 'Failed to create AI Studio session.');
       }
 
-      // 4. Update Reducer State
+      // 4. Update Reducer State (Deduct 1 credit)
       dispatch({
         type: 'SET_IMAGE',
         url: uploadResult.url,
         sessionId: sessionRes.session.id,
-        credits: state.credits - 1
+        credits: Math.max(0, state.credits - 1)
       });
 
     } catch (err: any) {
@@ -93,6 +93,28 @@ export function StudioUploader() {
       setIsUploading(false);
     }
   }, [compressImage, dispatch, state.credits]);
+
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimStatus, setClaimStatus] = useState<string | null>(null);
+
+  const handleClaimDailyCredits = async () => {
+    setIsClaiming(true);
+    setClaimStatus(null);
+    try {
+      const { claimDailyCreditsAction } = await import('@/app/actions/studio');
+      const res = await claimDailyCreditsAction();
+      if (res.success && typeof res.balance === 'number') {
+        dispatch({ type: 'EDIT_FIELD', field: 'promptText', value: state.userEdits.promptText }); // trigger re-render
+        setClaimStatus('✓ Claimed +5 Free Credits!');
+      } else {
+        setClaimStatus(res.error || 'Claim unavailable today');
+      }
+    } catch (err: any) {
+      setClaimStatus(err.message || 'Claim failed');
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   const handleFileSelect = useCallback((file: File) => {
     processAndUpload(file);
@@ -151,8 +173,9 @@ export function StudioUploader() {
     <div className="w-full max-w-3xl mx-auto px-4 py-8">
       {/* V1 Hero Section */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-purple-400 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-          <PrizomLogo size={16} /> AI Studio V1
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-white text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+          <PrizomWordmark height={14} className="text-white" />
+          <span className="text-purple-400 font-mono text-[11px] border-l border-zinc-700 pl-2">AI Studio • 1 Credit / Gen</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
           Image to Prompt
@@ -228,20 +251,41 @@ export function StudioUploader() {
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-purple-200" />
-                <span>Generate Prompt ✨</span>
+                <span>Generate Prompt ✨ (1 Credit)</span>
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Credit Status Indicator */}
-      <div className="mt-6 flex items-center justify-between text-xs font-medium text-zinc-500 px-2">
-        <span className="flex items-center gap-1.5">
-          <ImageIcon className="w-3.5 h-3.5 text-purple-400/80" /> Auto-compressed for speed
+      {/* Credit Status & Daily Claim Indicator */}
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-zinc-400 bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800">
+        <span className="flex items-center gap-1.5 text-zinc-400">
+          <ImageIcon className="w-3.5 h-3.5 text-purple-400/80" /> Auto-compressed WebP (1 Credit/Generation)
         </span>
-        <span className="font-bold text-purple-400">Available Credits: {state.credits}</span>
+
+        <div className="flex items-center gap-3">
+          <span className="font-bold text-purple-300 bg-purple-950/80 border border-purple-800/40 px-3 py-1 rounded-full font-mono">
+            Balance: {state.credits} Credits
+          </span>
+
+          <button
+            type="button"
+            onClick={handleClaimDailyCredits}
+            disabled={isClaiming}
+            className="px-3.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isClaiming ? 'Claiming...' : '🎁 Claim +5 Daily'}
+          </button>
+        </div>
       </div>
+
+      {claimStatus && (
+        <div className="mt-2 text-center text-xs font-bold text-emerald-400 animate-in fade-in">
+          {claimStatus}
+        </div>
+      )}
     </div>
   );
 }
+

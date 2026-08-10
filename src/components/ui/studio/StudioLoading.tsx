@@ -70,36 +70,50 @@ export function StudioLoading() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white border border-zinc-200 rounded-3xl p-8 sm:p-12 shadow-sm text-center">
-        {/* Animated Icon Glow */}
-        <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-full blur-xl opacity-40 animate-pulse" />
-          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg text-white">
-            <Sparkles className="w-10 h-10 animate-bounce" />
+      <div className="bg-zinc-900/90 border border-zinc-800/90 rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-xl text-center">
+        {/* Source Image Thumbnail Preview */}
+        {state.uploadedImageUrl ? (
+          <div className="relative w-20 h-20 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.3)]">
+            <img
+              src={state.uploadedImageUrl}
+              alt="Source analysis preview"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-1">
+              <Sparkles className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Animated Icon Glow */
+          <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-full blur-xl opacity-40 animate-pulse" />
+            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg text-white">
+              <Sparkles className="w-10 h-10 animate-bounce" />
+            </div>
+          </div>
+        )}
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold mb-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-xs font-bold mb-4">
           <Clock className="w-3.5 h-3.5" />
           <span>Estimated Time: ~{secondsRemaining}s</span>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mb-2">
-          AG Router is Analyzing Your Image
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+          Deconstructing Visual Perception
         </h2>
-        <p className="text-zinc-500 text-sm font-medium mb-6">
-          Generating structured prompts, camera settings, lighting parameters, and taxonomy tags.
+        <p className="text-zinc-400 text-sm font-medium mb-6">
+          Analyzing composition, camera optics, volumetric lighting, and compiling multi-target prompts.
         </p>
 
         {/* Visual Progress Bar */}
         <div className="max-w-md mx-auto mb-8">
-          <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden mb-2">
+          <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden mb-2 border border-zinc-800">
             <div
-              className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+              className="bg-gradient-to-r from-purple-600 to-indigo-500 h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <div className="flex justify-between text-[11px] font-bold text-zinc-400">
+          <div className="flex justify-between text-[11px] font-bold text-zinc-500 font-mono">
             <span>{progressPercent}% Complete</span>
             <span>Step {activeStepIndex + 1} of {LOADING_STEPS.length}</span>
           </div>
@@ -115,12 +129,12 @@ export function StudioLoading() {
             return (
               <div
                 key={idx}
-                className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 ${
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 ${
                   isCurrent
-                    ? 'bg-purple-50 border border-purple-200 text-purple-900 shadow-sm'
+                    ? 'bg-purple-950/60 border border-purple-500/40 text-purple-200 shadow-md'
                     : isDone
-                    ? 'text-zinc-700 opacity-80'
-                    : 'text-zinc-400 opacity-40'
+                    ? 'text-zinc-300 opacity-90'
+                    : 'text-zinc-600 opacity-40'
                 }`}
               >
                 <div
@@ -129,7 +143,7 @@ export function StudioLoading() {
                       ? 'bg-purple-600 text-white'
                       : isDone
                       ? 'bg-emerald-500 text-white'
-                      : 'bg-zinc-100 text-zinc-400'
+                      : 'bg-zinc-950 text-zinc-600 border border-zinc-800'
                   }`}
                 >
                   {isCurrent ? (
@@ -146,11 +160,11 @@ export function StudioLoading() {
 
         {/* Stream Field Skeleton Reveal */}
         {state.streamingField && (
-          <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 text-left animate-in fade-in duration-200">
-            <div className="text-[10px] font-black uppercase text-purple-600 tracking-wider mb-1">
-              Streaming Stream Token: {state.streamingField}
+          <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-800 text-left animate-in fade-in duration-200">
+            <div className="text-[10px] font-black uppercase text-purple-400 tracking-wider mb-1 font-mono">
+              Streaming Field Token: {state.streamingField}
             </div>
-            <div className="text-xs font-mono text-zinc-700 truncate">
+            <div className="text-xs font-mono text-zinc-300 truncate">
               {state.userEdits[state.streamingField as keyof typeof state.userEdits] || 'Populating...'}
             </div>
           </div>

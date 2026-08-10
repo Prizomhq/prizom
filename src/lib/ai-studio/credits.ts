@@ -111,3 +111,43 @@ export async function refundCreditsAtomic(
 
   throw new Error('Refund execution returned an empty RPC result');
 }
+
+/**
+ * Grants +5 bonus credits if 24 hours have passed since last daily claim.
+ */
+export async function claimDailyCredits(
+  userId: string,
+  customClient?: any
+): Promise<{ success: boolean; balanceAfter: number; error?: string }> {
+  const supabase = customClient || (await createAdminClient());
+
+  // Check last daily claim in ledger
+  const { data: lastClaim } = await supabase
+    .from('ai_credit_ledger')
+    .select('created_at')
+    .eq('user_id', userId)
+    .eq('reason', 'daily_claim')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (lastClaim) {
+    const lastClaimTime = new Date(lastClaim.created_at).getTime();
+    const hoursSince = (Date.now() - lastClaimTime) / (1000 * 60 * 60);
+    if (hoursSince < 24) {
+      const remainingHours = Math.ceil(24 - hoursSince);
+      return {
+        success: false,
+        balanceAfter: 0,
+        error: `Daily credits already claimed today. Please try again in ${remainingHours} hour(s).`
+      };
+    }
+  }
+
+  const result = await refundCreditsAtomic(userId, 5, 'daily_claim', null, supabase);
+  return {
+    success: true,
+    balanceAfter: result.balanceAfter
+  };
+}
+
