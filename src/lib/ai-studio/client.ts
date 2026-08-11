@@ -7,6 +7,7 @@ import { extractCharacterIdentity } from './identity';
 import { getCachedPromptAnalysis, cachePromptAnalysis } from './vector-cache';
 import { evaluatePromptQuality } from './evaluator';
 import { runAutonomousSelfRefinementLoop } from './autonomous-engine';
+import { build14SectionUniversalPrompt } from './universal-engine';
 
 const AG_ROUTER_BASE_URL = process.env.AG_ROUTER_BASE_URL || 'http://localhost:4000';
 const AG_ROUTER_API_KEY = process.env.AG_ROUTER_API_KEY || 'mock_prizom_api_key';
@@ -44,10 +45,25 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   const { detectAiImageSuitability } = require('./analyzer');
   const aiDetection = detectAiImageSuitability(promptText, styleText, compositionText);
 
+  const universalPromptData = build14SectionUniversalPrompt({
+    coreConcept: data.analysis?.subject || promptText,
+    subject: data.analysis?.subject || promptText,
+    composition: compositionText,
+    environment: data.analysis?.environment || 'Scene setting matching reference image.',
+    lighting: lightingText,
+    colorPalette,
+    cameraPhotographic: cameraText,
+    materialsTextures: 'Natural material shaders and tactile surface details.',
+    visualStyle: styleText,
+    negativeConstraints: data.negative_prompt || 'blurry, low quality, distorted',
+    aspectRatio: '1:1',
+    category: data.analysis?.photography_style || 'Photography'
+  });
+
   const basePartial: Partial<AGRouterPromptResponse> = {
     requestId,
     prompt: {
-      main: promptText,
+      main: universalPromptData.universalMasterPrompt,
       negative: data.negative_prompt || 'blurry, low quality, distorted',
       style: styleText,
       lighting: lightingText,
@@ -56,6 +72,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
       colorPalette,
       mood: data.analysis?.mood || 'Dramatic atmosphere'
     },
+    universalPrompt: universalPromptData,
     optics,
     lightingDetail,
     aiDetection,
@@ -72,6 +89,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   return {
     requestId,
     prompt: basePartial.prompt!,
+    universalPrompt: universalPromptData,
     spatial: { elements: spatialElements, layoutSummary: `${compositionText} depth layout.` },
     optics,
     lightingDetail,

@@ -49,6 +49,43 @@ export interface EditableVariable {
   description: string;
 }
 
+export type ComplexityLevel = 'simple' | 'medium' | 'high';
+
+export interface UniversalPromptSection {
+  key: string;
+  title: string;
+  content: string;
+  status: 'observed' | 'inferred' | 'uncertain';
+}
+
+export interface UniversalPromptData {
+  coreConcept: string;
+  subject: string;
+  composition: string;
+  environment: string;
+  lighting: string;
+  colorPalette: string;
+  cameraPhotographic: string;
+  materialsTextures: string;
+  typographyText: string;
+  graphicDesignElements: string;
+  visualStyle: string;
+  technicalQuality: string;
+  negativeConstraints: string;
+  aspectRatio: string;
+  sections: UniversalPromptSection[];
+  fullMarkdownPrompt: string;
+  universalMasterPrompt: string;
+  complexityLevel: ComplexityLevel;
+}
+
+export interface QualityValidationResult {
+  isValid: boolean;
+  missingSections: string[];
+  score: number;
+  feedback: string[];
+}
+
 export interface AGRouterPromptResponse {
   requestId: string;
   prompt: {
@@ -65,6 +102,7 @@ export interface AGRouterPromptResponse {
     colorPalette: string[];
     mood: string;
   };
+  universalPrompt?: UniversalPromptData;
   spatial?: {
     elements: SpatialElement[];
     layoutSummary: string;

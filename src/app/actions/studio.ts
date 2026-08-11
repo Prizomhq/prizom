@@ -57,6 +57,22 @@ export async function createStudioSessionAction(
     // Assert user standing (banned, suspended)
     await assertNotSuspendedOrBanned(user.id);
 
+    // Idempotency check: Check if user created session for identical image URL recently (within 5 min)
+    const { data: existingSession } = await supabase
+      .from('ai_studio_sessions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('cloudinary_url', cloudinaryUrl)
+      .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingSession) {
+      console.log('[STUDIO ACTION IDEMPOTENCY] Found active session for user & URL, re-using session:', existingSession.id);
+      return { success: true, session: existingSession, idempotentHit: true };
+    }
+
     // 1. CAPTCHA turnstile check if secret key configured
     if (process.env.TURNSTILE_SECRET_KEY && turnstileToken) {
       const captchaRes = await verifyTurnstileToken(turnstileToken);

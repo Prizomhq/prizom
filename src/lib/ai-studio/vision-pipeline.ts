@@ -6,6 +6,7 @@ import { extractCharacterIdentity } from './identity';
 import { evaluatePromptQuality } from './evaluator';
 import { runAutonomousSelfRefinementLoop } from './autonomous-engine';
 import { analyzeCameraOptics, analyzeLighting, extractSpatialLayout } from './analyzer';
+import { build14SectionUniversalPrompt, validateUniversalPromptQuality, extractEditableVariablesFromPrompt } from './universal-engine';
 
 export interface VisionPipelineOptions {
   quality?: 'standard' | 'premium';
@@ -178,10 +179,30 @@ Return ONLY valid JSON adhering strictly to this schema:
 
     const referenceGuide = rawJson.referenceGuide || `Use this image as a composition & style reference. Preserve the subject placement, framing, lighting direction, and color palette (${colorPalette.join(', ')}).`;
 
+    const universalPromptData = build14SectionUniversalPrompt({
+      coreConcept: rawJson.title || rawJson.concept || cleanedMainPrompt,
+      subject: rawJson.mainSubject || rawJson.subject || cleanedMainPrompt,
+      composition: compositionText,
+      environment: rawJson.environment || 'Background atmosphere matching scene.',
+      lighting: lightingText,
+      colorPalette,
+      cameraPhotographic: cameraText,
+      materialsTextures: rawJson.materials || 'Tactile surface rendering.',
+      typographyText: typography.hasText ? `Text reads "${typography.detectedText.join(' ')}"` : undefined,
+      visualStyle: styleText,
+      negativeConstraints: negativePromptText,
+      aspectRatio,
+      hasText: typography.hasText,
+      detectedText: typography.detectedText,
+      category
+    });
+
+    const qualityGate = validateUniversalPromptQuality(universalPromptData);
+
     const basePartial: Partial<AGRouterPromptResponse> = {
       requestId,
       prompt: {
-        main: cleanedMainPrompt,
+        main: universalPromptData.universalMasterPrompt,
         template: templatePrompt,
         variables: variablesDict,
         editableVariables,
@@ -194,6 +215,7 @@ Return ONLY valid JSON adhering strictly to this schema:
         colorPalette,
         mood: moodText
       },
+      universalPrompt: universalPromptData,
       optics,
       lightingDetail,
       metadata: {
@@ -212,6 +234,7 @@ Return ONLY valid JSON adhering strictly to this schema:
     return {
       requestId,
       prompt: basePartial.prompt!,
+      universalPrompt: universalPromptData,
       spatial: {
         elements: spatialElements,
         layoutSummary: `${compositionText} with structured depth separation across foreground, midground, and background layers.`
@@ -231,8 +254,8 @@ Return ONLY valid JSON adhering strictly to this schema:
         launchUrl: 'https://prizom.in/studio'
       },
       quality: {
-        confidenceScore: evaluation.clipAlignmentScore,
-        qualityScore: evaluation.overallScore / 100,
+        confidenceScore: qualityGate.isValid ? Math.max(evaluation.clipAlignmentScore, qualityGate.score / 100) : evaluation.clipAlignmentScore,
+        qualityScore: qualityGate.score / 100,
         promptClarity: evaluation.promptClarityIndex,
         estimatedOutputQuality: evaluation.estimatedFidelityGrade
       },
@@ -471,10 +494,28 @@ export async function execute14StageVisionPipeline(
   const { detectAiImageSuitability } = require('./analyzer');
   const aiDetection = detectAiImageSuitability(mainPromptText, styleText, compositionText);
 
+  const universalPromptData = build14SectionUniversalPrompt({
+    coreConcept: `${category} depiction of ${detectedSubject}`,
+    subject: detectedSubject,
+    composition: compositionText,
+    environment: 'Atmospheric scene environment with rich depth layering.',
+    lighting: lightingText,
+    colorPalette,
+    cameraPhotographic: cameraText,
+    materialsTextures: 'Crisp tactile surface shaders and physical micro-contrast separation.',
+    typographyText: typography.hasText ? `Text reads "${typography.detectedText.join(' ')}"` : undefined,
+    visualStyle: styleText,
+    negativeConstraints: negativePromptText,
+    aspectRatio,
+    hasText: typography.hasText,
+    detectedText: typography.detectedText,
+    category
+  });
+
   const fullResponse: AGRouterPromptResponse = {
     requestId,
     prompt: {
-      main: mainPromptText,
+      main: universalPromptData.universalMasterPrompt,
       negative: negativePromptText,
       style: styleText,
       lighting: lightingText,
@@ -483,6 +524,7 @@ export async function execute14StageVisionPipeline(
       colorPalette,
       mood: moodText
     },
+    universalPrompt: universalPromptData,
     spatial: {
       elements: spatialElements,
       layoutSummary: `${optics.shotType} with structured depth separation across foreground, midground, and background layers.`
@@ -497,7 +539,7 @@ export async function execute14StageVisionPipeline(
     metadata: {
       title: `${category} Reverse Engineering Spec`,
       description: `High-fidelity prompt deconstruction for ${category.toLowerCase()} visual artwork.`,
-      tags: [category.toLowerCase().replace(/\s+/g, '-'), 'prizom-v2', 'reverse-engineered', '8k-photorealism', 'cinematic'],
+      tags: [category.toLowerCase().replace(/\s+/g, '-'), 'prizom-v2', 'reverse-engineered', 'cinematic'],
       category,
       aspectRatio,
       promptType: 'image'
