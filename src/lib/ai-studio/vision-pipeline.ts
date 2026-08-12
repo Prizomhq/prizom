@@ -74,7 +74,7 @@ Return ONLY valid JSON adhering strictly to this schema:
     let modelUsed = 'gemini-1.5-flash';
 
     if (geminiKey) {
-      let parts: any[] = [{ text: systemPrompt }];
+      const parts: any[] = [{ text: systemPrompt }];
 
       // Fetch image bytes server-side to pass real visual pixels via inline_data to Gemini
       try {
