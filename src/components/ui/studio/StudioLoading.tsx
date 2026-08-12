@@ -50,15 +50,19 @@ export function StudioLoading() {
           if (isMounted) {
             dispatch({ type: 'SET_RESPONSE', response: res.response });
 
-            // Persist completion and prompt version to database asynchronously
+            // Persist completion and prompt version to database
             if (state.sessionId) {
-              completeStudioSessionAction(
-                state.sessionId,
-                1,
-                res.response.prompt.main,
-                res.response.prompt.negative || null,
-                res.response
-              ).catch((pErr) => console.warn('[STUDIO PERSISTENCE WARN]', pErr));
+              try {
+                await completeStudioSessionAction(
+                  state.sessionId,
+                  1,
+                  res.response.prompt.main,
+                  res.response.prompt.negative || null,
+                  res.response
+                );
+              } catch (pErr) {
+                console.warn('[STUDIO PERSISTENCE WARN]', pErr);
+              }
             }
           }
         } catch (err: any) {

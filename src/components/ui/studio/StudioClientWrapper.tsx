@@ -39,24 +39,46 @@ function StudioContent() {
             ? res.versions[res.versions.length - 1]
             : null;
 
-          const response = latestVersion?.ag_router_response || {
+          const rawAg = latestVersion?.ag_router_response;
+          let parsedAg: any = null;
+          if (rawAg) {
+            if (typeof rawAg === 'string') {
+              try { parsedAg = JSON.parse(rawAg); } catch (_) {}
+            } else if (typeof rawAg === 'object') {
+              parsedAg = rawAg;
+            }
+          }
+
+          const resolvedPromptText = (latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction')
+            ? latestVersion.prompt_text
+            : (parsedAg?.prompt?.main && parsedAg.prompt.main !== 'Visual prompt deconstruction')
+              ? parsedAg.prompt.main
+              : 'A detailed high-fidelity visual artwork capturing subject composition, soft studio lighting vectors, and rich atmospheric depth.';
+
+          const response = (parsedAg && parsedAg.prompt?.main) ? {
+            ...parsedAg,
+            prompt: {
+              ...parsedAg.prompt,
+              main: resolvedPromptText
+            }
+          } : {
             requestId: res.session.request_id || crypto.randomUUID(),
             prompt: {
-              main: latestVersion?.prompt_text || 'Visual prompt deconstruction',
-              negative: latestVersion?.negative_prompt || 'blurry, low quality, distortion',
-              style: 'Photorealistic',
-              lighting: 'Natural lighting',
-              composition: 'Centered framing',
-              camera: '50mm prime lens',
-              colorPalette: ['#A855F7', '#06B6D4', '#0F172A'],
-              mood: 'Cinematic atmosphere'
+              main: resolvedPromptText,
+              negative: latestVersion?.negative_prompt || parsedAg?.prompt?.negative || 'blurry, low quality, noise, distortion, watermark',
+              style: parsedAg?.prompt?.style || 'Photorealistic',
+              lighting: parsedAg?.prompt?.lighting || 'Natural studio lighting',
+              composition: parsedAg?.prompt?.composition || 'Centered framing',
+              camera: parsedAg?.prompt?.camera || '50mm prime lens',
+              colorPalette: parsedAg?.prompt?.colorPalette || ['#A855F7', '#06B6D4', '#0F172A'],
+              mood: parsedAg?.prompt?.mood || 'Cinematic atmosphere'
             },
             metadata: {
-              title: 'Visual Deconstruction',
-              description: 'Reverse engineering analysis',
-              tags: ['ai-studio', 'saved-generation'],
-              category: 'Photography',
-              aspectRatio: res.session.aspect_ratio || '1:1',
+              title: parsedAg?.metadata?.title || 'Universal Visual Specification',
+              description: parsedAg?.metadata?.description || 'Reverse engineering analysis',
+              tags: parsedAg?.metadata?.tags || ['ai-studio', 'saved-generation'],
+              category: parsedAg?.metadata?.category || 'Photography',
+              aspectRatio: res.session.aspect_ratio || parsedAg?.metadata?.aspectRatio || '1:1',
               promptType: 'image'
             },
             intelligence: {

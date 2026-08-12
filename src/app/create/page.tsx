@@ -287,14 +287,24 @@ function CreateContent() {
             ? res.versions[res.versions.length - 1]
             : null;
           
-          const response = latestVersion?.ag_router_response;
-          if (response) {
-            setTitle(response.metadata?.title || 'Universal AI Prompt');
-            setPromptText(response.prompt?.main || latestVersion?.prompt_text || '');
-            setNegativePrompt(response.prompt?.negative || latestVersion?.negative_prompt || '');
-            setCategory(response.metadata?.category || 'Photography');
-            setTags(response.metadata?.tags || ['ai-studio', 'universal-prompt']);
-            setAspectRatio(res.session.aspect_ratio || response.metadata?.aspectRatio || '1:1');
+          const rawAg = latestVersion?.ag_router_response;
+          let response: any = null;
+          if (rawAg) {
+            if (typeof rawAg === 'string') {
+              try { response = JSON.parse(rawAg); } catch (_) {}
+            } else if (typeof rawAg === 'object') {
+              response = rawAg;
+            }
+          }
+
+          const mainText = latestVersion?.prompt_text || response?.prompt?.main || '';
+          if (mainText && mainText !== 'Visual prompt deconstruction') {
+            setTitle(response?.metadata?.title || 'Universal AI Prompt');
+            setPromptText(mainText);
+            setNegativePrompt(response?.prompt?.negative || latestVersion?.negative_prompt || '');
+            setCategory(response?.metadata?.category || 'Photography');
+            setTags(response?.metadata?.tags || ['ai-studio', 'universal-prompt']);
+            setAspectRatio(res.session.aspect_ratio || response?.metadata?.aspectRatio || '1:1');
           }
         }
       } catch (err) {
