@@ -28,33 +28,44 @@ async function callLiveVisionProvider(
 
   if (!geminiKey && !openRouterKey) return null;
 
-  const systemPrompt = `You are the master AI vision perception engine for Prizom AI Studio V3.
-Deconstruct the image into a high-precision, production-ready AI image prompt for text-to-image generators (Midjourney v6.1, Flux 1.1 Pro, SDXL).
+  const systemPrompt = `You are the Principal AI Vision & Reverse-Engineering Engine for Prizom AI Studio V3.
+Deconstruct the image into a high-precision, production-grade Universal Image Reconstruction Prompt for text-to-image generators (Flux 1.1 Pro, Midjourney v6.1, SDXL).
+
+CRITICAL INSTRUCTIONS FOR IMAGE DECONSTRUCTION:
+1. SUBJECT & IDENTITY: Detail the main focal subject, posture, facial expression, eye contact, physical detail, clothing garments, materials, patterns, and positioning.
+2. COMPOSITION & SPATIAL RELATIONSHIPS: Describe framing (wide, medium, close-up), camera height/angle, visual hierarchy, rule-of-thirds alignment, negative space, and specific spatial interactions between foreground, midground, and background elements.
+3. ENVIRONMENT & SETTING: Location architecture, background structures, atmospheric elements, surfaces, textures, and environmental context.
+4. VOLUMETRIC LIGHTING: Identify key light, fill light, rim light, directionality, shadows, highlights, softness/hardness, ambient light drop-off, color temperature (e.g. 5600K daylight, 3200K tungsten), and reflections.
+5. COLOR PALETTE: List dominant, secondary, and accent colors with precise tonal relationships and contrast levels.
+6. MATERIALS & TEXTURES: Physical PBR shader characteristics (skin pores, fabric weaves, brushed metal, wet glass, glossy plastic, matte concrete, water translucency).
+7. CAMERA & OPTICS: Infer visual optical characteristics (perspective, lens focal length impression, depth of field falloff, bokeh, background separation, micro-contrast). Do NOT make false claims about exact camera brand hardware.
+8. TYPOGRAPHY & GRAPHIC DESIGN: If readable text exists, detect exact text characters, font weight, color, alignment, and relationship to background.
+9. ADAPTIVE DEPTH: For complex images, provide exhaustive, granular descriptions. For simple images, be concise and exact. Avoid empty filler or low-quality buzzwords like '8k', 'hyperrealistic', 'masterpiece', or 'award winning'.
+
 Return ONLY valid JSON adhering strictly to this schema:
 {
   "title": "Short descriptive title of artwork/photo",
-  "mainPrompt": "Full visual prompt in continuous descriptive prose reverse-engineering the image. Detail the primary subject, apparel, posture, spatial environment, depth of field, exact lighting, surface textures, material shaders, camera lens optics, color grading, and artistic atmosphere. Do NOT include quality buzzwords like '8k', 'hyperrealistic', 'ultra detailed', or 'masterpiece'.",
+  "mainPrompt": "Exhaustive, continuous visual prompt reverse-engineering the image in complete prose. Detail the primary subject, apparel, posture, spatial environment, depth of field, exact lighting vectors, surface textures, material shaders, camera optics, color palette, and visual style.",
   "category": "Photography | Concept Art | Architecture | Nature | 3D Render | Illustration | Fashion | Street Photography | Cyberpunk | Fantasy | Poster | Product",
-  "aspectRatio": "1:1 | 4:5 | 3:4 | 16:9 | 9:16 | 2:3 | 3:2",
-  "style": "Exact visual style, art medium, or rendering engine",
-  "lighting": "Primary light type and directionality",
-  "composition": "Framing, shot type, visual hierarchy, and subject placement",
-  "camera": "Lens focal length, aperture, and depth of field parameters",
+  "aspectRatio": "1:1 | 4:5 | 5:4 | 3:4 | 4:3 | 16:9 | 9:16 | 2:3 | 3:2 | 21:9",
+  "style": "Exact visual style, rendering medium, or artistic aesthetic",
+  "lighting": "Primary light source, directionality, highlights, and shadow falloff",
+  "composition": "Framing, shot type, subject placement, and spatial relationships",
+  "camera": "Lens impression, focal length, aperture, and depth of field",
   "colorPalette": ["#HEX1", "#HEX2", "#HEX3", "#HEX4", "#HEX5"],
   "mood": "Atmospheric mood descriptor",
-  "negativePrompt": "low quality, blurry, noise, distortion, bad anatomy, deformed, watermark, signature",
+  "negativePrompt": "low quality, blurry, noise, distortion, bad anatomy, deformed hands, plastic skin, watermark, signature",
   "tags": ["tag1", "tag2", "tag3"],
   "hasText": false,
-  "detectedText": ["EXACT TEXT VISIBLE IN IMAGE"],
-  "typographyStyle": "Typography font style, weight, and color description if text is present",
-  "textPlacement": "Placement of text in the composition",
-  "templatePrompt": "Template prompt replacing key elements with {VARIABLE_NAME} brackets, e.g. 'A poster with headline \"{TITLE_TEXT}\" featuring {SUBJECT} in {ENVIRONMENT} with {LIGHTING}...'",
+  "detectedText": ["EXACT READABLE TEXT VISIBLE IN IMAGE"],
+  "typographyStyle": "Typography font style, weight, alignment, and color description if text is present",
+  "textPlacement": "Placement of text in the visual layout",
+  "templatePrompt": "Template prompt replacing key elements with {VARIABLE_NAME} brackets",
   "editableVariables": [
-    { "key": "TITLE_TEXT", "currentValue": "PRIZOM", "category": "text", "description": "Headline text displayed in artwork" },
-    { "key": "SUBJECT", "currentValue": "futuristic warrior", "category": "subject", "description": "Primary focal subject" },
-    { "key": "BACKGROUND", "currentValue": "neon metropolis", "category": "environment", "description": "Background setting" }
+    { "key": "SUBJECT", "currentValue": "main focal subject", "category": "subject", "description": "Primary focal subject" },
+    { "key": "ENVIRONMENT", "currentValue": "background setting", "category": "environment", "description": "Environment setting" }
   ],
-  "referenceGuide": "Use this reference image as a composition guide. Preserve subject placement, framing, lighting direction, typography hierarchy, and overall color palette."
+  "referenceGuide": "Use this reference image strictly as a composition and style guide. Preserve subject placement, framing, lighting direction, and color palette."
 }`;
 
   try {

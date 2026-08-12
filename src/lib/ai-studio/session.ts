@@ -9,22 +9,27 @@ export async function createStudioSession(
   cloudinaryUrl: string,
   cloudinaryPublicId: string,
   requestId: string,
+  meta?: { width?: number; height?: number; aspectRatio?: string },
   customClient?: any
 ): Promise<AIStudioSession> {
   const supabase = customClient || (await createClient());
 
+  const insertData: any = {
+    user_id: userId,
+    cloudinary_url: cloudinaryUrl,
+    cloudinary_public_id: cloudinaryPublicId,
+    request_id: requestId,
+    status: 'pending',
+    active_version: 1
+  };
+
+  if (meta?.aspectRatio) {
+    insertData.aspect_ratio = meta.aspectRatio;
+  }
+
   const { data, error } = await supabase
     .from('ai_studio_sessions')
-    .insert([
-      {
-        user_id: userId,
-        cloudinary_url: cloudinaryUrl,
-        cloudinary_public_id: cloudinaryPublicId,
-        request_id: requestId,
-        status: 'pending',
-        active_version: 1
-      }
-    ])
+    .insert([insertData])
     .select()
     .single();
 
@@ -164,3 +169,70 @@ export async function getStudioSession(
     versions: (versions || []) as AIPromptVersion[]
   };
 }
+
+/**
+ * Retrieves all studio sessions for a specific user.
+ */
+export async function getUserStudioSessions(
+  userId: string,
+  limit: number = 30,
+  customClient?: any
+): Promise<{ session: AIStudioSession; latestVersion: AIPromptVersion | null }[]> {
+  const supabase = customClient || (await createClient());
+
+  const { data: sessions, error } = await supabase
+    .from('ai_studio_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('[SESSION UTILS ERROR] Failed to fetch user sessions:', error.message);
+    return [];
+  }
+
+  if (!sessions || sessions.length === 0) return [];
+
+  const sessionIds = sessions.map((s: any) => s.id);
+  const { data: versions } = await supabase
+    .from('ai_prompt_versions')
+    .select('*')
+    .in('session_id', sessionIds)
+    .order('version_number', { ascending: false });
+
+  const result = sessions.map((sess: any) => {
+    const latestVersion = (versions || []).find((v: any) => v.session_id === sess.id) || null;
+    return {
+      session: sess as AIStudioSession,
+      latestVersion: latestVersion as AIPromptVersion | null
+    };
+  });
+
+  return result;
+}
+
+/**
+ * Deletes a studio session and associated version iterations for a user.
+ */
+export async function deleteStudioSession(
+  sessionId: string,
+  userId: string,
+  customClient?: any
+): Promise<boolean> {
+  const supabase = customClient || (await createClient());
+
+  const { error } = await supabase
+    .from('ai_studio_sessions')
+    .delete()
+    .eq('id', sessionId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('[SESSION UTILS ERROR] Failed to delete session:', error.message);
+    return false;
+  }
+
+  return true;
+}
+

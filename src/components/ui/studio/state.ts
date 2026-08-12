@@ -4,6 +4,9 @@ export interface StudioState {
   step: 'upload' | 'analyzing' | 'editing' | 'publishing' | 'done';
   sessionId: string | null;
   uploadedImageUrl: string | null;
+  sourceWidth?: number | null;
+  sourceHeight?: number | null;
+  sourceAspectRatio?: string | null;
   activeVersion: number;
   aiResponse: AGRouterPromptResponse | null;
   userEdits: {
@@ -21,10 +24,11 @@ export interface StudioState {
 }
 
 export type StudioAction =
-  | { type: 'SET_IMAGE'; url: string; sessionId: string; credits: number }
+  | { type: 'SET_IMAGE'; url: string; sessionId: string; credits: number; aspectRatio?: string; width?: number; height?: number }
   | { type: 'START_ANALYSIS' }
   | { type: 'STREAM_FIELD'; field: string; value: string }
   | { type: 'SET_RESPONSE'; response: AGRouterPromptResponse }
+  | { type: 'HYDRATE_SESSION'; sessionId: string; url: string; response: AGRouterPromptResponse; activeVersion?: number; aspectRatio?: string }
   | { type: 'EDIT_FIELD'; field: keyof StudioState['userEdits']; value: any }
   | { type: 'INCREMENT_VERSION'; response: AGRouterPromptResponse }
   | { type: 'SUBMIT_PUBLISH' }
@@ -36,6 +40,9 @@ export const initialStudioState: StudioState = {
   step: 'upload',
   sessionId: null,
   uploadedImageUrl: null,
+  sourceWidth: null,
+  sourceHeight: null,
+  sourceAspectRatio: null,
   activeVersion: 1,
   aiResponse: null,
   userEdits: {
@@ -61,6 +68,13 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
         uploadedImageUrl: action.url,
         sessionId: action.sessionId,
         credits: action.credits,
+        sourceAspectRatio: action.aspectRatio || null,
+        sourceWidth: action.width || null,
+        sourceHeight: action.height || null,
+        userEdits: {
+          ...state.userEdits,
+          aspectRatio: action.aspectRatio || state.userEdits.aspectRatio || '1:1'
+        },
         error: null
       };
 
@@ -94,8 +108,29 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
           category: action.response.metadata.category || '',
           tags: action.response.metadata.tags || [],
           aiTool: action.response.intelligence.recommendedPlatform || '',
-          aspectRatio: action.response.metadata.aspectRatio || '1:1'
+          aspectRatio: state.sourceAspectRatio || action.response.metadata.aspectRatio || '1:1'
         }
+      };
+
+    case 'HYDRATE_SESSION':
+      return {
+        ...state,
+        step: 'editing',
+        sessionId: action.sessionId,
+        uploadedImageUrl: action.url,
+        activeVersion: action.activeVersion || 1,
+        aiResponse: action.response,
+        sourceAspectRatio: action.aspectRatio || action.response.metadata.aspectRatio || '1:1',
+        userEdits: {
+          title: action.response.metadata.title || '',
+          promptText: action.response.prompt.main || '',
+          negativePrompt: action.response.prompt.negative || '',
+          category: action.response.metadata.category || '',
+          tags: action.response.metadata.tags || [],
+          aiTool: action.response.intelligence.recommendedPlatform || '',
+          aspectRatio: action.aspectRatio || action.response.metadata.aspectRatio || '1:1'
+        },
+        error: null
       };
 
     case 'EDIT_FIELD':
@@ -147,7 +182,7 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
     case 'RESET_FLOW':
       return {
         ...initialStudioState,
-        credits: state.credits // Retain credit snapshot across resets
+        credits: state.credits
       };
 
     default:

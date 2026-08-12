@@ -39,6 +39,7 @@ export async function createStudioSessionAction(
   cloudinaryUrl: string,
   cloudinaryPublicId: string,
   requestId: string,
+  meta?: { width?: number; height?: number; aspectRatio?: string },
   turnstileToken?: string
 ) {
   const access = await verifyAiStudioAccessServer();
@@ -90,7 +91,7 @@ export async function createStudioSessionAction(
 
     // 3. Create session draft entry
     try {
-      const session = await createStudioSession(user.id, cloudinaryUrl, cloudinaryPublicId, requestId, supabase);
+      const session = await createStudioSession(user.id, cloudinaryUrl, cloudinaryPublicId, requestId, meta, supabase);
       
       // Update ledger entry with session ID for accurate transaction tracking
       await supabase
@@ -111,6 +112,118 @@ export async function createStudioSessionAction(
     return { success: false, error: err.message || 'An unexpected error occurred.' };
   }
 }
+
+/**
+ * Server action to mark studio session as complete and save the prompt version iteration.
+ */
+export async function completeStudioSessionAction(
+  sessionId: string,
+  versionNumber: number,
+  promptText: string,
+  negativePrompt: string | null,
+  agRouterResponse: any
+) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  try {
+    const { savePromptVersion, completeStudioSession } = await import('@/lib/ai-studio/session');
+    
+    // Security check: Verify user owns the session
+    const { data: session } = await supabase
+      .from('ai_studio_sessions')
+      .select('user_id')
+      .eq('id', sessionId)
+      .single();
+
+    if (!session || session.user_id !== user.id) {
+      return { success: false, error: 'Forbidden: You do not own this studio session.' };
+    }
+
+    await savePromptVersion(
+      sessionId,
+      versionNumber,
+      promptText,
+      negativePrompt,
+      { aspect_ratio: agRouterResponse?.metadata?.aspectRatio || '1:1' },
+      agRouterResponse,
+      true,
+      supabase
+    );
+
+    await completeStudioSession(sessionId, versionNumber, supabase);
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('[STUDIO ACTION ERROR] Failed to complete studio session:', err);
+    return { success: false, error: err.message || 'Failed to persist prompt version.' };
+  }
+}
+
+/**
+ * Server action to fetch user's past studio generations history.
+ */
+export async function getUserStudioHistoryAction(limit: number = 30) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  try {
+    const { getUserStudioSessions } = await import('@/lib/ai-studio/session');
+    const history = await getUserStudioSessions(user.id, limit, supabase);
+    return { success: true, history };
+  } catch (err: any) {
+    console.error('[STUDIO ACTION ERROR] Failed to fetch user history:', err);
+    return { success: false, error: err.message || 'Failed to fetch history.' };
+  }
+}
+
+/**
+ * Server action to delete a user's past studio session.
+ */
+export async function deleteStudioSessionAction(sessionId: string) {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  try {
+    const { deleteStudioSession } = await import('@/lib/ai-studio/session');
+    const deleted = await deleteStudioSession(sessionId, user.id, supabase);
+    if (!deleted) {
+      return { success: false, error: 'Failed to delete session or forbidden.' };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('[STUDIO ACTION ERROR] Failed to delete session:', err);
+    return { success: false, error: err.message || 'Failed to delete session.' };
+  }
+}
+
 
 /**
  * Server action allowing users to claim +5 bonus credits every 24 hours.

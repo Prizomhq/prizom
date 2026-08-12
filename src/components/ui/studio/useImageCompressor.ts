@@ -8,15 +8,40 @@ export interface CompressedImageResult {
 }
 
 export function calculateAspectRatio(w: number, h: number): string {
+  if (!w || !h) return '1:1';
   const ratio = w / h;
-  if (Math.abs(ratio - 1.0) < 0.08) return '1:1';
-  if (Math.abs(ratio - (16 / 9)) < 0.1) return '16:9';
-  if (Math.abs(ratio - (9 / 16)) < 0.1) return '9:16';
-  if (Math.abs(ratio - (4 / 5)) < 0.08) return '4:5';
-  if (Math.abs(ratio - (3 / 4)) < 0.08) return '3:4';
-  if (Math.abs(ratio - (3 / 2)) < 0.1) return '3:2';
-  if (Math.abs(ratio - (2 / 3)) < 0.1) return '2:3';
-  return w > h ? '16:9' : '9:16';
+  
+  const standardRatios = [
+    { label: '1:1', value: 1.0 },
+    { label: '4:5', value: 0.8 },
+    { label: '5:4', value: 1.25 },
+    { label: '3:4', value: 0.75 },
+    { label: '4:3', value: 1.333 },
+    { label: '2:3', value: 0.667 },
+    { label: '3:2', value: 1.5 },
+    { label: '9:16', value: 0.5625 },
+    { label: '16:9', value: 1.7778 },
+    { label: '21:9', value: 2.333 }
+  ];
+
+  let closest = standardRatios[0];
+  let minDiff = Math.abs(ratio - closest.value);
+
+  for (let i = 1; i < standardRatios.length; i++) {
+    const diff = Math.abs(ratio - standardRatios[i].value);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = standardRatios[i];
+    }
+  }
+
+  // If closest standard ratio difference is within threshold 0.12, use standard ratio label
+  if (minDiff <= 0.12) {
+    return closest.label;
+  }
+
+  // Fallback to custom ratio format or orientation default
+  return w > h ? `${Math.round((w / h) * 10) / 10}:1` : `1:${Math.round((h / w) * 10) / 10}`;
 }
 
 /**

@@ -68,6 +68,11 @@ export function StudioEditor() {
   };
 
   const handleReset = () => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('session');
+      window.history.pushState({}, '', url.toString());
+    }
     dispatch({ type: 'RESET_FLOW' });
   };
 

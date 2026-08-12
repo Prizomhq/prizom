@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles, History, Clock, Trash2, ChevronRight, FileText } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { useImageCompressor } from './useImageCompressor';
-import { createStudioSessionAction } from '@/app/actions/studio';
+import { createStudioSessionAction, getUserStudioHistoryAction, getStudioSessionAction, deleteStudioSessionAction } from '@/app/actions/studio';
 import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
 
 export function StudioUploader() {
@@ -17,8 +17,15 @@ export function StudioUploader() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isProcessingRef = useRef(false);
+
   const processAndUpload = useCallback(async (file: File) => {
     if (!file) return;
+
+    if (isProcessingRef.current || isUploading) {
+      console.warn('[STUDIO UPLOADER] Upload process locked against rapid duplicate clicks.');
+      return;
+    }
 
     // Check overdraft balance
     if (state.credits <= 0) {
@@ -39,11 +46,12 @@ export function StudioUploader() {
       return;
     }
 
+    isProcessingRef.current = true;
     setUploadError(null);
     setIsUploading(true);
 
     try {
-      // 1. Compress image client-side via canvas & extract aspect ratio
+      // 1. Compress image client-side via canvas & extract exact aspect ratio and dimensions
       const compressed = await compressImage(file, 1024);
       const compressedFile = new File([compressed.blob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
         type: 'image/webp'
@@ -65,16 +73,28 @@ export function StudioUploader() {
         throw new Error(uploadResult.error || 'Failed to upload draft image.');
       }
 
-      // 3. Create Studio Session record in database
+      // 3. Create Studio Session record in database with explicit metadata
       const requestId = crypto.randomUUID();
       const sessionRes = await createStudioSessionAction(
         uploadResult.url,
         uploadResult.publicId,
-        requestId
+        requestId,
+        {
+          width: compressed.width,
+          height: compressed.height,
+          aspectRatio: compressed.aspectRatio
+        }
       );
 
       if (!sessionRes.success || !sessionRes.session) {
         throw new Error(sessionRes.error || 'Failed to create AI Studio session.');
+      }
+
+      // Update URL with session ID for browser history push
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('session', sessionRes.session.id);
+        window.history.pushState({ sessionId: sessionRes.session.id }, '', url.toString());
       }
 
       // 4. Update Reducer State (Deduct 1 credit)
@@ -82,7 +102,10 @@ export function StudioUploader() {
         type: 'SET_IMAGE',
         url: uploadResult.url,
         sessionId: sessionRes.session.id,
-        credits: Math.max(0, state.credits - 1)
+        credits: Math.max(0, state.credits - 1),
+        aspectRatio: compressed.aspectRatio,
+        width: compressed.width,
+        height: compressed.height
       });
 
     } catch (err: any) {
@@ -91,8 +114,9 @@ export function StudioUploader() {
       dispatch({ type: 'SET_ERROR', message: err.message || 'Upload failed.' });
     } finally {
       setIsUploading(false);
+      isProcessingRef.current = false;
     }
-  }, [compressImage, dispatch, state.credits]);
+  }, [compressImage, dispatch, isUploading, state.credits]);
 
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimStatus, setClaimStatus] = useState<string | null>(null);
@@ -285,6 +309,178 @@ export function StudioUploader() {
           {claimStatus}
         </div>
       )}
+
+      {/* Past Generations (Generation History) */}
+      <PastGenerationsSection />
+    </div>
+  );
+}
+
+function PastGenerationsSection() {
+  const dispatch = useStudioDispatch();
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
+
+  const loadHistory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getUserStudioHistoryAction(20);
+      if (res.success && Array.isArray(res.history)) {
+        setHistory(res.history);
+      }
+    } catch (err) {
+      console.warn('[STUDIO HISTORY WARNING] Failed to load history:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  const handleOpenSession = async (sessionId: string, url: string) => {
+    setLoadingSessionId(sessionId);
+    try {
+      const res = await getStudioSessionAction(sessionId);
+      if (res.success && res.session) {
+        const latestVersion = res.versions && res.versions.length > 0
+          ? res.versions[res.versions.length - 1]
+          : null;
+
+        if (latestVersion && latestVersion.ag_router_response) {
+          // Push URL for browser history back navigation
+          if (typeof window !== 'undefined') {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('session', sessionId);
+            window.history.pushState({ sessionId }, '', newUrl.toString());
+          }
+
+          dispatch({
+            type: 'HYDRATE_SESSION',
+            sessionId: res.session.id,
+            url: res.session.cloudinary_url || url,
+            response: latestVersion.ag_router_response,
+            activeVersion: res.session.active_version || 1,
+            aspectRatio: res.session.aspect_ratio || latestVersion.ag_router_response?.metadata?.aspectRatio || '1:1'
+          });
+        }
+      }
+    } catch (err) {
+      console.error('[STUDIO HISTORY] Error opening session:', err);
+    } finally {
+      setLoadingSessionId(null);
+    }
+  };
+
+  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    try {
+      const res = await deleteStudioSessionAction(sessionId);
+      if (res.success) {
+        setHistory((prev) => prev.filter((item) => item.session.id !== sessionId));
+      }
+    } catch (err) {
+      console.error('[STUDIO HISTORY] Error deleting session:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="mt-10 p-6 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl text-center">
+        <Loader2 className="w-6 h-6 text-purple-400 animate-spin mx-auto mb-2" />
+        <span className="text-xs text-zinc-400 font-medium">Loading generation history...</span>
+      </div>
+    );
+  }
+
+  if (history.length === 0) return null;
+
+  return (
+    <div className="mt-10 space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+          <History className="w-4 h-4 text-purple-400" /> Past Generations ({history.length})
+        </h3>
+        <span className="text-[11px] text-zinc-500 font-mono">
+          Saved in account history
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {history.map(({ session, latestVersion }) => {
+          const title = latestVersion?.ag_router_response?.metadata?.title || 'Visual Deconstruction';
+          const promptSnippet = latestVersion?.prompt_text || latestVersion?.ag_router_response?.prompt?.main || 'Session draft';
+          const aspectRatio = session.aspect_ratio || latestVersion?.ag_router_response?.metadata?.aspectRatio || '1:1';
+          const createdDate = new Date(session.created_at).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          return (
+            <div
+              key={session.id}
+              onClick={() => handleOpenSession(session.id, session.cloudinary_url)}
+              className="group relative bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 rounded-2xl p-4 transition-all duration-300 cursor-pointer flex gap-3.5 items-center shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+            >
+              {/* Thumbnail */}
+              <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800">
+                {session.cloudinary_url ? (
+                  <img
+                    src={session.cloudinary_url}
+                    alt={title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-zinc-600">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                )}
+                <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono font-bold text-purple-300">
+                  {aspectRatio}
+                </span>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <h4 className="text-xs font-extrabold text-white truncate group-hover:text-purple-300 transition-colors">
+                    {title}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteSession(e, session.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-all rounded"
+                    title="Delete generation history"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-sans mb-1.5">
+                  {promptSnippet}
+                </p>
+
+                <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-mono">
+                  <Clock className="w-3 h-3 text-purple-400/80" />
+                  <span>{createdDate}</span>
+                  <span className="text-zinc-600">•</span>
+                  <span className="capitalize text-purple-400 font-bold">{session.status}</span>
+                </div>
+              </div>
+
+              {loadingSessionId === session.id ? (
+                <Loader2 className="w-4 h-4 text-purple-400 animate-spin shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

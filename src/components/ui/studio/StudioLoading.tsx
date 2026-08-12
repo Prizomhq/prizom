@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck, Clock } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
-import { analyzeImageStudioAction } from '@/app/actions/studio';
+import { analyzeImageStudioAction, completeStudioSessionAction } from '@/app/actions/studio';
 
 const LOADING_STEPS = [
   { icon: Eye, label: 'Stage 1–4: Scene Graph, Entity Bounding & Spatial Layer Extraction...' },
@@ -49,6 +49,17 @@ export function StudioLoading() {
           }
           if (isMounted) {
             dispatch({ type: 'SET_RESPONSE', response: res.response });
+
+            // Persist completion and prompt version to database asynchronously
+            if (state.sessionId) {
+              completeStudioSessionAction(
+                state.sessionId,
+                1,
+                res.response.prompt.main,
+                res.response.prompt.negative || null,
+                res.response
+              ).catch((pErr) => console.warn('[STUDIO PERSISTENCE WARN]', pErr));
+            }
           }
         } catch (err: any) {
           console.error('[STUDIO LOADING ANALYSIS ERROR]', err);

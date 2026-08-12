@@ -139,24 +139,39 @@ export function StudioPublishPanel() {
   // Render Pre-Publish Review Form
   return (
     <div className="space-y-6">
+      {/* Reference Image Guidance Banner */}
+      <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-purple-200 text-xs font-medium space-y-1">
+        <div className="font-bold flex items-center gap-1.5 text-purple-300">
+          <Sparkles className="w-4 h-4 text-purple-400" /> Reference Image vs Public Post Artwork
+        </div>
+        <p className="leading-relaxed text-zinc-300">
+          Your uploaded reference image is used exclusively for AI visual analysis and style reverse-engineering. It is <strong>not automatically set as your public prompt&apos;s final image</strong>.
+        </p>
+      </div>
+
       {/* Post Preview Card */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold text-purple-300 border-b border-zinc-900 pb-3">
-          <Sparkles className="w-4 h-4 text-purple-400" />
-          <span>Prizom Post Share Preview</span>
+          <Share2 className="w-4 h-4 text-purple-400" />
+          <span>Prizom Community Post Share Preview</span>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start">
-          {/* Reference Image Preview */}
+          {/* Reference Image Badge & Preview */}
           <div className="relative aspect-square w-24 sm:w-28 shrink-0 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
             {state.uploadedImageUrl ? (
-              <Image
-                src={state.uploadedImageUrl}
-                alt="Source preview"
-                fill
-                unoptimized
-                className="object-cover"
-              />
+              <>
+                <Image
+                  src={state.uploadedImageUrl}
+                  alt="Reference image preview"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-[8px] font-mono font-bold text-amber-300 uppercase tracking-wider">
+                  Reference
+                </div>
+              </>
             ) : (
               <div className="flex items-center justify-center h-full text-[10px] text-zinc-600 font-bold">
                 No Preview
@@ -222,23 +237,34 @@ export function StudioPublishPanel() {
         </div>
       )}
 
-      {/* Publish CTA Button */}
-      <button
-        type="button"
-        onClick={handlePublish}
-        disabled={isPublishing}
-        className="w-full py-4 px-6 rounded-2xl text-sm font-extrabold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
-      >
-        {isPublishing ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" /> Publishing Prompt Post...
-          </>
-        ) : (
-          <>
-            <Share2 className="w-4 h-4" /> Publish Prompt Post <ArrowRight className="w-4 h-4" />
-          </>
+      {/* Action Buttons: Publish or Open Pre-filled in Create Prompt */}
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <button
+          type="button"
+          onClick={handlePublish}
+          disabled={isPublishing}
+          className="flex-1 w-full py-4 px-6 rounded-2xl text-sm font-extrabold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+        >
+          {isPublishing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Publishing Prompt Post...
+            </>
+          ) : (
+            <>
+              <Share2 className="w-4 h-4" /> Publish Prompt Post <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+
+        {state.sessionId && (
+          <Link
+            href={`/create?studioSession=${state.sessionId}`}
+            className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-purple-300 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <ExternalLink className="w-4 h-4 text-purple-400" /> Pre-fill in Create Page
+          </Link>
         )}
-      </button>
+      </div>
     </div>
   );
 }

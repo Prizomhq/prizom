@@ -274,6 +274,36 @@ function CreateContent() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const studioSessionId = searchParams.get('studioSession');
+
+  useEffect(() => {
+    const fetchStudioSession = async () => {
+      if (!studioSessionId) return;
+      try {
+        const { getStudioSessionAction } = await import('@/app/actions/studio');
+        const res = await getStudioSessionAction(studioSessionId);
+        if (res.success && res.session) {
+          const latestVersion = res.versions && res.versions.length > 0
+            ? res.versions[res.versions.length - 1]
+            : null;
+          
+          const response = latestVersion?.ag_router_response;
+          if (response) {
+            setTitle(response.metadata?.title || 'Universal AI Prompt');
+            setPromptText(response.prompt?.main || latestVersion?.prompt_text || '');
+            setNegativePrompt(response.prompt?.negative || latestVersion?.negative_prompt || '');
+            setCategory(response.metadata?.category || 'Photography');
+            setTags(response.metadata?.tags || ['ai-studio', 'universal-prompt']);
+            setAspectRatio(res.session.aspect_ratio || response.metadata?.aspectRatio || '1:1');
+          }
+        }
+      } catch (err) {
+        console.warn('[CREATE PAGE] Failed to pre-fill from studio session:', err);
+      }
+    };
+    fetchStudioSession();
+  }, [studioSessionId]);
+
   useEffect(() => {
     const fetchParentPrompt = async () => {
       if (!remixId) return;

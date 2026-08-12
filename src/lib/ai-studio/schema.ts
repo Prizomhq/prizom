@@ -164,6 +164,7 @@ export interface AIStudioSession {
   request_id: string;
   active_version: number;
   credits_deducted: number;
+  aspect_ratio?: string | null;
   error_message: string | null;
   created_at: string;
   updated_at: string;
