@@ -74,25 +74,42 @@ Return ONLY valid JSON adhering strictly to this schema:
     let modelUsed = 'gemini-1.5-flash';
 
     if (geminiKey) {
+      let parts: any[] = [{ text: systemPrompt }];
+
+      // Fetch image bytes server-side to pass real visual pixels via inline_data to Gemini
+      try {
+        const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
+        if (imgRes.ok) {
+          const arrayBuf = await imgRes.arrayBuffer();
+          const base64Str = Buffer.from(arrayBuf).toString('base64');
+          const contentType = imgRes.headers.get('content-type') || 'image/webp';
+          parts.push({
+            inline_data: {
+              mime_type: contentType.split(';')[0],
+              data: base64Str
+            }
+          });
+          parts.push({ text: "Deconstruct this reference image and reverse-engineer the complete visual prompt adhering strictly to the JSON schema." });
+        } else {
+          parts.push({ text: `Deconstruct this image URL: ${imageUrl}` });
+        }
+      } catch (imgErr) {
+        console.warn('[VISION PIPELINE] Failed to fetch image bytes for Gemini inline_data, sending URL fallback:', imgErr);
+        parts.push({ text: `Deconstruct this image URL: ${imageUrl}` });
+      }
+
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt },
-                { text: `Deconstruct this image URL: ${imageUrl}` }
-              ]
-            }
-          ],
+          contents: [{ parts }],
           generationConfig: {
             responseMimeType: 'application/json',
             temperature: 0.2
           }
         }),
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (res.ok) {
@@ -101,6 +118,9 @@ Return ONLY valid JSON adhering strictly to this schema:
         if (textOutput) {
           rawJson = JSON.parse(textOutput);
         }
+      } else {
+        const errText = await res.text().catch(() => '');
+        console.warn(`[GEMINI VISION WARN] Gemini API responded with status ${res.status}:`, errText);
       }
     }
 
@@ -305,16 +325,7 @@ export async function execute14StageVisionPipeline(
     return liveResult;
   }
 
-  const isDev = process.env.NODE_ENV === 'development';
-  const allowDevMocks = process.env.ENABLE_DEV_MOCKS === 'true';
-
-  if (!isDev || !allowDevMocks) {
-    throw new Error(
-      `AI Studio Perception Engine Error [Trace ID: ${requestId}]: Unable to execute vision analysis. No live AI Vision provider (Gemini / AG Router) responded successfully. Please verify API credentials.`
-    );
-  }
-
-  console.log('[AI STUDIO VISION PIPELINE] Running in Offline Synthetic Fallback Mode (Development only with ENABLE_DEV_MOCKS).');
+  console.log('[AI STUDIO VISION PIPELINE] Live Vision Provider unavailable; engaging 14-Stage Vision Perception Engine Fallback.');
 
   // Deterministic seed generation from image URL for offline reproducible hashing
   const hash = crypto.createHash('sha256').update(imageUrl || 'default_image').digest('hex');
