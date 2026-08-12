@@ -27,11 +27,24 @@ export async function createStudioSession(
     insertData.aspect_ratio = meta.aspectRatio;
   }
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from('ai_studio_sessions')
     .insert([insertData])
     .select()
     .single();
+
+  // If column aspect_ratio does not exist in schema cache, fallback to inserting without it
+  if (error && error.message && error.message.includes('aspect_ratio')) {
+    console.warn('[SESSION UTILS] aspect_ratio column missing in remote schema, retrying base session insert...');
+    delete insertData.aspect_ratio;
+    const retry = await supabase
+      .from('ai_studio_sessions')
+      .insert([insertData])
+      .select()
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     console.error('[SESSION UTILS ERROR] Failed to create session:', error.message);
@@ -222,6 +235,19 @@ export async function deleteStudioSession(
 ): Promise<boolean> {
   const supabase = customClient || (await createClient());
 
+  // 1. Delete associated prompt versions first
+  await supabase
+    .from('ai_prompt_versions')
+    .delete()
+    .eq('session_id', sessionId);
+
+  // 2. Delete associated prompt deltas
+  await supabase
+    .from('ai_prompt_deltas')
+    .delete()
+    .eq('session_id', sessionId);
+
+  // 3. Delete master studio session
   const { error } = await supabase
     .from('ai_studio_sessions')
     .delete()
