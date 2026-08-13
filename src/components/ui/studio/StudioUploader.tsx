@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles, History, Clock, Trash2, ChevronRight, FileText } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles, History, Clock, Trash2, ChevronRight, FileText, Zap } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { useImageCompressor } from './useImageCompressor';
 import { createStudioSessionAction, getUserStudioHistoryAction, getStudioSessionAction, deleteStudioSessionAction } from '@/app/actions/studio';
 import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
+import { CreditTopUpModal } from '@/components/shared/CreditTopUpModal';
 
 export function StudioUploader() {
   const state = useStudioState();
@@ -15,7 +16,9 @@ export function StudioUploader() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const isProcessingRef = useRef(false);
 
@@ -288,18 +291,26 @@ export function StudioUploader() {
           <ImageIcon className="w-3.5 h-3.5 text-purple-400/80" /> Auto-compressed WebP (1 Credit/Generation)
         </span>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <span className="font-bold text-purple-300 bg-purple-950/80 border border-purple-800/40 px-3 py-1 rounded-full font-mono">
             Balance: {state.credits} Credits
           </span>
 
           <button
             type="button"
+            onClick={() => setIsTopUpOpen(true)}
+            className="px-3.5 py-1 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5" /> Top Up
+          </button>
+
+          <button
+            type="button"
             onClick={handleClaimDailyCredits}
             disabled={isClaiming}
-            className="px-3.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+            className="px-3 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
           >
-            {isClaiming ? 'Claiming...' : '🎁 Claim +5 Daily'}
+            {isClaiming ? 'Claiming...' : '🎁 Daily'}
           </button>
         </div>
       </div>
@@ -310,9 +321,20 @@ export function StudioUploader() {
         </div>
       )}
 
+      {/* Credit Top-Up Modal */}
+      <CreditTopUpModal
+        isOpen={isTopUpOpen}
+        onClose={() => setIsTopUpOpen(false)}
+        currentBalance={state.credits}
+        onTopUpSuccess={(newBal) => {
+          dispatch({ type: 'UPDATE_CREDITS', credits: newBal });
+        }}
+      />
+
       {/* Past Generations (Generation History) */}
       <PastGenerationsSection />
     </div>
+
   );
 }
 
@@ -427,15 +449,25 @@ function PastGenerationsSection() {
 
   const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
+    const previousHistory = [...history];
+    
+    // Optimistically remove from UI list immediately
+    setHistory((prev) => prev.filter((item) => item.session.id !== sessionId));
+
     try {
       const res = await deleteStudioSessionAction(sessionId);
-      if (res.success) {
-        setHistory((prev) => prev.filter((item) => item.session.id !== sessionId));
+      if (!res.success) {
+        // Rollback on server failure
+        setHistory(previousHistory);
+        console.error('[STUDIO HISTORY] Server failed to delete session:', res.error);
       }
     } catch (err) {
+      // Rollback on network exception
+      setHistory(previousHistory);
       console.error('[STUDIO HISTORY] Error deleting session:', err);
     }
   };
+
 
   if (loading) {
     return (

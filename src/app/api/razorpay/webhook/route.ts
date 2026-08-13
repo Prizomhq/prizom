@@ -6,9 +6,13 @@ export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
     const signature = request.headers.get('x-razorpay-signature');
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'placeholder_webhook_secret';
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-    if (signature) {
+    if (webhookSecret) {
+      if (!signature) {
+        return NextResponse.json({ error: 'Missing webhook signature header' }, { status: 400 });
+      }
+
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(rawBody)
@@ -29,6 +33,8 @@ export async function POST(request: Request) {
       const paymentId = payment.id;
       const userId = payment.notes?.user_id;
       const type = payment.notes?.type;
+      const packageId = payment.notes?.package_id || 'topup_pack';
+      const creditsFromNotes = Number(payment.notes?.credits);
 
       if (orderId) {
         await adminSupabase
@@ -47,6 +53,26 @@ export async function POST(request: Request) {
           .update({ is_pro: true })
           .eq('id', userId);
       }
+
+      if ((type === 'pack_purchase' || type === 'top_up' || creditsFromNotes > 0) && userId) {
+        const { topUpCreditsAtomic } = await import('@/lib/ai-studio/credits');
+        const amountPaise = Number(payment.amount) || 0;
+        const amountInr = Math.round(amountPaise / 100);
+
+        const creditsToGrant = creditsFromNotes || (
+          amountInr >= 599 ? 200 :
+          amountInr >= 249 ? 75 :
+          amountInr >= 99 ? 25 : 10
+        );
+
+        await topUpCreditsAtomic(
+          userId,
+          creditsToGrant,
+          paymentId,
+          packageId,
+          adminSupabase
+        );
+      }
     }
 
     return NextResponse.json({ received: true, event });
@@ -55,3 +81,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }
+

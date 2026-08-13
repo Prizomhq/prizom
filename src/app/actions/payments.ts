@@ -135,12 +135,40 @@ export async function verifyRazorpayPayment(
         });
     }
 
+    // If pack_purchase or top_up, grant AI Studio credits atomically & idempotently
+    let newBalance: number | undefined;
+    let creditsGranted: number | undefined;
+
+    if (transaction?.type === 'pack_purchase' || transaction?.type === 'top_up') {
+      const { topUpCreditsAtomic } = await import('@/lib/ai-studio/credits');
+      
+      // Package mapping: metadata credits > amount-based calculation (1 credit per ₹4 approx)
+      creditsGranted = Number(transaction.metadata?.credits) || (
+        transaction.amount >= 599 ? 200 :
+        transaction.amount >= 249 ? 75 :
+        transaction.amount >= 99 ? 25 : 10
+      );
+
+      const topUpRes = await topUpCreditsAtomic(
+        user.id,
+        creditsGranted,
+        razorpay_payment_id,
+        transaction.metadata?.package_id || 'topup_pack',
+        adminSupabase
+      );
+
+      newBalance = topUpRes.balanceAfter;
+    }
+
     return {
       success: true,
       message: 'Payment verified successfully!',
       transactionType: transaction?.type || 'payment',
+      creditsGranted,
+      newBalance
     };
   } catch (err: any) {
+
     console.error('[Payments] Razorpay Signature Verification Error:', err);
     return { success: false, error: err.message || 'Signature verification failed' };
   }

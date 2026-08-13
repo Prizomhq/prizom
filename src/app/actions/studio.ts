@@ -1,11 +1,13 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createStudioSession, getStudioSession } from '@/lib/ai-studio/session';
 import { deductCreditsAtomic, refundCreditsAtomic, getUserCreditBalance } from '@/lib/ai-studio/credits';
 import { assertNotSuspendedOrBanned } from './moderation';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
+
 
 /**
  * Server action to check user credit balance.
@@ -217,12 +219,61 @@ export async function deleteStudioSessionAction(sessionId: string) {
     if (!deleted) {
       return { success: false, error: 'Failed to delete session or forbidden.' };
     }
+
+    revalidatePath('/studio');
+    revalidatePath('/studio/projects');
+    revalidatePath('/create/studio');
+
     return { success: true };
   } catch (err: any) {
     console.error('[STUDIO ACTION ERROR] Failed to delete session:', err);
     return { success: false, error: err.message || 'Failed to delete session.' };
   }
 }
+
+/**
+ * Server action to automatically refund user credits when AI generation fails.
+ */
+export async function refundFailedGenerationAction(sessionId: string, reason: string = 'generation_failed') {
+  const access = await verifyAiStudioAccessServer();
+  if (!access.allowed) {
+    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required.' };
+  }
+
+  try {
+    const { data: session } = await supabase
+      .from('ai_studio_sessions')
+      .select('id, user_id, status')
+      .eq('id', sessionId)
+      .single();
+
+    if (!session || session.user_id !== user.id) {
+      return { success: false, error: 'Forbidden or session not found.' };
+    }
+
+    await supabase
+      .from('ai_studio_sessions')
+      .update({ status: 'failed', error_message: reason })
+      .eq('id', sessionId);
+
+    const refundRes = await refundCreditsAtomic(user.id, 1, 'failed_generation_refund', sessionId);
+    
+    revalidatePath('/studio');
+
+    return { success: true, balanceAfter: refundRes.balanceAfter };
+  } catch (err: any) {
+    console.error('[STUDIO ACTION ERROR] Failed auto-refund for failed generation:', err);
+    return { success: false, error: err.message || 'Refund failed' };
+  }
+}
+
 
 
 /**

@@ -15,35 +15,7 @@ export function StudioEditor() {
   const [viewMode, setViewMode] = useState<'master' | 'structured'>('master');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
-  // Execute AG Router Analysis when state reaches 'analyzing'
-  useEffect(() => {
-    if (state.step === 'analyzing' && state.uploadedImageUrl && !state.aiResponse) {
-      let isMounted = true;
 
-      const runAnalysis = async () => {
-        try {
-          const res = await analyzeImageStudioAction(state.uploadedImageUrl!);
-          if (!res.success || !res.response) {
-            throw new Error(res.error || 'Analysis failed.');
-          }
-          if (isMounted) {
-            dispatch({ type: 'SET_RESPONSE', response: res.response });
-          }
-        } catch (err: any) {
-          console.error('[STUDIO EDITOR ANALYSIS ERROR]', err);
-          if (isMounted) {
-            dispatch({ type: 'SET_ERROR', message: err.message || 'Analysis failed.' });
-          }
-        }
-      };
-
-      runAnalysis();
-
-      return () => {
-        isMounted = false;
-      };
-    }
-  }, [state.step, state.uploadedImageUrl, state.aiResponse, dispatch]);
 
   const activeUniversalPrompt = (
     state.aiResponse?.universalPrompt?.universalMasterPrompt ||

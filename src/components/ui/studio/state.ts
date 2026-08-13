@@ -34,6 +34,7 @@ export type StudioAction =
   | { type: 'SUBMIT_PUBLISH' }
   | { type: 'PUBLISH_SUCCESS'; promptId: string }
   | { type: 'SET_ERROR'; message: string }
+  | { type: 'UPDATE_CREDITS'; credits: number }
   | { type: 'RESET_FLOW' };
 
 export const initialStudioState: StudioState = {
@@ -61,7 +62,14 @@ export const initialStudioState: StudioState = {
 
 export function studioReducer(state: StudioState, action: StudioAction): StudioState {
   switch (action.type) {
+    case 'UPDATE_CREDITS':
+      return {
+        ...state,
+        credits: action.credits
+      };
+
     case 'SET_IMAGE':
+
       return {
         ...state,
         step: 'analyzing',

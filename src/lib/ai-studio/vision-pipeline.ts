@@ -325,7 +325,9 @@ export async function execute14StageVisionPipeline(
     return liveResult;
   }
 
-  console.log('[AI STUDIO VISION PIPELINE] Live Vision Provider unavailable; engaging 14-Stage Vision Perception Engine Fallback.');
+  console.error('[AI STUDIO VISION PIPELINE ERROR] Live Vision Provider unavailable or request failed.');
+  throw new Error('AI Vision Service Unavailable: Unable to process image perception request. Please verify system API keys or try again.');
+
 
   // Deterministic seed generation from image URL for offline reproducible hashing
   const hash = crypto.createHash('sha256').update(imageUrl || 'default_image').digest('hex');

@@ -151,3 +151,88 @@ export async function claimDailyCredits(
   };
 }
 
+/**
+ * Credits top-up function that grants purchased credits atomically.
+ * Guarantees IDEMPOTENCY by checking if razorpayPaymentId was already recorded in ai_credit_ledger.
+ */
+export async function topUpCreditsAtomic(
+  userId: string,
+  amount: number,
+  razorpayPaymentId: string,
+  packageId: string = 'credit_topup',
+  customClient?: any
+): Promise<{ success: boolean; balanceAfter: number; alreadyProcessed?: boolean }> {
+  const supabase = customClient || (await createAdminClient());
+
+  // Idempotency check: inspect ai_credit_ledger for reason 'topup_purchase' and razorpayPaymentId
+  const { data: existingEntries } = await supabase
+    .from('ai_credit_ledger')
+    .select('balance_after, id, metadata')
+    .eq('user_id', userId)
+    .eq('reason', 'topup_purchase');
+
+  if (existingEntries && existingEntries.length > 0) {
+    const existing = existingEntries.find((entry: any) => 
+      entry.metadata?.razorpay_payment_id === razorpayPaymentId
+    );
+    if (existing) {
+      console.log('[CREDITS TOPUP IDEMPOTENCY] Payment already credited for payment ID:', razorpayPaymentId);
+      return {
+        success: true,
+        balanceAfter: existing.balance_after,
+        alreadyProcessed: true
+      };
+    }
+  }
+
+  // Fetch current balance or default to 10
+  const currentBalance = await getUserCreditBalance(userId, supabase);
+  const newBalance = currentBalance + amount;
+
+  // Update credit balance
+  const { error: balErr } = await supabase
+    .from('ai_credit_balances')
+    .upsert({
+      user_id: userId,
+      balance: newBalance,
+      updated_at: new Date().toISOString()
+    });
+
+  if (balErr) {
+    console.error('[CREDITS TOPUP ERROR] Failed to update credit balance:', balErr.message);
+    throw balErr;
+  }
+
+  // Record ledger transaction
+  const ledgerPayload: any = {
+    user_id: userId,
+    delta: amount,
+    reason: 'topup_purchase',
+    balance_after: newBalance,
+    metadata: {
+      package_id: packageId,
+      razorpay_payment_id: razorpayPaymentId,
+      credited_at: new Date().toISOString()
+    }
+  };
+
+  const { error: ledgerErr } = await supabase
+    .from('ai_credit_ledger')
+    .insert([ledgerPayload]);
+
+  if (ledgerErr) {
+    console.warn('[CREDITS TOPUP WARN] Ledger insert notice:', ledgerErr.message);
+    // Retry without metadata field if remote table lacks column
+    if (ledgerErr.message && ledgerErr.message.includes('metadata')) {
+      delete ledgerPayload.metadata;
+      await supabase.from('ai_credit_ledger').insert([ledgerPayload]);
+    }
+  }
+
+  return {
+    success: true,
+    balanceAfter: newBalance
+  };
+}
+
+

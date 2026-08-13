@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck, Clock } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
-import { analyzeImageStudioAction, completeStudioSessionAction } from '@/app/actions/studio';
+import { analyzeImageStudioAction, completeStudioSessionAction, refundFailedGenerationAction } from '@/app/actions/studio';
 
 const LOADING_STEPS = [
   { icon: Eye, label: 'Stage 1–4: Scene Graph, Entity Bounding & Spatial Layer Extraction...' },
@@ -45,7 +45,7 @@ export function StudioLoading() {
         try {
           const res = await analyzeImageStudioAction(state.uploadedImageUrl!);
           if (!res.success || !res.response) {
-            throw new Error(res.error || 'Analysis failed.');
+            throw new Error(res.error || 'AI image perception analysis failed.');
           }
           if (isMounted) {
             dispatch({ type: 'SET_RESPONSE', response: res.response });
@@ -67,8 +67,25 @@ export function StudioLoading() {
           }
         } catch (err: any) {
           console.error('[STUDIO LOADING ANALYSIS ERROR]', err);
+          
+          // Trigger atomic refund for failed generation
+          if (state.sessionId) {
+            try {
+              const refundRes = await refundFailedGenerationAction(state.sessionId, err.message);
+              if (refundRes.success && typeof refundRes.balanceAfter === 'number' && isMounted) {
+                dispatch({
+                  type: 'SET_ERROR',
+                  message: `${err.message || 'Generation failed.'} Your 1 generation credit has been refunded to your account.`
+                });
+                return;
+              }
+            } catch (rErr) {
+              console.warn('[STUDIO REFUND WARN]', rErr);
+            }
+          }
+
           if (isMounted) {
-            dispatch({ type: 'SET_ERROR', message: err.message || 'Analysis failed.' });
+            dispatch({ type: 'SET_ERROR', message: err.message || 'Analysis failed. Please try again.' });
           }
         }
       };
@@ -79,7 +96,8 @@ export function StudioLoading() {
         isMounted = false;
       };
     }
-  }, [state.uploadedImageUrl, state.aiResponse, dispatch]);
+  }, [state.uploadedImageUrl, state.aiResponse, state.sessionId, dispatch]);
+
 
   const progressPercent = Math.min(95, Math.round(((activeStepIndex + 1) / LOADING_STEPS.length) * 100));
 
