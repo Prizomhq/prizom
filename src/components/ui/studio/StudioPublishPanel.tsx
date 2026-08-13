@@ -18,7 +18,7 @@ export function StudioPublishPanel() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const activePromptText = state.userEdits.promptText || state.aiResponse?.universalPrompt?.universalMasterPrompt || state.aiResponse?.prompt.main || '';
+  const activePromptText = state.userEdits.promptText || state.aiResponse?.prompt?.main || state.aiResponse?.universalPrompt?.universalMasterPrompt || '';
 
   const handlePublish = async () => {
     const { title, negativePrompt, category, tags, aspectRatio } = state.userEdits;

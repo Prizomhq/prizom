@@ -233,7 +233,7 @@ Return ONLY valid JSON adhering strictly to this schema:
     const basePartial: Partial<AGRouterPromptResponse> = {
       requestId,
       prompt: {
-        main: universalPromptData.universalMasterPrompt,
+        main: cleanedMainPrompt || universalPromptData.universalMasterPrompt,
         template: templatePrompt,
         variables: variablesDict,
         editableVariables,
@@ -539,7 +539,7 @@ export async function execute14StageVisionPipeline(
   const fullResponse: AGRouterPromptResponse = {
     requestId,
     prompt: {
-      main: universalPromptData.universalMasterPrompt,
+      main: mainPromptText || universalPromptData.universalMasterPrompt,
       negative: negativePromptText,
       style: styleText,
       lighting: lightingText,

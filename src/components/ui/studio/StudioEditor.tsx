@@ -18,8 +18,8 @@ export function StudioEditor() {
 
 
   const activeUniversalPrompt = (
+    state.aiResponse?.prompt?.main ||
     state.aiResponse?.universalPrompt?.universalMasterPrompt ||
-    state.aiResponse?.prompt.main ||
     ''
   ).trim();
 
