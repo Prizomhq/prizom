@@ -59,11 +59,26 @@ function StudioContent() {
                   ? parsedAg.prompt
                   : 'High-precision AI image prompt capturing subject, optics, and lighting.';
 
-          const response = (parsedAg && parsedAg.prompt?.main) ? {
+          const hasValidAgPrompt = Boolean(parsedAg && (
+            typeof parsedAg.prompt === 'string' ||
+            typeof parsedAg.prompt?.main === 'string' ||
+            typeof parsedAg.reverse_prompts?.flux_prompt === 'string'
+          ));
+
+          const response = hasValidAgPrompt ? {
             ...parsedAg,
-            prompt: {
+            prompt: typeof parsedAg.prompt === 'object' ? {
               ...parsedAg.prompt,
               main: resolvedPromptText
+            } : {
+              main: resolvedPromptText,
+              negative: parsedAg.negative_prompt || 'blurry, low quality, noise, distortion, watermark',
+              style: parsedAg.style || 'Photorealistic',
+              lighting: parsedAg.lighting || 'Natural studio lighting',
+              composition: parsedAg.composition || 'Centered framing',
+              camera: parsedAg.camera || '50mm prime lens',
+              colorPalette: parsedAg.colorPalette || ['#A855F7', '#06B6D4', '#0F172A'],
+              mood: parsedAg.mood || 'Cinematic atmosphere'
             }
           } : {
             requestId: res.session.request_id || crypto.randomUUID(),

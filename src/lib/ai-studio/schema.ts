@@ -103,6 +103,7 @@ export interface AGRouterPromptResponse {
     mood: string;
   };
   universalPrompt?: UniversalPromptData;
+  reverse_prompts?: Record<string, string>;
   spatial?: {
     elements: SpatialElement[];
     layoutSummary: string;

@@ -96,6 +96,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
     requestId,
     prompt: basePartial.prompt!,
     universalPrompt: universalPromptData,
+    reverse_prompts: data.reverse_prompts,
     spatial: { elements: spatialElements, layoutSummary: `${compositionText} depth layout.` },
     optics,
     lightingDetail,
