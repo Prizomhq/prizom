@@ -381,11 +381,15 @@ function PastGenerationsSection() {
           }
         }
 
-        const resolvedPromptText = (latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction')
+        const resolvedPromptText = (latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction' && !latestVersion.prompt_text.startsWith('A detailed high-fidelity visual artwork capturing'))
           ? latestVersion.prompt_text
-          : (parsedAg?.prompt?.main && parsedAg.prompt.main !== 'Visual prompt deconstruction')
+          : (parsedAg?.prompt?.main && parsedAg.prompt.main !== 'Visual prompt deconstruction' && !parsedAg.prompt.main.startsWith('A detailed high-fidelity visual artwork capturing'))
             ? parsedAg.prompt.main
-            : 'A detailed high-fidelity visual artwork capturing subject composition, soft studio lighting vectors, and rich atmospheric depth.';
+            : (parsedAg?.reverse_prompts?.flux_prompt)
+              ? parsedAg.reverse_prompts.flux_prompt
+              : (typeof parsedAg?.prompt === 'string' && parsedAg.prompt)
+                ? parsedAg.prompt
+                : 'High-precision AI image prompt capturing subject, optics, and lighting.';
 
         const response = (parsedAg && parsedAg.prompt?.main) ? {
           ...parsedAg,

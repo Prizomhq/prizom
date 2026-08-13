@@ -30,12 +30,18 @@ export function generateHMACSignature(
 import { execute14StageVisionPipeline } from './vision-pipeline';
 
 function transformAGRouterResponse(data: any, requestId: string): AGRouterPromptResponse {
-  const promptText = data.prompt || data.reverse_prompts?.flux_prompt || 'High-fidelity visual artwork.';
-  const styleText = data.analysis?.art_style || 'Photorealistic';
+  const rawPrompt = (typeof data.prompt === 'string' && data.prompt) 
+    || (typeof data.prompt?.main === 'string' && data.prompt.main) 
+    || (typeof data.reverse_prompts?.flux_prompt === 'string' && data.reverse_prompts.flux_prompt)
+    || (typeof data.mainPrompt === 'string' && data.mainPrompt)
+    || '';
+
+  const promptText = rawPrompt || 'High-fidelity visual artwork capturing subject and atmosphere.';
+  const styleText = data.analysis?.art_style || data.style || 'Photorealistic';
   const lightingText = data.analysis?.lighting || data.lighting || 'Natural studio lighting';
-  const compositionText = data.analysis?.composition || 'Balanced composition';
-  const cameraText = data.analysis?.estimated_camera_settings?.lens || '50mm prime';
-  const colorPalette = Array.isArray(data.analysis?.color_palette) ? data.analysis.color_palette : ['#A855F7', '#06B6D4', '#0F172A'];
+  const compositionText = data.analysis?.composition || data.composition || 'Balanced composition';
+  const cameraText = data.analysis?.estimated_camera_settings?.lens || data.camera || '50mm prime';
+  const colorPalette = Array.isArray(data.analysis?.color_palette) ? data.analysis.color_palette : (Array.isArray(data.colorPalette) ? data.colorPalette : ['#A855F7', '#06B6D4', '#0F172A']);
   const optics = analyzeCameraOptics(promptText, styleText, compositionText);
   const lightingDetail = analyzeLighting(promptText, styleText, lightingText);
   const spatialElements = extractSpatialLayout(promptText, compositionText).elements;
@@ -46,7 +52,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   const aiDetection = detectAiImageSuitability(promptText, styleText, compositionText);
 
   const universalPromptData = build14SectionUniversalPrompt({
-    coreConcept: data.analysis?.subject || promptText,
+    coreConcept: promptText,
     subject: data.analysis?.subject || promptText,
     composition: compositionText,
     environment: data.analysis?.environment || 'Scene setting matching reference image.',
@@ -63,7 +69,7 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   const basePartial: Partial<AGRouterPromptResponse> = {
     requestId,
     prompt: {
-      main: universalPromptData.universalMasterPrompt,
+      main: rawPrompt || universalPromptData.universalMasterPrompt,
       negative: data.negative_prompt || 'blurry, low quality, distorted',
       style: styleText,
       lighting: lightingText,
