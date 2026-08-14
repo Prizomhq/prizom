@@ -15,6 +15,7 @@ import LoginRequiredModal from '@/components/ui/LoginRequiredModal';
 import { getTrueAspectRatioStyle } from '@/lib/cloudinary-client';
 import ProgressiveImage from '@/components/ui/ProgressiveImage';
 import Avatar from '@/components/ui/Avatar';
+import AIStudioAttribution from '@/components/ui/AIStudioAttribution';
 
 interface PromptCardProps {
   id: string;
@@ -31,13 +32,14 @@ interface PromptCardProps {
   saves: number;
   description?: string | null;
   tags?: string[] | null;
-  promptText?: string; // Kept for backwards compatibility but not used
+  promptText?: string;
   remixOf?: string | null;
   remixCount?: number | null;
   aspectRatio?: string | null;
   category?: string | null;
   imageWidth?: number | null;
   imageHeight?: number | null;
+  generationSource?: string | null;
   initialLiked?: boolean;
   initialSaved?: boolean;
   currentUserId?: string;
@@ -54,7 +56,7 @@ function formatStatsNumber(num: number): string {
   return num.toString();
 }
 
-export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight, initialLiked, initialSaved, currentUserId }: PromptCardProps) {
+export default function PromptCard({ id, title, imageUrl, tool, creator, likes: initialLikes, saves: initialSaves, remixOf, remixCount, aspectRatio = '1:1', category = 'General', imageWidth, imageHeight, generationSource, initialLiked, initialSaved, currentUserId }: PromptCardProps) {
   const router = useRouter();
   const supabase = createClient();
   
@@ -421,6 +423,12 @@ export default function PromptCard({ id, title, imageUrl, tool, creator, likes: 
               }`}>
                 {likes > 10 ? 'Popular Remix' : 'Remix'}
               </span>
+            </div>
+          )}
+
+          {generationSource === 'ai_studio' && !remixOf && (
+            <div className="absolute top-4 left-4 z-10">
+              <AIStudioAttribution variant="compact" />
             </div>
           )}
           

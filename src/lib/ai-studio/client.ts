@@ -1,13 +1,13 @@
 import crypto from 'crypto';
 import { AGRouterPromptResponse } from './schema';
-import { analyzeCameraOptics, analyzeLighting, extractSpatialLayout, extractTypography } from './analyzer';
+import { analyzeCameraOptics, analyzeLighting, extractSpatialLayout } from './analyzer';
 import { compileAllTargets } from './compiler';
 import { extractStyleDNA } from './style-dna';
 import { extractCharacterIdentity } from './identity';
-import { getCachedPromptAnalysis, cachePromptAnalysis } from './vector-cache';
+import { cachePromptAnalysis } from './vector-cache';
 import { evaluatePromptQuality } from './evaluator';
-import { runAutonomousSelfRefinementLoop } from './autonomous-engine';
-import { build14SectionUniversalPrompt } from './universal-engine';
+import { build14SectionUniversalPrompt, extractEditableVariablesFromPrompt } from './universal-engine';
+import { analyzeImageAspectRatio } from './aspect-ratio';
 
 const AG_ROUTER_BASE_URL = process.env.AG_ROUTER_BASE_URL || 'http://localhost:4000';
 const AG_ROUTER_API_KEY = process.env.AG_ROUTER_API_KEY || 'mock_prizom_api_key';
@@ -27,9 +27,7 @@ export function generateHMACSignature(
     .digest('hex');
 }
 
-import { execute14StageVisionPipeline } from './vision-pipeline';
-
-function transformAGRouterResponse(data: any, requestId: string): AGRouterPromptResponse {
+function transformAGRouterResponse(data: any, requestId: string, sourceDimensions?: { width: number; height: number }): AGRouterPromptResponse {
   const rawPrompt = (typeof data.prompt === 'string' && data.prompt) 
     || (typeof data.prompt?.main === 'string' && data.prompt.main) 
     || (typeof data.reverse_prompts?.flux_prompt === 'string' && data.reverse_prompts.flux_prompt)
@@ -48,8 +46,16 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
   const styleDNA = extractStyleDNA(promptText, styleText, lightingText, colorPalette);
   const characterIdentity = extractCharacterIdentity(promptText, styleText);
   const evaluation = evaluatePromptQuality(promptText, styleText, 'blurry, low quality');
-  const { detectAiImageSuitability } = require('./analyzer');
-  const aiDetection = detectAiImageSuitability(promptText, styleText, compositionText);
+
+  // Aspect ratio calculation
+  const width = sourceDimensions?.width || data.analysis?.dimensions?.width || 1024;
+  const height = sourceDimensions?.height || data.analysis?.dimensions?.height || 1024;
+  const aspectRatioDetails = analyzeImageAspectRatio(width, height);
+
+  const hasText = Boolean(data.analysis?.typography?.hasText || data.hasText);
+  const detectedText = Array.isArray(data.analysis?.typography?.detectedText)
+    ? data.analysis.typography.detectedText
+    : (Array.isArray(data.detectedText) ? data.detectedText : []);
 
   const universalPromptData = build14SectionUniversalPrompt({
     coreConcept: promptText,
@@ -59,18 +65,24 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
     lighting: lightingText,
     colorPalette,
     cameraPhotographic: cameraText,
-    materialsTextures: 'Natural material shaders and tactile surface details.',
+    materialsTextures: data.analysis?.materials || 'Natural material shaders and tactile surface details.',
     visualStyle: styleText,
     negativeConstraints: data.negative_prompt || 'blurry, low quality, distorted',
-    aspectRatio: '1:1',
+    aspectRatio: aspectRatioDetails.normalized_aspect_ratio,
+    aspectRatioDetails,
+    hasText,
+    detectedText,
     category: data.analysis?.photography_style || 'Photography'
   });
+
+  const editableVariables = extractEditableVariablesFromPrompt(universalPromptData, hasText, detectedText);
 
   const basePartial: Partial<AGRouterPromptResponse> = {
     requestId,
     prompt: {
       main: rawPrompt || universalPromptData.universalMasterPrompt,
-      negative: data.negative_prompt || 'blurry, low quality, distorted',
+      editableVariables,
+      negative: data.negative_prompt || 'blurry, low quality, distorted, watermark',
       style: styleText,
       lighting: lightingText,
       composition: compositionText,
@@ -81,17 +93,18 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
     universalPrompt: universalPromptData,
     optics,
     lightingDetail,
-    aiDetection,
     metadata: {
       title: data.analysis?.subject ? `${data.analysis.subject.slice(0, 30)} Spec` : 'Reverse Engineering Spec',
       description: 'High-fidelity prompt deconstruction.',
-      tags: ['prizom-v3', 'ag-router-production'],
+      tags: ['prizom-ai-studio', 'ag-router-production'],
       category: data.analysis?.photography_style || 'Photography',
-      aspectRatio: '1:1',
+      aspectRatio: aspectRatioDetails.normalized_aspect_ratio,
       promptType: 'image'
     }
   };
+
   const compilerTargets = compileAllTargets(basePartial);
+
   return {
     requestId,
     prompt: basePartial.prompt!,
@@ -100,7 +113,12 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
     spatial: { elements: spatialElements, layoutSummary: `${compositionText} depth layout.` },
     optics,
     lightingDetail,
-    typography: { hasText: false, detectedText: [], fontStyle: 'None', placement: 'None' },
+    typography: {
+      hasText,
+      detectedText,
+      fontStyle: data.analysis?.typography?.fontStyle || 'Sans-serif',
+      placement: data.analysis?.typography?.placement || 'Centered'
+    },
     styleDNA,
     characterIdentity,
     compilerTargets,
@@ -130,14 +148,17 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
 }
 
 /**
- * Prizom AI Studio V3 — Mandatory AG Router Proxy Client
- * Enforces mandatory gateway routing through AG Router.
- * FAIL CLOSED: If AG Router is offline, unconfigured, or returns an error,
- * this function throws an explicit exception. No local fallback pipeline executes.
+ * Mandatory AG Router Client for Prizom AI Studio
+ * FAIL CLOSED Policy: If AG Router is unavailable or invalid, generation MUST fail cleanly.
+ * NO direct provider bypass is permitted.
  */
 export async function generatePromptFromImage(
   imageUrl: string,
-  options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
+  options: {
+    quality?: 'standard' | 'premium';
+    requestId?: string;
+    sourceDimensions?: { width: number; height: number };
+  } = {}
 ): Promise<AGRouterPromptResponse> {
   const requestId = options.requestId || crypto.randomUUID();
   const startTime = Date.now();
@@ -146,31 +167,29 @@ export async function generatePromptFromImage(
   const body = {
     requestId,
     operation: 'image_to_prompt',
-    image_url: imageUrl, // Required by AG Router /v1/vision/analyze
-    imageUrl: imageUrl,  // For backward compatibility
-    analysis_type: 'full',
-    context: { platform: 'prizom', version: 'v3-production' },
-    qualityLevel: options.quality || 'premium'
+    image_url: imageUrl,
+    imageUrl: imageUrl,
+    analysis_type: 'full_11_stage',
+    context: { platform: 'prizom_ai_studio', version: '3.0-production' },
+    qualityLevel: options.quality || 'premium',
+    sourceDimensions: options.sourceDimensions
   };
 
   const bodyString = JSON.stringify(body);
   const timestamp = Date.now();
   const nonce = crypto.randomBytes(16).toString('hex');
 
-  // Verify AG Router URL & credentials configuration
   const agRouterBaseUrl = process.env.AG_ROUTER_BASE_URL !== undefined 
     ? process.env.AG_ROUTER_BASE_URL 
     : AG_ROUTER_BASE_URL;
-    
+
   if (!agRouterBaseUrl || agRouterBaseUrl.trim() === '') {
-    console.error('[AG ROUTER GATEWAY ERROR] AG_ROUTER_BASE_URL environment variable is missing.');
+    console.error('[AG ROUTER GATEWAY ERROR] AG_ROUTER_BASE_URL missing.');
     throw new Error('AI generation is temporarily unavailable. Gateway configuration missing.');
   }
 
-  // Normalize base URL to strip trailing slash and '/v1'
   const normalizedBase = agRouterBaseUrl.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
   const requestUrl = `${normalizedBase}${path}`;
-
   const signature = generateHMACSignature(path, bodyString, timestamp, nonce, AG_ROUTER_HMAC_SECRET);
 
   const headers: HeadersInit = {
@@ -192,12 +211,11 @@ export async function generatePromptFromImage(
       signal: AbortSignal.timeout(30000)
     });
 
-    // Retry with reverse-engineer route if primary route returns 404
     if (response.status === 404) {
       const fallbackPath = '/v1/vision/reverse-engineer';
       const fallbackUrl = `${normalizedBase}${fallbackPath}`;
       const fallbackSig = generateHMACSignature(fallbackPath, bodyString, timestamp, nonce, AG_ROUTER_HMAC_SECRET);
-      console.log(`[AG ROUTER CLIENT] Retrying request ${requestId} via reverse-engineer endpoint: ${fallbackUrl}`);
+      console.log(`[AG ROUTER CLIENT] Retrying request ${requestId} via fallback endpoint: ${fallbackUrl}`);
       response = await fetch(fallbackUrl, {
         method: 'POST',
         headers: {
@@ -217,8 +235,6 @@ export async function generatePromptFromImage(
     }
 
     const data = await response.json();
-    
-    // Validate AG Router response payload
     if (!data || typeof data !== 'object') {
       throw new Error('AG Router returned an empty or invalid JSON response.');
     }
@@ -236,9 +252,8 @@ export async function generatePromptFromImage(
     const transformed = transformAGRouterResponse({
       ...data,
       latency_ms: data.latency_ms || (Date.now() - startTime)
-    }, requestId);
+    }, requestId, options.sourceDimensions);
 
-    // Cache valid prompt analysis for fast lookup
     cachePromptAnalysis(imageUrl, transformed);
 
     console.log(`[AG ROUTER CLIENT SUCCESS] Request ${requestId} completed via provider: ${transformed.generation.provider}, model: ${transformed.generation.modelUsed}, latency: ${transformed.generation.latencyMs}ms`);
@@ -246,7 +261,6 @@ export async function generatePromptFromImage(
     return transformed;
   } catch (error: any) {
     console.error(`[AG ROUTER GATEWAY FAILURE - FAIL CLOSED] Request ${requestId} failed:`, error.message);
-    // FAIL CLOSED: Re-throw error so backend & UI handle failure cleanly without alternate generation
     throw new Error(
       error.message?.includes('AG Router') 
         ? error.message 
@@ -254,5 +268,3 @@ export async function generatePromptFromImage(
     );
   }
 }
-
-

@@ -1,33 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, Sparkles, Eye, Wand2, Tag, ShieldCheck, Clock } from 'lucide-react';
+import { Loader2, Eye, Wand2, Tag, ShieldCheck, Clock, Layers, Camera } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { analyzeImageStudioAction, completeStudioSessionAction, refundFailedGenerationAction } from '@/app/actions/studio';
+import { PrizomAIStudioMark } from '@/components/ui/PrizomAIStudioMark';
 
 const LOADING_STEPS = [
-  { icon: Eye, label: 'Stage 1–4: Scene Graph, Entity Bounding & Spatial Layer Extraction...' },
-  { icon: Wand2, label: 'Stage 5–7: Volumetric Lighting Vectors & Camera Optics Simulation...' },
-  { icon: Tag, label: 'Stage 8–10: Style Lineage & Multi-Model AST Compiler Generation...' },
-  { icon: ShieldCheck, label: 'Stage 11–14: Self-Reflection, Perceptual Similarity & Scorecard Validation...' }
+  { icon: Eye, label: 'Stage 1–2: Global Scene Perception & Primary Subject Identification' },
+  { icon: Layers, label: 'Stage 3–4: Composition Framing, Depth Layers & Spatial Hierarchy' },
+  { icon: Camera, label: 'Stage 5–6: Calibrated Camera Optics, Aperture & Lighting Analysis' },
+  { icon: Wand2, label: 'Stage 7–8: Color Palette Extraction & Material Surface Shaders' },
+  { icon: Tag, label: 'Stage 9–10: Typography Preservation & Visual Style Lineage' },
+  { icon: ShieldCheck, label: 'Stage 11: Universal Master Prompt AST Recipe Compilation' }
 ];
 
 export function StudioLoading() {
   const state = useStudioState();
   const dispatch = useStudioDispatch();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [secondsRemaining, setSecondsRemaining] = useState(3);
+  const [secondsRemaining, setSecondsRemaining] = useState(4);
 
-  // Step advancement timer
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveStepIndex((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 600);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Estimated countdown timer
   useEffect(() => {
     const timer = setInterval(() => {
       setSecondsRemaining((prev) => (prev > 0.5 ? Math.round((prev - 0.5) * 10) / 10 : 0.5));
@@ -36,21 +37,26 @@ export function StudioLoading() {
     return () => clearInterval(timer);
   }, []);
 
-  // Execute AG Router vision analysis upon mounting during analyzing step
   useEffect(() => {
     if (state.uploadedImageUrl && !state.aiResponse) {
       let isMounted = true;
 
       const runAnalysis = async () => {
         try {
-          const res = await analyzeImageStudioAction(state.uploadedImageUrl!);
+          const res = await analyzeImageStudioAction(state.uploadedImageUrl!, {
+            quality: 'premium',
+            sourceDimensions: (state.sourceWidth && state.sourceHeight)
+              ? { width: state.sourceWidth, height: state.sourceHeight }
+              : undefined
+          });
+
           if (!res.success || !res.response) {
             throw new Error(res.error || 'AI image perception analysis failed.');
           }
+
           if (isMounted) {
             dispatch({ type: 'SET_RESPONSE', response: res.response });
 
-            // Persist completion and prompt version to database
             if (state.sessionId) {
               try {
                 await completeStudioSessionAction(
@@ -67,15 +73,14 @@ export function StudioLoading() {
           }
         } catch (err: any) {
           console.error('[STUDIO LOADING ANALYSIS ERROR]', err);
-          
-          // Trigger atomic refund for failed generation
+
           if (state.sessionId) {
             try {
               const refundRes = await refundFailedGenerationAction(state.sessionId, err.message);
               if (refundRes.success && typeof refundRes.balanceAfter === 'number' && isMounted) {
                 dispatch({
                   type: 'SET_ERROR',
-                  message: `${err.message || 'Generation failed.'} Your 1 generation credit has been refunded to your account.`
+                  message: `${err.message || 'Generation failed.'} Your 1 generation credit has been refunded.`
                 });
                 return;
               }
@@ -96,32 +101,29 @@ export function StudioLoading() {
         isMounted = false;
       };
     }
-  }, [state.uploadedImageUrl, state.aiResponse, state.sessionId, dispatch]);
-
+  }, [state.uploadedImageUrl, state.aiResponse, state.sessionId, state.sourceWidth, state.sourceHeight, dispatch]);
 
   const progressPercent = Math.min(95, Math.round(((activeStepIndex + 1) / LOADING_STEPS.length) * 100));
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-12">
       <div className="bg-zinc-900/90 border border-zinc-800/90 rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-xl text-center">
-        {/* Source Image Thumbnail Preview */}
         {state.uploadedImageUrl ? (
-          <div className="relative w-20 h-20 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.3)]">
+          <div className="relative w-24 h-24 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.3)]">
             <img
               src={state.uploadedImageUrl}
               alt="Source analysis preview"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-1">
-              <Sparkles className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-1.5">
+              <PrizomAIStudioMark size={20} className="animate-spin" />
             </div>
           </div>
         ) : (
-          /* Animated Icon Glow */
           <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-full blur-xl opacity-40 animate-pulse" />
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg text-white">
-              <Sparkles className="w-10 h-10 animate-bounce" />
+            <div className="relative w-20 h-20 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center shadow-lg">
+              <PrizomAIStudioMark size={40} className="animate-spin" />
             </div>
           </div>
         )}
@@ -135,14 +137,14 @@ export function StudioLoading() {
           Deconstructing Visual Perception
         </h2>
         <p className="text-zinc-400 text-sm font-medium mb-6">
-          Analyzing composition, camera optics, volumetric lighting, and compiling multi-target prompts.
+          Executing 11-stage visual perception analysis and compiling universal prompt spec.
         </p>
 
         {/* Visual Progress Bar */}
         <div className="max-w-md mx-auto mb-8">
           <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden mb-2 border border-zinc-800">
             <div
-              className="bg-gradient-to-r from-purple-600 to-indigo-500 h-2 rounded-full transition-all duration-500 ease-out"
+              className="bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -152,7 +154,7 @@ export function StudioLoading() {
           </div>
         </div>
 
-        {/* Step-by-Step Progress Pipeline */}
+        {/* Step Progress Pipeline */}
         <div className="max-w-md mx-auto space-y-3 mb-10 text-left">
           {LOADING_STEPS.map((step, idx) => {
             const Icon = step.icon;
@@ -190,18 +192,6 @@ export function StudioLoading() {
             );
           })}
         </div>
-
-        {/* Stream Field Skeleton Reveal */}
-        {state.streamingField && (
-          <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-800 text-left animate-in fade-in duration-200">
-            <div className="text-[10px] font-black uppercase text-purple-400 tracking-wider mb-1 font-mono">
-              Streaming Field Token: {state.streamingField}
-            </div>
-            <div className="text-xs font-mono text-zinc-300 truncate">
-              {state.userEdits[state.streamingField as keyof typeof state.userEdits] || 'Populating...'}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

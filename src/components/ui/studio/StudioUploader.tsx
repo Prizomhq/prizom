@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, Sparkles, History, Clock, Trash2, ChevronRight, FileText, Zap } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Loader2, AlertCircle, History, Clock, Trash2, ChevronRight, FileText, Zap, Layers } from 'lucide-react';
 import { useStudioState, useStudioDispatch } from './context';
 import { useImageCompressor } from './useImageCompressor';
 import { createStudioSessionAction, getUserStudioHistoryAction, getStudioSessionAction, deleteStudioSessionAction } from '@/app/actions/studio';
-import PrizomLogo, { PrizomWordmark } from '@/components/ui/PrizomLogo';
+import { PrizomAIStudioLogo, PrizomAIStudioMark } from '@/components/ui/PrizomAIStudioMark';
 import { CreditTopUpModal } from '@/components/shared/CreditTopUpModal';
 
 export function StudioUploader() {
@@ -17,8 +17,12 @@ export function StudioUploader() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [selectedFileMeta, setSelectedFileMeta] = useState<{
+    name: string;
+    sizeFormatted: string;
+    mimeType: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
 
   const isProcessingRef = useRef(false);
 
@@ -30,22 +34,19 @@ export function StudioUploader() {
       return;
     }
 
-    // Check overdraft balance
     if (state.credits <= 0) {
       setUploadError('You have run out of AI Studio credits. Please wait for your monthly allocation or upgrade to Pro.');
       return;
     }
 
-    // Validate type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setUploadError('Invalid image format. Only JPG, PNG, and WebP are allowed.');
       return;
     }
 
-    // Validate size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('File size must be under 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File size must be under 10MB.');
       return;
     }
 
@@ -53,8 +54,15 @@ export function StudioUploader() {
     setUploadError(null);
     setIsUploading(true);
 
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    setSelectedFileMeta({
+      name: file.name,
+      sizeFormatted: `${sizeInMB} MB`,
+      mimeType: file.type
+    });
+
     try {
-      // 1. Compress image client-side via canvas & extract exact aspect ratio and dimensions
+      // 1. Client-side technical inspection & 4-layer aspect ratio analysis
       const compressed = await compressImage(file, 1024);
       const compressedFile = new File([compressed.blob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
         type: 'image/webp'
@@ -71,12 +79,11 @@ export function StudioUploader() {
       });
 
       const uploadResult = await uploadRes.json();
-
       if (!uploadRes.ok) {
         throw new Error(uploadResult.error || 'Failed to upload draft image.');
       }
 
-      // 3. Create Studio Session record in database with explicit metadata
+      // 3. Create Studio Session record
       const requestId = crypto.randomUUID();
       const sessionRes = await createStudioSessionAction(
         uploadResult.url,
@@ -93,22 +100,18 @@ export function StudioUploader() {
         throw new Error(sessionRes.error || 'Failed to create AI Studio session.');
       }
 
-      // Update URL with session ID for browser history push
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href);
-        url.searchParams.set('session', sessionRes.session.id);
-        window.history.pushState({ sessionId: sessionRes.session.id }, '', url.toString());
-      }
-
-      // 4. Update Reducer State (Deduct 1 credit)
+      // 4. Dispatch SET_IMAGE to step into 'analyzing' WITHOUT pushing URL query param yet
       dispatch({
         type: 'SET_IMAGE',
         url: uploadResult.url,
         sessionId: sessionRes.session.id,
         credits: Math.max(0, state.credits - 1),
         aspectRatio: compressed.aspectRatio,
+        aspectRatioDetails: compressed.aspectRatioDetails,
         width: compressed.width,
-        height: compressed.height
+        height: compressed.height,
+        mimeType: file.type,
+        fileSize: file.size
       });
 
     } catch (err: any) {
@@ -131,7 +134,7 @@ export function StudioUploader() {
       const { claimDailyCreditsAction } = await import('@/app/actions/studio');
       const res = await claimDailyCreditsAction();
       if (res.success && typeof res.balance === 'number') {
-        dispatch({ type: 'EDIT_FIELD', field: 'promptText', value: state.userEdits.promptText }); // trigger re-render
+        dispatch({ type: 'UPDATE_CREDITS', credits: res.balance });
         setClaimStatus('✓ Claimed +5 Free Credits!');
       } else {
         setClaimStatus(res.error || 'Claim unavailable today');
@@ -147,7 +150,7 @@ export function StudioUploader() {
     processAndUpload(file);
   }, [processAndUpload]);
 
-  // Global Ctrl+V Clipboard Image Paste Listener
+  // Global Paste Listener
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       if (!e.clipboardData || !e.clipboardData.files || e.clipboardData.files.length === 0) {
@@ -198,17 +201,17 @@ export function StudioUploader() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-8">
-      {/* V1 Hero Section */}
+      {/* Official Prizom AI Studio Hero Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-white text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-          <PrizomWordmark height={14} className="text-white" />
-          <span className="text-purple-400 font-mono text-[11px] border-l border-zinc-700 pl-2">AI Studio • 1 Credit / Gen</span>
+          <PrizomAIStudioLogo size="sm" showBadge={true} />
+          <span className="text-purple-400 font-mono text-[11px] border-l border-zinc-700 pl-2.5">1 Credit / Gen</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
-          Image to Prompt
+          Image to Universal Prompt
         </h1>
         <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-          Upload any AI image to get a production-ready prompt instantly.
+          Upload any visual artwork for 11-stage optical perception and universal prompt reconstruction.
         </p>
       </div>
 
@@ -239,7 +242,6 @@ export function StudioUploader() {
           className="hidden"
         />
 
-        {/* Ambient Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative z-10">
@@ -250,45 +252,48 @@ export function StudioUploader() {
                 <Loader2 className="relative w-12 h-12 text-purple-400 animate-spin" />
               </div>
               <p className="text-white font-bold text-lg mb-1 tracking-tight">
-                {isCompressing ? 'Optimizing Image...' : 'Analyzing Visual Data...'}
+                {isCompressing ? 'Inspecting Technical Dimensions...' : 'Analyzing Visual Data...'}
               </p>
-              <p className="text-zinc-400 text-xs font-medium">Generating your prompt instantly</p>
+              {selectedFileMeta && (
+                <div className="mt-2 text-xs font-mono text-purple-300 bg-purple-950/60 border border-purple-800/40 px-3 py-1 rounded-full">
+                  {selectedFileMeta.name} • {selectedFileMeta.sizeFormatted} • {selectedFileMeta.mimeType}
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-20 h-20 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
                 <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <UploadCloud className="relative w-9 h-9 text-purple-400" />
+                <PrizomAIStudioMark size={36} />
               </div>
               
               <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight">
                 Drag & Drop image here, or <span className="text-purple-400 underline decoration-purple-500/40 underline-offset-4">browse file</span>
               </h3>
               <p className="text-zinc-400 text-xs sm:text-sm font-medium mb-6">
-                Supports JPG, PNG, and WebP up to 5MB • <kbd className="px-2 py-0.5 rounded bg-zinc-800 text-purple-300 font-mono text-[11px] border border-zinc-700">Ctrl+V</kbd> paste enabled
+                Supports JPG, PNG, WebP up to 10MB • <kbd className="px-2 py-0.5 rounded bg-zinc-800 text-purple-300 font-mono text-[11px] border border-zinc-700">Ctrl+V</kbd> paste enabled
               </p>
 
-              {/* Primary CTA Button */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-purple-200" />
-                <span>Generate Prompt ✨ (1 Credit)</span>
+                <PrizomAIStudioMark size={16} />
+                <span>Reconstruct Universal Prompt (1 Credit)</span>
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Credit Status & Daily Claim Indicator */}
+      {/* Credit Status */}
       <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-zinc-400 bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800">
         <span className="flex items-center gap-1.5 text-zinc-400">
-          <ImageIcon className="w-3.5 h-3.5 text-purple-400/80" /> Auto-compressed WebP (1 Credit/Generation)
+          <Layers className="w-3.5 h-3.5 text-purple-400/80" /> 4-Layer Aspect Ratio & 11-Stage Vision Engine
         </span>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -321,7 +326,6 @@ export function StudioUploader() {
         </div>
       )}
 
-      {/* Credit Top-Up Modal */}
       <CreditTopUpModal
         isOpen={isTopUpOpen}
         onClose={() => setIsTopUpOpen(false)}
@@ -331,10 +335,9 @@ export function StudioUploader() {
         }}
       />
 
-      {/* Past Generations (Generation History) */}
+      {/* Restore Previous Work / Generation History */}
       <PastGenerationsSection />
     </div>
-
   );
 }
 
@@ -394,7 +397,7 @@ function PastGenerationsSection() {
         if (!resolvedPromptText && res.session.status === 'failed') {
           dispatch({
             type: 'SET_ERROR',
-            message: res.session.error_message || 'This generation failed. AI generation unavailable.'
+            message: res.session.error_message || 'This generation failed.'
           });
           return;
         }
@@ -417,7 +420,6 @@ function PastGenerationsSection() {
             }
           };
 
-          // Push URL for browser history back navigation
           if (typeof window !== 'undefined') {
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.set('session', sessionId);
@@ -444,30 +446,23 @@ function PastGenerationsSection() {
   const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
     const previousHistory = [...history];
-    
-    // Optimistically remove from UI list immediately
     setHistory((prev) => prev.filter((item) => item.session.id !== sessionId));
 
     try {
       const res = await deleteStudioSessionAction(sessionId);
       if (!res.success) {
-        // Rollback on server failure
         setHistory(previousHistory);
-        console.error('[STUDIO HISTORY] Server failed to delete session:', res.error);
       }
     } catch (err) {
-      // Rollback on network exception
       setHistory(previousHistory);
-      console.error('[STUDIO HISTORY] Error deleting session:', err);
     }
   };
-
 
   if (loading) {
     return (
       <div className="mt-10 p-6 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl text-center">
         <Loader2 className="w-6 h-6 text-purple-400 animate-spin mx-auto mb-2" />
-        <span className="text-xs text-zinc-400 font-medium">Loading generation history...</span>
+        <span className="text-xs text-zinc-400 font-medium">Loading session history...</span>
       </div>
     );
   }
@@ -478,7 +473,7 @@ function PastGenerationsSection() {
     <div className="mt-10 space-y-4">
       <div className="flex items-center justify-between px-1">
         <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <History className="w-4 h-4 text-purple-400" /> Past Generations ({history.length})
+          <History className="w-4 h-4 text-purple-400" /> Restore Previous Work ({history.length})
         </h3>
         <span className="text-[11px] text-zinc-500 font-mono">
           Saved in account history
@@ -498,8 +493,8 @@ function PastGenerationsSection() {
           const rawSnippet = latestVersion?.prompt_text || parsedAg?.prompt?.main || '';
           const promptSnippet = (rawSnippet && rawSnippet !== 'Visual prompt deconstruction')
             ? rawSnippet
-            : 'Visual Scene Analysis';
-          const title = parsedAg?.metadata?.title || (promptSnippet !== 'Visual Scene Analysis' ? promptSnippet.slice(0, 32) + '...' : 'Universal Visual Spec');
+            : 'Universal Visual Spec';
+          const title = parsedAg?.metadata?.title || (promptSnippet !== 'Universal Visual Spec' ? promptSnippet.slice(0, 32) + '...' : 'Universal Visual Spec');
           const aspectRatio = session.aspect_ratio || parsedAg?.metadata?.aspectRatio || '1:1';
           const createdDate = new Date(session.created_at).toLocaleDateString(undefined, {
             month: 'short',
@@ -514,7 +509,6 @@ function PastGenerationsSection() {
               onClick={() => handleOpenSession(session.id, session.cloudinary_url)}
               className="group relative bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 rounded-2xl p-4 transition-all duration-300 cursor-pointer flex gap-3.5 items-center shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
             >
-              {/* Thumbnail */}
               <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800">
                 {session.cloudinary_url ? (
                   <img
@@ -532,7 +526,6 @@ function PastGenerationsSection() {
                 </span>
               </div>
 
-              {/* Body */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1 mb-1">
                   <h4 className="text-xs font-extrabold text-white truncate group-hover:text-purple-300 transition-colors">
@@ -542,7 +535,7 @@ function PastGenerationsSection() {
                     type="button"
                     onClick={(e) => handleDeleteSession(e, session.id)}
                     className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-all rounded"
-                    title="Delete generation history"
+                    title="Delete session"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -572,4 +565,3 @@ function PastGenerationsSection() {
     </div>
   );
 }
-

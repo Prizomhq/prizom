@@ -8,31 +8,29 @@ import { StudioLoading } from './StudioLoading';
 import { StudioEditor } from './StudioEditor';
 import { getStudioSessionAction } from '@/app/actions/studio';
 import { Loader2 } from 'lucide-react';
+import { PrizomAIStudioMark } from '@/components/ui/PrizomAIStudioMark';
 
 function StudioContent() {
   const state = useStudioState();
   const dispatch = useStudioDispatch();
   const searchParams = useSearchParams();
   const sessionIdParam = searchParams.get('session');
-  const [hydrating, setHydrating] = useState<boolean>(Boolean(sessionIdParam));
+  
+  // Hydrate only on initial page mount when session is explicitly present in URL and step is upload
+  const [hydrating, setHydrating] = useState<boolean>(Boolean(sessionIdParam && state.step === 'upload' && !state.sessionId));
 
   useEffect(() => {
     let isMounted = true;
 
     const checkAndHydrateSession = async (targetSessionId: string | null) => {
-      if (!targetSessionId) {
-        setHydrating(false);
-        return;
-      }
-
-      // If state is already hydrated for this session, no need to re-fetch
-      if (state.sessionId === targetSessionId && state.aiResponse) {
-        setHydrating(false);
+      // Do NOT trigger restoration loader during active image upload flow
+      if (!targetSessionId || state.step === 'analyzing' || (state.sessionId === targetSessionId && state.aiResponse)) {
+        if (isMounted) setHydrating(false);
         return;
       }
 
       try {
-        setHydrating(true);
+        if (isMounted) setHydrating(true);
         const res = await getStudioSessionAction(targetSessionId);
         if (res.success && res.session && isMounted) {
           const latestVersion = res.versions && res.versions.length > 0
@@ -64,7 +62,7 @@ function StudioContent() {
           if (!hasValidAgPrompt && res.session.status === 'failed') {
             dispatch({
               type: 'SET_ERROR',
-              message: res.session.error_message || 'This generation previously failed. AI generation unavailable.'
+              message: res.session.error_message || 'This generation previously failed.'
             });
             return;
           }
@@ -98,20 +96,24 @@ function StudioContent() {
           }
         }
       } catch (err) {
-        console.warn('[STUDIO NAVIGATION] Failed to hydrate session from URL:', err);
+        console.warn('[STUDIO NAVIGATION] Failed to hydrate session:', err);
       } finally {
         if (isMounted) setHydrating(false);
       }
     };
 
-    checkAndHydrateSession(sessionIdParam);
+    if (state.step === 'upload' && !state.sessionId && sessionIdParam) {
+      checkAndHydrateSession(sessionIdParam);
+    } else {
+      setHydrating(false);
+    }
 
     const handlePopState = () => {
       const currentUrl = new URL(window.location.href);
       const sessId = currentUrl.searchParams.get('session');
-      if (sessId) {
+      if (sessId && state.step === 'upload') {
         checkAndHydrateSession(sessId);
-      } else {
+      } else if (!sessId && state.step !== 'upload') {
         dispatch({ type: 'RESET_FLOW' });
       }
     };
@@ -121,16 +123,16 @@ function StudioContent() {
       isMounted = false;
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [sessionIdParam, state.sessionId, state.aiResponse, dispatch]);
+  }, [sessionIdParam, state.sessionId, state.aiResponse, state.step, dispatch]);
 
   if (hydrating) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-        <div className="relative">
+        <div className="relative flex items-center justify-center">
           <div className="absolute inset-0 bg-purple-500 blur-xl opacity-30 rounded-full animate-pulse" />
-          <Loader2 className="relative w-10 h-10 text-purple-400 animate-spin" />
+          <PrizomAIStudioMark size={40} className="relative z-10 animate-spin" />
         </div>
-        <p className="text-sm font-bold text-white tracking-tight">Restoring Generation State...</p>
+        <p className="text-sm font-bold text-white tracking-tight">Restoring Prizom AI Studio Session...</p>
       </div>
     );
   }

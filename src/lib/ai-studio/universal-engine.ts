@@ -5,12 +5,20 @@ import {
   QualityValidationResult,
   EditableVariable
 } from './schema';
+import { AspectRatioAnalysisResult } from './aspect-ratio';
 
 /**
-  * Prizom Universal Prompt Engine
-  * Constructs a structured, high-density, reusable visual reconstruction prompt
-  * designed for cross-platform image generators.
-  */
+ * Prizom Universal Prompt Engine (V3 World-Class Edition)
+ * Constructs a high-density, grounded, cross-model visual reconstruction recipe.
+ */
+
+export function stripQualityBuzzwords(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\b(8k|4k|uhd|ultra hd|hd|hyperrealistic|photorealistic quality|masterpiece|award winning|trending on artstation|best quality|top quality|unreal engine 5|octane render|blender 3d)\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 export function determineComplexityLevel(input: {
   hasText?: boolean;
@@ -20,44 +28,35 @@ export function determineComplexityLevel(input: {
   descriptionLength?: number;
 }): ComplexityLevel {
   const textCount = input.detectedTextCount || 0;
-  const isPosterOrGraphic = ['Poster', 'Product', 'Commercial', 'Architecture'].includes(input.category || '');
+  const isComplexCategory = ['Poster', 'Product', 'Commercial', 'Architecture', 'Fashion', 'Cyberpunk', 'Fantasy'].includes(input.category || '');
   const length = input.descriptionLength || 0;
 
-  if (input.hasText || textCount > 0 || isPosterOrGraphic || length > 600) {
+  if (input.hasText || textCount > 0 || (isComplexCategory && length > 350) || length > 600) {
     return 'high';
   }
 
-  if (length > 250 || (input.elementCount && input.elementCount > 2)) {
+  if (length > 200 || (input.elementCount && input.elementCount > 2)) {
     return 'medium';
   }
 
   return 'simple';
 }
 
-/**
- * Normalizes camera optical claims so they describe visual characteristics
- * without making false claims about exact camera hardware.
- */
 export function sanitizeCameraOptics(cameraStr: string): string {
   if (!cameraStr || cameraStr.toLowerCase() === 'none') {
-    return 'Eye-level natural perspective with subtle depth falloff.';
+    return 'Eye-level optical perspective with clean focus and natural depth falloff.';
   }
 
   let cleaned = cameraStr;
+  cleaned = cleaned.replace(/shot on (canon|nikon|sony|leica|hasselblad) [^\s,]+/gi, 'captured with a calibrated optical prime lens');
+  cleaned = cleaned.replace(/85mm f\/1\.4 prime/gi, 'medium telephoto perspective with shallow depth of field falloff');
+  cleaned = cleaned.replace(/35mm f\/1\.8/gi, 'natural perspective with cinematic depth separation');
+  cleaned = cleaned.replace(/24mm ultra-wide/gi, 'wide-angle perspective with crisp edge resolution');
+  cleaned = cleaned.replace(/100mm macro prime/gi, 'macro close-up focus with fine surface detail');
 
-  // Replace exact hardware claims with visual impression terms
-  cleaned = cleaned.replace(/shot on (canon|nikon|sony|leica|hasselblad) [^\s,]+/gi, 'captured with a clean optical lens');
-  cleaned = cleaned.replace(/85mm f\/1\.4 prime/gi, 'medium telephoto perspective with shallow depth of field');
-  cleaned = cleaned.replace(/35mm f\/1\.8/gi, 'natural wide perspective with cinematic depth separation');
-  cleaned = cleaned.replace(/24mm ultra-wide/gi, 'wide-angle optical perspective');
-  cleaned = cleaned.replace(/100mm macro prime/gi, 'macro close-up magnification focus');
-
-  return cleaned.trim();
+  return stripQualityBuzzwords(cleaned);
 }
 
-/**
- * Builds the 14-section structured Universal Prompt Data object.
- */
 export function build14SectionUniversalPrompt(raw: {
   coreConcept?: string;
   subject?: string;
@@ -73,65 +72,66 @@ export function build14SectionUniversalPrompt(raw: {
   technicalQuality?: string;
   negativeConstraints?: string;
   aspectRatio?: string;
+  aspectRatioDetails?: AspectRatioAnalysisResult;
   hasText?: boolean;
   detectedText?: string[];
   category?: string;
 }): UniversalPromptData {
   const category = raw.category || 'Visual Art';
-  const aspectRatio = raw.aspectRatio || '1:1';
+  const aspectRatio = raw.aspectRatioDetails?.normalized_aspect_ratio || raw.aspectRatio || '1:1';
+  const framingDirective = raw.aspectRatioDetails?.framing_directive || `Maintain original ${aspectRatio} composition`;
 
   // 1. Core Concept
-  const coreConcept = (raw.coreConcept || raw.subject || `A high-fidelity ${category.toLowerCase()} artwork.`).trim();
+  const coreConcept = stripQualityBuzzwords(raw.coreConcept || raw.subject || `A high-fidelity ${category.toLowerCase()} visual reconstruction.`);
 
-  // 2. Subject
-  const subject = (raw.subject || 'The main focal subject displayed in the reference image.').trim();
+  // 2. Subject & Identity
+  const subject = stripQualityBuzzwords(raw.subject || 'Primary subject positioned clearly in the frame.');
 
-  // 3. Composition
-  const composition = (raw.composition || 'Balanced framing with structured visual hierarchy across foreground and background layers.').trim();
+  // 3. Composition & Framing
+  const composition = stripQualityBuzzwords(`${raw.composition || 'Balanced visual framing with distinct foreground and background layers.'}. ${framingDirective}.`);
 
-  // 4. Environment
-  const environment = (raw.environment || 'Atmospheric background setting with complementary spatial details.').trim();
+  // 4. Environment & Setting
+  const environment = stripQualityBuzzwords(raw.environment || 'Contextual background environment complementary to the focal subject.');
 
-  // 5. Lighting
-  const lighting = (raw.lighting || 'Directional studio lighting with clear highlight placement and controlled shadow falloff.').trim();
+  // 5. Lighting & Atmosphere
+  const lighting = stripQualityBuzzwords(raw.lighting || 'Directional lighting with controlled highlight placement and natural shadow falloff.');
 
   // 6. Color Palette
   let colorPaletteStr = '';
   if (Array.isArray(raw.colorPalette)) {
-    colorPaletteStr = `Dominant color palette: ${raw.colorPalette.join(', ')}. Harmonious contrast with controlled saturation.`;
+    colorPaletteStr = `Dominant palette: ${raw.colorPalette.join(', ')}. Controlled color harmony and balanced saturation.`;
   } else {
-    colorPaletteStr = raw.colorPalette || 'Harmonious color palette with balanced saturation and tonal contrast.';
+    colorPaletteStr = stripQualityBuzzwords(raw.colorPalette || 'Harmonious color palette with controlled contrast.');
   }
 
-  // 7. Camera & Photographic Character
-  const cameraPhotographic = sanitizeCameraOptics(raw.cameraPhotographic || 'Eye-level perspective with controlled depth of field.');
+  // 7. Camera & Optics
+  const cameraPhotographic = sanitizeCameraOptics(raw.cameraPhotographic || 'Eye-level optical perspective with controlled depth of field.');
 
   // 8. Materials & Textures
-  const materialsTextures = (raw.materialsTextures || 'Tactile surface details with natural material shaders and physical texture separation.').trim();
+  const materialsTextures = stripQualityBuzzwords(raw.materialsTextures || 'Natural surface shaders with distinct tactile texture details.');
 
-  // 9. Typography / Text Reconstruction
+  // 9. Typography / Text
   let typographyText = '';
   if (raw.hasText && Array.isArray(raw.detectedText) && raw.detectedText.length > 0) {
-    typographyText = `Visible text reads: "${raw.detectedText.join(' ')}". Display typography with clean font alignment and spatial hierarchy. [OBSERVED]`;
+    typographyText = `Visible text reads: "${raw.detectedText.join(' ')}". Clean display typography with structured spatial alignment.`;
   } else if (raw.typographyText) {
-    typographyText = raw.typographyText;
+    typographyText = stripQualityBuzzwords(raw.typographyText);
   } else {
-    typographyText = 'No prominent visible text detected in reference image. Keep composition clean of random text artifacts. [OBSERVED]';
+    typographyText = 'No prominent visible text. Keep background free of random text artifacts.';
   }
 
   // 10. Graphic / Design Elements
-  const graphicDesignElements = (raw.graphicDesignElements || 'Clean framing, spatial alignment, and graphic shape hierarchy complement the visual layout.').trim();
+  const graphicDesignElements = stripQualityBuzzwords(raw.graphicDesignElements || 'Structured spatial alignment and clean shape hierarchy.');
 
   // 11. Visual Style
-  const visualStyle = (raw.visualStyle || `${category} aesthetic with distinct artistic rendering characteristics.`).trim();
+  const visualStyle = stripQualityBuzzwords(raw.visualStyle || `${category} aesthetic with distinct visual rendering characteristics.`);
 
-  // 12. Technical & Quality Characteristics
-  const technicalQuality = (raw.technicalQuality || 'Sharp focal detail, clean texture fidelity, subtle film grain, and realistic dynamic range falloff.').trim();
+  // 12. Technical Quality
+  const technicalQuality = stripQualityBuzzwords(raw.technicalQuality || 'Sharp focal clarity, clean texture fidelity, dynamic contrast, and fine optical falloff.');
 
-  // 13. Targeted Negative Constraints
-  const negativeConstraints = (raw.negativeConstraints || 'Unwanted text artifacts, extra limbs, distorted features, duplicate subjects, unintentional background clutter, heavy plastic skin, oversaturation.').trim();
+  // 13. Negative Constraints
+  const negativeConstraints = stripQualityBuzzwords(raw.negativeConstraints || 'Blurry, low resolution, distorted features, extra limbs, duplicate subjects, random text artifacts, plastic skin sheen.');
 
-  // Determine adaptive complexity level
   const complexityLevel = determineComplexityLevel({
     hasText: raw.hasText,
     detectedTextCount: raw.detectedText?.length,
@@ -156,8 +156,7 @@ export function build14SectionUniversalPrompt(raw: {
     { key: 'aspectRatio', title: 'Aspect Ratio', content: `Aspect Ratio: ${aspectRatio}`, status: 'observed' }
   ];
 
-  // Construct Markdown representation
-  const fullMarkdownPrompt = `# Universal Image Recreation Prompt
+  const fullMarkdownPrompt = `# Prizom Universal Reconstruction Spec
 
 ## Core Concept
 ${coreConcept}
@@ -165,13 +164,13 @@ ${coreConcept}
 ## Subject
 ${subject}
 
-## Composition
+## Composition & Framing
 ${composition}
 
 ## Environment
 ${environment}
 
-## Lighting
+## Lighting & Atmosphere
 ${lighting}
 
 ## Color Palette
@@ -183,7 +182,7 @@ ${cameraPhotographic}
 ## Materials & Textures
 ${materialsTextures}
 
-## Typography / Graphic Elements
+## Typography / Text Elements
 ${typographyText}
 
 ## Visual Style
@@ -198,7 +197,7 @@ ${negativeConstraints}
 ## Aspect Ratio
 ${aspectRatio}`;
 
-  // Construct continuous Master Prompt for AI generators
+  // Build high-density continuous master prompt for cross-model generation
   const masterParts = [
     coreConcept,
     `Subject: ${subject}`,
@@ -240,9 +239,6 @@ ${aspectRatio}`;
   };
 }
 
-/**
- * Pre-Output Quality Validation Gate
- */
 export function validateUniversalPromptQuality(data: UniversalPromptData): QualityValidationResult {
   const missingSections: string[] = [];
   const feedback: string[] = [];
@@ -251,7 +247,7 @@ export function validateUniversalPromptQuality(data: UniversalPromptData): Quali
   if (!data.coreConcept || data.coreConcept.length < 5) {
     missingSections.push('Core Concept');
     score -= 20;
-    feedback.push('Core concept is missing or too brief.');
+    feedback.push('Core concept is missing or underspecified.');
   }
 
   if (!data.subject || data.subject.length < 5) {
@@ -269,13 +265,13 @@ export function validateUniversalPromptQuality(data: UniversalPromptData): Quali
   if (!data.lighting || data.lighting.length < 5) {
     missingSections.push('Lighting');
     score -= 15;
-    feedback.push('Lighting information missing.');
+    feedback.push('Lighting analysis missing.');
   }
 
   if (!data.visualStyle || data.visualStyle.length < 3) {
     missingSections.push('Visual Style');
     score -= 15;
-    feedback.push('Visual style missing.');
+    feedback.push('Visual style classification missing.');
   }
 
   if (!data.aspectRatio) {
@@ -284,23 +280,20 @@ export function validateUniversalPromptQuality(data: UniversalPromptData): Quali
     feedback.push('Aspect ratio missing.');
   }
 
-  // Check for quality buzzword contamination ("8k", "ultra HD", "masterpiece")
-  if (/8k|ultra hd|masterpiece|award-winning/i.test(data.universalMasterPrompt)) {
-    score -= 10;
-    feedback.push('Prompt contains quality buzzwords that cause prompt contamination.');
+  // Anti-buzzword check
+  if (/8k|ultra hd|masterpiece|award-winning|trending on artstation/i.test(data.universalMasterPrompt)) {
+    score -= 15;
+    feedback.push('Prompt contains quality buzzword contamination.');
   }
 
   return {
-    isValid: missingSections.length === 0 && score >= 70,
+    isValid: missingSections.length === 0 && score >= 75,
     missingSections,
     score: Math.max(0, score),
     feedback
   };
 }
 
-/**
- * Extracts intelligent editable variables from prompt text and JSON elements.
- */
 export function extractEditableVariablesFromPrompt(
   promptData: UniversalPromptData,
   hasText?: boolean,
@@ -308,7 +301,6 @@ export function extractEditableVariablesFromPrompt(
 ): EditableVariable[] {
   const vars: EditableVariable[] = [];
 
-  // Subject Variable
   if (promptData.subject) {
     const mainSubj = promptData.subject.split('.')[0].slice(0, 40);
     vars.push({
@@ -319,17 +311,15 @@ export function extractEditableVariablesFromPrompt(
     });
   }
 
-  // Text Variable if present
   if (hasText && Array.isArray(detectedText) && detectedText.length > 0) {
     vars.push({
       key: 'HEADLINE_TEXT',
       currentValue: detectedText[0],
       category: 'text',
-      description: 'Main visible text in composition'
+      description: 'Main visible headline text'
     });
   }
 
-  // Location / Environment Variable
   if (promptData.environment) {
     const envSummary = promptData.environment.split('.')[0].slice(0, 40);
     vars.push({
@@ -340,7 +330,6 @@ export function extractEditableVariablesFromPrompt(
     });
   }
 
-  // Primary Color Variable
   if (promptData.colorPalette) {
     const hexMatch = promptData.colorPalette.match(/#[A-Fa-f0-9]{6}/);
     if (hexMatch) {

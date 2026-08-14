@@ -16,6 +16,7 @@ import RelatedPromptsFeed from '@/components/ui/RelatedPromptsFeed';
 import { Metadata } from 'next';
 import PromptViewTracker from '@/components/analytics/PromptViewTracker';
 import { SITE_CONFIG, getCanonicalUrl } from '@/lib/site-config';
+import AIStudioAttribution from '@/components/ui/AIStudioAttribution';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -498,13 +499,16 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           <div className="lg:col-span-7 space-y-8">
             <div className="bg-white/80 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-xl shadow-zinc-200/20 relative z-20">
               <div className="mb-6">
-                <div className="flex items-center space-x-2 mb-6">
+                <div className="flex items-center space-x-2 mb-6 flex-wrap gap-y-2">
                   <Link href={`/discover?tool=${prompt.ai_tool}`} className="px-4 py-1.5 rounded-full bg-[var(--color-neon-purple)]/10 hover:bg-[var(--color-neon-purple)]/20 text-[var(--color-neon-purple)] text-xs font-black uppercase tracking-wider border border-[var(--color-neon-purple)]/20 transition-colors">
                     {prompt.ai_tool}
                   </Link>
                   <Link href={`/discover?category=${prompt.category}`} className="px-4 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-xs font-black uppercase tracking-wider border border-zinc-200 transition-colors">
                     {prompt.category}
                   </Link>
+                  {(prompt.generation_source === 'ai_studio' || prompt.tags?.includes('prizom-ai-studio')) && (
+                    <AIStudioAttribution variant="detail" />
+                  )}
                 </div>
                 <h1 className="text-4xl md:text-5xl font-black mb-4 text-zinc-900 leading-[1.1] tracking-tight break-words">{prompt.title}</h1>
                 

@@ -1,4 +1,5 @@
 import { AGRouterPromptResponse } from '@/lib/ai-studio/schema';
+import { AspectRatioAnalysisResult } from '@/lib/ai-studio/aspect-ratio';
 
 export interface StudioState {
   step: 'upload' | 'analyzing' | 'editing' | 'publishing' | 'done';
@@ -6,9 +7,12 @@ export interface StudioState {
   uploadedImageUrl: string | null;
   sourceWidth?: number | null;
   sourceHeight?: number | null;
-  sourceAspectRatio?: string | null;
+  sourceMimeType?: string | null;
+  sourceFileSize?: number | null;
+  aspectRatioDetails?: AspectRatioAnalysisResult | null;
   activeVersion: number;
   aiResponse: AGRouterPromptResponse | null;
+  isRestoringFromHistory: boolean;
   userEdits: {
     title: string;
     promptText: string;
@@ -24,11 +28,30 @@ export interface StudioState {
 }
 
 export type StudioAction =
-  | { type: 'SET_IMAGE'; url: string; sessionId: string; credits: number; aspectRatio?: string; width?: number; height?: number }
+  | {
+      type: 'SET_IMAGE';
+      url: string;
+      sessionId: string;
+      credits: number;
+      aspectRatio?: string;
+      aspectRatioDetails?: AspectRatioAnalysisResult;
+      width?: number;
+      height?: number;
+      mimeType?: string;
+      fileSize?: number;
+    }
   | { type: 'START_ANALYSIS' }
   | { type: 'STREAM_FIELD'; field: string; value: string }
   | { type: 'SET_RESPONSE'; response: AGRouterPromptResponse }
-  | { type: 'HYDRATE_SESSION'; sessionId: string; url: string; response: AGRouterPromptResponse; activeVersion?: number; aspectRatio?: string }
+  | {
+      type: 'HYDRATE_SESSION';
+      sessionId: string;
+      url: string;
+      response: AGRouterPromptResponse;
+      activeVersion?: number;
+      aspectRatio?: string;
+    }
+  | { type: 'SET_RESTORING'; isRestoring: boolean }
   | { type: 'EDIT_FIELD'; field: keyof StudioState['userEdits']; value: any }
   | { type: 'INCREMENT_VERSION'; response: AGRouterPromptResponse }
   | { type: 'SUBMIT_PUBLISH' }
@@ -43,9 +66,12 @@ export const initialStudioState: StudioState = {
   uploadedImageUrl: null,
   sourceWidth: null,
   sourceHeight: null,
-  sourceAspectRatio: null,
+  sourceMimeType: null,
+  sourceFileSize: null,
+  aspectRatioDetails: null,
   activeVersion: 1,
   aiResponse: null,
+  isRestoringFromHistory: false,
   userEdits: {
     title: '',
     promptText: '',
@@ -68,17 +94,25 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
         credits: action.credits
       };
 
-    case 'SET_IMAGE':
+    case 'SET_RESTORING':
+      return {
+        ...state,
+        isRestoringFromHistory: action.isRestoring
+      };
 
+    case 'SET_IMAGE':
       return {
         ...state,
         step: 'analyzing',
         uploadedImageUrl: action.url,
         sessionId: action.sessionId,
         credits: action.credits,
-        sourceAspectRatio: action.aspectRatio || null,
+        aspectRatioDetails: action.aspectRatioDetails || null,
         sourceWidth: action.width || null,
         sourceHeight: action.height || null,
+        sourceMimeType: action.mimeType || null,
+        sourceFileSize: action.fileSize || null,
+        isRestoringFromHistory: false,
         userEdits: {
           ...state.userEdits,
           aspectRatio: action.aspectRatio || state.userEdits.aspectRatio || '1:1'
@@ -116,7 +150,7 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
           category: action.response.metadata.category || '',
           tags: action.response.metadata.tags || [],
           aiTool: action.response.intelligence.recommendedPlatform || '',
-          aspectRatio: state.sourceAspectRatio || action.response.metadata.aspectRatio || '1:1'
+          aspectRatio: action.response.metadata.aspectRatio || '1:1'
         }
       };
 
@@ -128,7 +162,7 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
         uploadedImageUrl: action.url,
         activeVersion: action.activeVersion || 1,
         aiResponse: action.response,
-        sourceAspectRatio: action.aspectRatio || action.response.metadata.aspectRatio || '1:1',
+        isRestoringFromHistory: false,
         userEdits: {
           title: action.response.metadata.title || '',
           promptText: action.response.prompt.main || '',
@@ -184,6 +218,7 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
       return {
         ...state,
         step: 'upload',
+        isRestoringFromHistory: false,
         error: action.message
       };
 

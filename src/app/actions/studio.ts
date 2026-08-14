@@ -470,7 +470,11 @@ export async function logStudioTelemetryAction(input: {
  */
 export async function analyzeImageStudioAction(
   imageUrl: string,
-  options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
+  options: {
+    quality?: 'standard' | 'premium';
+    requestId?: string;
+    sourceDimensions?: { width: number; height: number };
+  } = {}
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
