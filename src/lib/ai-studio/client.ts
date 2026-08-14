@@ -130,25 +130,17 @@ function transformAGRouterResponse(data: any, requestId: string): AGRouterPrompt
 }
 
 /**
- * Prizom AI Studio V3 — Phase 1 Orchestration Proxy Client
- * Performs zero-latency visual embedding cache checks before dispatching requests to AG Router.
- * Supports HMAC SHA-256 header validation, timestamp nonces, and automatic failover.
+ * Prizom AI Studio V3 — Mandatory AG Router Proxy Client
+ * Enforces mandatory gateway routing through AG Router.
+ * FAIL CLOSED: If AG Router is offline, unconfigured, or returns an error,
+ * this function throws an explicit exception. No local fallback pipeline executes.
  */
 export async function generatePromptFromImage(
   imageUrl: string,
   options: { quality?: 'standard' | 'premium'; requestId?: string } = {}
 ): Promise<AGRouterPromptResponse> {
   const requestId = options.requestId || crypto.randomUUID();
-
-  // 1. Check Vector Similarity Cache first (Zero-latency hit if visual similarity > 0.95)
-  const cachedHit = getCachedPromptAnalysis(imageUrl, 0.95);
-  if (cachedHit.hit && cachedHit.response) {
-    console.log('[AI STUDIO VECTOR CACHE] Hit! Perceptual Cosine Similarity:', cachedHit.similarityScore);
-    return {
-      ...cachedHit.response,
-      requestId
-    };
-  }
+  const startTime = Date.now();
 
   const path = '/v1/vision/analyze';
   const body = {
@@ -157,7 +149,7 @@ export async function generatePromptFromImage(
     image_url: imageUrl, // Required by AG Router /v1/vision/analyze
     imageUrl: imageUrl,  // For backward compatibility
     analysis_type: 'full',
-    context: { platform: 'prizom', version: 'v3-hybrid' },
+    context: { platform: 'prizom', version: 'v3-production' },
     qualityLevel: options.quality || 'premium'
   };
 
@@ -165,30 +157,18 @@ export async function generatePromptFromImage(
   const timestamp = Date.now();
   const nonce = crypto.randomBytes(16).toString('hex');
 
-  // Verify router URL & credentials
-  const hasAgRouterUrl = Boolean(process.env.AG_ROUTER_BASE_URL);
-  const isMockKeys = 
-    AG_ROUTER_API_KEY === 'mock_prizom_api_key' || 
-    AG_ROUTER_HMAC_SECRET === 'mock_prizom_hmac_secret';
-
-  // Check if live direct Vision credentials exist (Gemini / OpenRouter)
-  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_STUDIO_KEY || process.env.GOOGLE_API_KEY);
-  const hasOpenRouterKey = Boolean(process.env.OPENROUTER_API_KEY);
-
-  // If AG Router is unconfigured or using mock keys, attempt live Vision engine or local pipeline
-  if (!hasAgRouterUrl || isMockKeys) {
-    if (hasGeminiKey || hasOpenRouterKey) {
-      console.log('[AI STUDIO CLIENT] AG Router unconfigured; engaging Live Vision Provider Pipeline (Gemini / OpenRouter).');
-    } else {
-      console.log('[AI STUDIO CLIENT] AG Router unconfigured; engaging Vision Perception Pipeline.');
-    }
-    const response = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
-    cachePromptAnalysis(imageUrl, response);
-    return response;
+  // Verify AG Router URL & credentials configuration
+  const agRouterBaseUrl = process.env.AG_ROUTER_BASE_URL !== undefined 
+    ? process.env.AG_ROUTER_BASE_URL 
+    : AG_ROUTER_BASE_URL;
+    
+  if (!agRouterBaseUrl || agRouterBaseUrl.trim() === '') {
+    console.error('[AG ROUTER GATEWAY ERROR] AG_ROUTER_BASE_URL environment variable is missing.');
+    throw new Error('AI generation is temporarily unavailable. Gateway configuration missing.');
   }
 
   // Normalize base URL to strip trailing slash and '/v1'
-  const normalizedBase = AG_ROUTER_BASE_URL.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
+  const normalizedBase = agRouterBaseUrl.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
   const requestUrl = `${normalizedBase}${path}`;
 
   const signature = generateHMACSignature(path, bodyString, timestamp, nonce, AG_ROUTER_HMAC_SECRET);
@@ -196,10 +176,13 @@ export async function generatePromptFromImage(
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${AG_ROUTER_API_KEY}`,
+    'X-Prizom-Request-ID': requestId,
     'X-Prizom-Signature': signature,
     'X-Prizom-Timestamp': timestamp.toString(),
     'X-Prizom-Nonce': nonce
   };
+
+  console.log(`[AG ROUTER CLIENT] Dispatching generation request ${requestId} to AG Router: ${requestUrl}`);
 
   try {
     let response = await fetch(requestUrl, {
@@ -209,11 +192,12 @@ export async function generatePromptFromImage(
       signal: AbortSignal.timeout(30000)
     });
 
-    // Retry with reverse-engineer route if primary route 404s
+    // Retry with reverse-engineer route if primary route returns 404
     if (response.status === 404) {
       const fallbackPath = '/v1/vision/reverse-engineer';
       const fallbackUrl = `${normalizedBase}${fallbackPath}`;
       const fallbackSig = generateHMACSignature(fallbackPath, bodyString, timestamp, nonce, AG_ROUTER_HMAC_SECRET);
+      console.log(`[AG ROUTER CLIENT] Retrying request ${requestId} via reverse-engineer endpoint: ${fallbackUrl}`);
       response = await fetch(fallbackUrl, {
         method: 'POST',
         headers: {
@@ -227,18 +211,48 @@ export async function generatePromptFromImage(
 
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
-      console.error(`[AG ROUTER ERROR] Status ${response.status}:`, errBody);
-      throw new Error(`AG Router API error (${response.status}): ${errBody.detail || errBody.error || 'Unknown error'}`);
+      const errorMsg = errBody.detail || errBody.error || `HTTP ${response.status} ${response.statusText}`;
+      console.error(`[AG ROUTER GATEWAY FAIL] Request ${requestId} status ${response.status}:`, errBody);
+      throw new Error(`AG Router gateway error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();
-    const transformed = transformAGRouterResponse(data, requestId);
+    
+    // Validate AG Router response payload
+    if (!data || typeof data !== 'object') {
+      throw new Error('AG Router returned an empty or invalid JSON response.');
+    }
+
+    const rawPrompt = (typeof data.prompt === 'string' && data.prompt) 
+      || (typeof data.prompt?.main === 'string' && data.prompt.main) 
+      || (typeof data.reverse_prompts?.flux_prompt === 'string' && data.reverse_prompts.flux_prompt)
+      || (typeof data.mainPrompt === 'string' && data.mainPrompt)
+      || '';
+
+    if (!rawPrompt && !data.analysis) {
+      throw new Error('AG Router returned a response without valid prompt data.');
+    }
+
+    const transformed = transformAGRouterResponse({
+      ...data,
+      latency_ms: data.latency_ms || (Date.now() - startTime)
+    }, requestId);
+
+    // Cache valid prompt analysis for fast lookup
     cachePromptAnalysis(imageUrl, transformed);
+
+    console.log(`[AG ROUTER CLIENT SUCCESS] Request ${requestId} completed via provider: ${transformed.generation.provider}, model: ${transformed.generation.modelUsed}, latency: ${transformed.generation.latencyMs}ms`);
+
     return transformed;
   } catch (error: any) {
-    console.warn('[AI STUDIO CLIENT WARNING] AG Router request unavailable, executing Vision Engine:', error.message);
-    const fallbackResponse = await execute14StageVisionPipeline(imageUrl, { quality: options.quality, requestId });
-    return fallbackResponse;
+    console.error(`[AG ROUTER GATEWAY FAILURE - FAIL CLOSED] Request ${requestId} failed:`, error.message);
+    // FAIL CLOSED: Re-throw error so backend & UI handle failure cleanly without alternate generation
+    throw new Error(
+      error.message?.includes('AG Router') 
+        ? error.message 
+        : `AI generation is temporarily unavailable: ${error.message || 'Gateway connection failed'}`
+    );
   }
 }
+
 

@@ -381,83 +381,58 @@ function PastGenerationsSection() {
           }
         }
 
-        const resolvedPromptText = (latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction' && !latestVersion.prompt_text.startsWith('A detailed high-fidelity visual artwork capturing'))
+        const resolvedPromptText = (latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction')
           ? latestVersion.prompt_text
-          : (parsedAg?.prompt?.main && parsedAg.prompt.main !== 'Visual prompt deconstruction' && !parsedAg.prompt.main.startsWith('A detailed high-fidelity visual artwork capturing'))
+          : (parsedAg?.prompt?.main && parsedAg.prompt.main !== 'Visual prompt deconstruction')
             ? parsedAg.prompt.main
             : (parsedAg?.reverse_prompts?.flux_prompt)
               ? parsedAg.reverse_prompts.flux_prompt
               : (typeof parsedAg?.prompt === 'string' && parsedAg.prompt)
                 ? parsedAg.prompt
-                : 'High-precision AI image prompt capturing subject, optics, and lighting.';
+                : '';
 
-        const hasValidAgPrompt = Boolean(parsedAg && (
-          typeof parsedAg.prompt === 'string' ||
-          typeof parsedAg.prompt?.main === 'string' ||
-          typeof parsedAg.reverse_prompts?.flux_prompt === 'string'
-        ));
-
-        const response = hasValidAgPrompt ? {
-          ...parsedAg,
-          prompt: typeof parsedAg.prompt === 'object' ? {
-            ...parsedAg.prompt,
-            main: resolvedPromptText
-          } : {
-            main: resolvedPromptText,
-            negative: parsedAg.negative_prompt || 'blurry, low quality, noise, distortion, watermark',
-            style: parsedAg.style || 'Photorealistic',
-            lighting: parsedAg.lighting || 'Natural studio lighting',
-            composition: parsedAg.composition || 'Centered framing',
-            camera: parsedAg.camera || '50mm prime lens',
-            colorPalette: parsedAg.colorPalette || ['#A855F7', '#06B6D4', '#0F172A'],
-            mood: parsedAg.mood || 'Cinematic atmosphere'
-          }
-        } : {
-          requestId: res.session.request_id || crypto.randomUUID(),
-          prompt: {
-            main: resolvedPromptText,
-            negative: latestVersion?.negative_prompt || parsedAg?.prompt?.negative || 'blurry, low quality, noise, distortion, watermark',
-            style: parsedAg?.prompt?.style || 'Photorealistic',
-            lighting: parsedAg?.prompt?.lighting || 'Natural studio lighting',
-            composition: parsedAg?.prompt?.composition || 'Centered framing',
-            camera: parsedAg?.prompt?.camera || '50mm prime lens',
-            colorPalette: parsedAg?.prompt?.colorPalette || ['#A855F7', '#06B6D4', '#0F172A'],
-            mood: parsedAg?.prompt?.mood || 'Cinematic atmosphere'
-          },
-          metadata: {
-            title: parsedAg?.metadata?.title || 'Universal Visual Specification',
-            description: parsedAg?.metadata?.description || 'Reverse engineering analysis',
-            tags: parsedAg?.metadata?.tags || ['ai-studio', 'saved-generation'],
-            category: parsedAg?.metadata?.category || 'Photography',
-            aspectRatio: res.session.aspect_ratio || parsedAg?.metadata?.aspectRatio || '1:1',
-            promptType: 'image'
-          },
-          intelligence: {
-            recommendedModel: 'flux-1-dev',
-            recommendedPlatform: 'flux',
-            supportedModels: ['flux-1-dev', 'midjourney-v6', 'sdxl-1.0'],
-            launchUrl: 'https://prizom.in/studio'
-          },
-          quality: { confidenceScore: 0.95, qualityScore: 0.95, promptClarity: 0.98, estimatedOutputQuality: 'high' },
-          safety: { flagged: false, flags: [], safetyScore: 0.99 },
-          generation: { modelUsed: 'prizom-engine', provider: 'prizom-studio', latencyMs: 400, tokensUsed: 420, version: '3.0', timestamp: res.session.created_at }
-        };
-
-        // Push URL for browser history back navigation
-        if (typeof window !== 'undefined') {
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.set('session', sessionId);
-          window.history.pushState({ sessionId }, '', newUrl.toString());
+        if (!resolvedPromptText && res.session.status === 'failed') {
+          dispatch({
+            type: 'SET_ERROR',
+            message: res.session.error_message || 'This generation failed. AI generation unavailable.'
+          });
+          return;
         }
 
-        dispatch({
-          type: 'HYDRATE_SESSION',
-          sessionId: res.session.id,
-          url: res.session.cloudinary_url || url,
-          response,
-          activeVersion: res.session.active_version || 1,
-          aspectRatio: res.session.aspect_ratio || response?.metadata?.aspectRatio || '1:1'
-        });
+        if (parsedAg && resolvedPromptText) {
+          const response = {
+            ...parsedAg,
+            prompt: typeof parsedAg.prompt === 'object' ? {
+              ...parsedAg.prompt,
+              main: resolvedPromptText
+            } : {
+              main: resolvedPromptText,
+              negative: parsedAg.negative_prompt || 'blurry, low quality, noise, distortion, watermark',
+              style: parsedAg.style || 'Photorealistic',
+              lighting: parsedAg.lighting || 'Natural studio lighting',
+              composition: parsedAg.composition || 'Centered framing',
+              camera: parsedAg.camera || '50mm prime lens',
+              colorPalette: parsedAg.colorPalette || ['#A855F7', '#06B6D4', '#0F172A'],
+              mood: parsedAg.mood || 'Cinematic atmosphere'
+            }
+          };
+
+          // Push URL for browser history back navigation
+          if (typeof window !== 'undefined') {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('session', sessionId);
+            window.history.pushState({ sessionId }, '', newUrl.toString());
+          }
+
+          dispatch({
+            type: 'HYDRATE_SESSION',
+            sessionId: res.session.id,
+            url: res.session.cloudinary_url || url,
+            response,
+            activeVersion: res.session.active_version || 1,
+            aspectRatio: res.session.aspect_ratio || response?.metadata?.aspectRatio || '1:1'
+          });
+        }
       }
     } catch (err) {
       console.error('[STUDIO HISTORY] Error opening session:', err);
