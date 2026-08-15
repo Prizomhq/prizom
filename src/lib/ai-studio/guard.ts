@@ -28,22 +28,21 @@ export interface AiStudioAccessResult {
  * Defaults to FALSE (Gated Early Access Mode).
  */
 export function isAiStudioPublic(): boolean {
-  const flag = process.env.AI_STUDIO_PUBLIC || process.env.NEXT_PUBLIC_AI_STUDIO_PUBLIC || process.env.AI_STUDIO_MODE;
-  return flag === 'true' || flag === '1' || flag?.toUpperCase() === 'PUBLIC';
+  // Controlled rollout: Public access is disabled by default.
+  // Access is strictly restricted to Super Admins and Approved Early Access users.
+  return false;
 }
 
 /**
  * Server-side feature gate & authorization check for AI Studio.
- * 1. Super Admin: Always allowed (reason: 'super_admin')
- * 2. Public Flag (AI_STUDIO_PUBLIC=true): Public access enabled (reason: 'public')
- * 3. Early Access Approved: User is approved in ai_studio_early_access table -> allowed (reason: 'early_access')
- * 4. Pending / Rejected / Revoked / None: Disallowed with explicit server reason
+ * Enforces controlled rollout authorization matrix:
+ * 1. Unauthenticated -> Denied (reason: 'unauthenticated')
+ * 2. Super Admin -> Allowed (reason: 'super_admin')
+ * 3. Early Access Approved -> Allowed (reason: 'early_access')
+ * 4. Pending / Rejected / Revoked / None -> Denied with explicit server reason
  */
 export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult> {
-  const isPublic = isAiStudioPublic();
-  if (isPublic) {
-    return { allowed: true, isPublic: true, isSuperAdmin: false, reason: 'public' };
-  }
+
 
   try {
     const supabase = await createClient();

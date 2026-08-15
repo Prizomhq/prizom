@@ -1,19 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkEnterpriseRateLimit } from '@/lib/ai-studio/api-platform';
 import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
     const access = await verifyAiStudioAccessServer();
     if (!access.allowed) {
       return NextResponse.json(
-        { success: false, error: 'Prizom AI Studio API is currently in private beta testing.' },
+        { success: false, error: 'Prizom AI Studio API is currently restricted to approved Early Access users and Super Admins.' },
         { status: 403 }
       );
     }
 
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     const authHeader = req.headers.get('authorization');
     const apiKey = authHeader?.replace('Bearer ', '');
+
+    if (!user && !apiKey) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Authentication required.' },
+        { status: 401 }
+      );
+    }
+
     const rateLimit = checkEnterpriseRateLimit(apiKey);
 
     if (rateLimit.tier === 'free') {

@@ -481,7 +481,16 @@ export async function analyzeImageStudioAction(
     return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required for AI Studio generation.' };
+  }
+
   try {
+    // Assert user standing (banned, suspended)
+    await assertNotSuspendedOrBanned(user.id);
     const { generatePromptFromImage } = await import('@/lib/ai-studio/client');
     const response = await generatePromptFromImage(imageUrl, options);
 

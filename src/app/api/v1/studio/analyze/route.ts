@@ -3,6 +3,8 @@ import { generatePromptFromImage } from '@/lib/ai-studio/client';
 import { checkEnterpriseRateLimit, packageEnterpriseApiBundle } from '@/lib/ai-studio/api-platform';
 import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 
+import { createClient } from '@/lib/supabase/server';
+
 /**
  * Prizom AI Studio Public REST API Endpoint (Phase 9)
  * POST /api/v1/studio/analyze
@@ -13,15 +15,25 @@ export async function POST(req: Request) {
     const access = await verifyAiStudioAccessServer();
     if (!access.allowed) {
       return NextResponse.json(
-        { success: false, error: 'Prizom AI Studio API is currently in private beta testing.' },
+        { success: false, error: 'Prizom AI Studio API is currently restricted to approved Early Access users and Super Admins.' },
         { status: 403 }
       );
     }
 
-    const authHeader = req.headers.get('authorization') || '';
-    const apiKey = authHeader.replace(/^Bearer\s+/i, '') || 'demo_guest_key';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const rateLimit = checkEnterpriseRateLimit(apiKey);
+    const authHeader = req.headers.get('authorization') || '';
+    const apiKey = authHeader.replace(/^Bearer\s+/i, '');
+
+    if (!user && (!apiKey || apiKey === 'demo_guest_key')) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Valid user session or Enterprise API Key is required.' },
+        { status: 401 }
+      );
+    }
+
+    const rateLimit = checkEnterpriseRateLimit(apiKey || 'user_session');
 
     const body = await req.json().catch(() => ({}));
     const { imageUrl, quality } = body;
