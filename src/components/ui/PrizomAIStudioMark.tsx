@@ -5,12 +5,13 @@ import React from 'react';
 interface PrizomAIStudioMarkProps {
   className?: string;
   size?: number;
-  variant?: 'solid' | 'gradient' | 'monochrome';
+  variant?: 'gradient' | 'solid' | 'monochrome';
 }
 
 /**
  * Prizom AI Studio Official Brand Mark
- * Precise geometric optics icon: Hexagonal precision aperture + nested geometric P-prism lens.
+ * Original geometric optics mark: Precision prism hexagon + light refraction beam + prompt vector brackets.
+ * Concept: Image -> Optical Prism Refraction -> Prompt Structure.
  */
 export function PrizomAIStudioMark({
   className = '',
@@ -29,20 +30,27 @@ export function PrizomAIStudioMark({
       className={`inline-block shrink-0 align-middle ${className}`}
     >
       <defs>
+        {/* Core Prizom Electric Gradient */}
         <linearGradient id={`${gradientId}-bg`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#A855F7" />
           <stop offset="50%" stopColor="#6366F1" />
           <stop offset="100%" stopColor="#06B6D4" />
         </linearGradient>
+        {/* Optical Accent Gradient */}
         <linearGradient id={`${gradientId}-accent`} x1="0%" y1="100%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#EC4899" />
           <stop offset="100%" stopColor="#8B5CF6" />
         </linearGradient>
+        {/* Refraction Beam Glow */}
+        <linearGradient id={`${gradientId}-beam`} x1="12" y1="24" x2="36" y2="24">
+          <stop offset="0%" stopColor="#C084FC" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.9" />
+        </linearGradient>
       </defs>
 
-      {/* Outer Precision Hexagonal Aperture Frame */}
+      {/* 1. Outer Precision Hexagonal Prism Frame */}
       <path
-        d="M24 4L41.3205 14V34L24 44L6.67949 34V14L24 4Z"
+        d="M24 3L42 13.3923V34.6077L24 45L6 34.6077V13.3923L24 3Z"
         stroke={variant === 'gradient' ? `url(#${gradientId}-bg)` : 'currentColor'}
         strokeWidth="2.5"
         strokeLinejoin="round"
@@ -50,19 +58,37 @@ export function PrizomAIStudioMark({
         className="opacity-90"
       />
 
-      {/* Internal Geometric Optics Lens Prism ('P' Integration) */}
+      {/* 2. Internal Refracting Prism Triangle (Image Light -> Spectrum) */}
+      <path
+        d="M24 11L34 29H14L24 11Z"
+        stroke={variant === 'gradient' ? `url(#${gradientId}-bg)` : 'currentColor'}
+        strokeWidth="2"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.85"
+      />
+
+      {/* 3. Optical Refraction Beam (Deconstructing Image into Syntax) */}
+      <path
+        d="M14 29L24 23L34 29"
+        stroke={variant === 'gradient' ? `url(#${gradientId}-beam)` : 'currentColor'}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      {/* 4. Signature P-Prism Core Node */}
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M16 14H28C32.4183 14 36 17.5817 36 22C36 26.4183 32.4183 30 28 30H22V34H16V14ZM22 20V24H27.5C28.8807 24 30 22.8807 30 21.5C30 20.1193 28.8807 19.5 27.5 19.5H22V20Z"
+        d="M21 18H26C28.2091 18 30 19.7909 30 22C30 24.2091 28.2091 26 26 26H23V30H21V18ZM23 20V24H26C27.1046 24 28 23.1046 28 22C28 20.8954 27.1046 20 26 20H23Z"
         fill={variant === 'gradient' ? `url(#${gradientId}-bg)` : 'currentColor'}
       />
 
-      {/* Focal Ray Accent Indicator */}
+      {/* 5. Focal Optical Ray Point */}
       <circle
         cx="34"
-        cy="14"
-        r="3"
+        cy="13.5"
+        r="2.5"
         fill={variant === 'gradient' ? `url(#${gradientId}-accent)` : 'currentColor'}
       />
     </svg>

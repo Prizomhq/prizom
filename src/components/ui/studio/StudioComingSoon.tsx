@@ -2,25 +2,18 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { 
-  Sparkles, 
-  Lock, 
   ArrowRight, 
   CheckCircle2, 
   Clock, 
   ShieldAlert, 
-  Layers, 
-  Eye, 
-  Wand2, 
-  Camera, 
-  Cpu, 
   Send,
   Loader2,
-  ChevronRight,
-  Info
+  X,
+  Sparkles
 } from 'lucide-react';
 import PrizomLogo from '@/components/ui/PrizomLogo';
+import { PrizomAIStudioMark } from '@/components/ui/PrizomAIStudioMark';
 import { AiStudioAccessResult } from '@/lib/ai-studio/guard';
 import { submitEarlyAccessApplicationAction } from '@/app/actions/earlyAccess';
 
@@ -30,7 +23,6 @@ interface StudioComingSoonProps {
 }
 
 export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonProps) {
-  const router = useRouter();
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,244 +45,214 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-500 selection:text-white flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-500 selection:text-white flex flex-col justify-between overflow-x-hidden font-sans">
       
-      {/* Background Ambient Lighting */}
+      {/* Refined Ambient Background Backdrop */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-900/20 via-indigo-900/10 to-transparent blur-[160px]" />
-        <div className="absolute top-[40%] -left-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-purple-900/15 rounded-full blur-[140px]" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-900/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* Top Header / Breadcrumb */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-2.5 group">
+      {/* Top Header Navigation */}
+      <header className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-3 group transition-opacity hover:opacity-90">
           <PrizomLogo size={32} />
-          <span className="font-extrabold text-lg text-white tracking-tight">Prizom AI Studio</span>
+          <span className="font-bold text-base text-white tracking-tight">Prizom</span>
         </Link>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-950/60 border border-purple-800/40 text-purple-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
-          <span>Gated Release</span>
-        </div>
-      </div>
+        <Link
+          href="/"
+          className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900/50"
+        >
+          Back to Home
+        </Link>
+      </header>
 
-      {/* Main Hero Container */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 flex-1 flex flex-col justify-center items-center text-center space-y-12">
+      {/* Main Hero Waiting Room Container */}
+      <main className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-12 flex-1 flex flex-col justify-center items-center text-center">
         
-        {/* Status Pill & Badge */}
-        <div className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest shadow-xl">
-            <Clock className="w-4 h-4 text-purple-400" />
-            <span>Coming Soon — Phase 1 Early Access Rollout</span>
+        {/* Original Prizom AI Studio Icon Badge */}
+        <div className="mb-8 relative group">
+          <div className="absolute inset-0 bg-purple-500/20 rounded-3xl blur-xl transition-all duration-500 group-hover:bg-purple-500/30" />
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-zinc-900 border border-purple-500/30 flex items-center justify-center shadow-2xl shadow-purple-950/40">
+            <PrizomAIStudioMark size={48} variant="gradient" />
           </div>
-
-          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.1] text-balance">
-            Reverse Engineer Any Image Into <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-              Production Prompt Formulas
-            </span>
-          </h1>
-
-          <p className="text-zinc-400 text-base sm:text-lg font-medium max-w-2xl mx-auto leading-relaxed">
-            AI Studio is Prizom&apos;s upcoming visual reverse engineering suite. Upload an image to analyze Style DNA, optics parameters, and multi-model compiled prompt formulas.
-          </p>
         </div>
 
-        {/* Dynamic Contextual Application Card */}
-        <div className="w-full max-w-xl bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6 text-left relative overflow-hidden">
-          
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Status Pill */}
+        <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/60 border border-purple-800/40 text-purple-300 text-xs font-bold uppercase tracking-widest">
+          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <span>Coming Soon</span>
+        </div>
 
-          {/* Guest State */}
+        {/* Primary Product Title */}
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+          AI Studio
+        </h1>
+
+        {/* One-Line Value Proposition */}
+        <p className="text-zinc-400 text-base sm:text-lg font-medium max-w-lg mx-auto mb-10 leading-relaxed text-balance">
+          Turn your AI-generated images into detailed, reusable prompts.
+        </p>
+
+        {/* Primary Access Control Card & Journey */}
+        <div className="w-full max-w-md bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-2xl transition-all">
+
+          {/* 1. Normal User (Logged in, not applied yet) */}
+          {currentStatus === 'coming_soon' && (
+            <div className="space-y-4 text-center">
+              <button
+                onClick={() => setShowApplyModal(true)}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-purple-950/50 hover:shadow-purple-500/25 flex items-center justify-center gap-2.5 cursor-pointer active:scale-98"
+              >
+                <span>Get Early Access</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <p className="text-xs text-zinc-500 font-medium">
+                We&apos;ll notify you when it&apos;s ready.
+              </p>
+            </div>
+          )}
+
+          {/* 2. Unauthenticated Guest */}
           {currentStatus === 'unauthenticated' && (
             <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400">
-                <Lock className="w-7 h-7" />
-              </div>
-              <h2 className="text-xl font-extrabold text-white">Log In to Request Early Access</h2>
-              <p className="text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed">
-                Prizom AI Studio is currently rolling out to select creators. Log into your Prizom account to submit your Early Access application.
-              </p>
               <Link
-                href={`/login?next=/studio`}
-                className="inline-flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg hover:shadow-purple-500/20 cursor-pointer"
+                href="/login?next=/studio"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-purple-950/50 hover:shadow-purple-500/25 flex items-center justify-center gap-2.5 cursor-pointer active:scale-98"
               >
-                <span>Log In & Apply</span>
+                <span>Log In & Request Early Access</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </div>
-          )}
-
-          {/* Pending Application State */}
-          {currentStatus === 'pending' && (
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
-                <Clock className="w-7 h-7" />
-              </div>
-              <h2 className="text-xl font-extrabold text-white">Application Submitted</h2>
-              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-medium leading-relaxed">
-                You are on the <strong className="text-purple-400 font-bold">AI Studio Early Access Waitlist</strong>. Super Admin is reviewing applications in batches. You will receive an in-app notification as soon as your access is approved.
-              </div>
-              <div className="pt-2 flex items-center justify-center gap-2 text-xs font-bold text-zinc-500">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Status: Waitlist Pending</span>
-              </div>
-            </div>
-          )}
-
-          {/* Rejected Application State */}
-          {currentStatus === 'rejected' && (
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto text-zinc-400">
-                <Info className="w-7 h-7 text-zinc-400" />
-              </div>
-              <h2 className="text-xl font-extrabold text-white">Early Access Status</h2>
-              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-400 font-medium leading-relaxed">
-                Early Access for AI Studio is currently limited. Your application is saved and access will be enabled during our standard public feature release.
-              </div>
-            </div>
-          )}
-
-          {/* Revoked Application State */}
-          {currentStatus === 'revoked' && (
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
-                <ShieldAlert className="w-7 h-7" />
-              </div>
-              <h2 className="text-xl font-extrabold text-white">Access Restricted</h2>
-              <p className="text-zinc-400 text-xs font-medium">
-                Early access permission for your account is currently restricted.
+              <p className="text-xs text-zinc-500 font-medium">
+                Log in to join the Early Access waitlist.
               </p>
             </div>
           )}
 
-          {/* Coming Soon / Ready to Apply State */}
-          {currentStatus === 'coming_soon' && (
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-extrabold text-white">Request Creator Early Access</h3>
-                    <p className="text-xs text-zinc-400 font-medium">Apply now to test reverse prompt generation before public release.</p>
-                  </div>
-                </div>
+          {/* 3. Pending Application User */}
+          {currentStatus === 'pending' && (
+            <div className="space-y-3 text-center">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
+                <Clock className="w-5 h-5" />
               </div>
-
-              {!showApplyModal ? (
-                <button
-                  onClick={() => setShowApplyModal(true)}
-                  className="inline-flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg hover:shadow-purple-500/25 cursor-pointer active:scale-98"
-                >
-                  <span>Get Early Access</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <form onSubmit={handleSubmitApplication} className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2">
-                  {error && (
-                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
-                      {error}
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-xs font-extrabold text-zinc-300 uppercase tracking-wider mb-1.5">
-                      Why do you want Early Access? <span className="text-zinc-500 font-normal">(Optional)</span>
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                      placeholder="Tell us about your creator use case or favorite AI tools (Midjourney, Flux, etc.)..."
-                      className="w-full p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowApplyModal(false)}
-                      className="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex-1 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Submitting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Submit Application</span>
-                          <Send className="w-3.5 h-3.5" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
+              <h2 className="text-base font-bold text-white">Early Access Requested</h2>
+              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
+                We&apos;ll let you know when AI Studio is available for you.
+              </p>
+              <div className="pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Waitlist Pending</span>
+                </span>
+              </div>
             </div>
           )}
 
-        </div>
+          {/* 4. Rejected Application User */}
+          {currentStatus === 'rejected' && (
+            <div className="space-y-3 text-center">
+              <h2 className="text-base font-bold text-white">Early Access Status</h2>
+              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
+                Access is currently restricted during early rollout, but standard release will be available soon.
+              </p>
+            </div>
+          )}
 
-        {/* Feature Grid Pillars */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl text-left pt-6">
-          {[
-            {
-              icon: Wand2,
-              title: 'Image → Prompt AST',
-              desc: 'Compiles visual input into accurate prompt syntax, weights, and subject descriptors.'
-            },
-            {
-              icon: Eye,
-              title: 'Style DNA Extraction',
-              desc: 'Identifies color palettes, lighting formulas, medium characteristics, and aesthetic genres.'
-            },
-            {
-              icon: Camera,
-              title: 'Optics Parameter Reconstruction',
-              desc: 'Reconstructs camera lens types, focal lengths, aperture stops, and aspect ratios.'
-            },
-            {
-              icon: Cpu,
-              title: 'Multi-Model Compilation',
-              desc: 'Generates tailored parameters for Midjourney, Flux, Stable Diffusion, and DALL-E.'
-            }
-          ].map((pillar, i) => {
-            const Icon = pillar.icon;
-            return (
-              <div 
-                key={i}
-                className="bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 space-y-3 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300 group"
-              >
-                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-sm font-extrabold text-white">{pillar.title}</h3>
-                <p className="text-xs text-zinc-400 font-medium leading-relaxed">{pillar.desc}</p>
+          {/* 5. Revoked User */}
+          {currentStatus === 'revoked' && (
+            <div className="space-y-3 text-center">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 mb-1">
+                <ShieldAlert className="w-5 h-5" />
               </div>
-            );
-          })}
+              <h2 className="text-base font-bold text-white">Access Restricted</h2>
+              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
+                Early access permission for your account has been updated by administration.
+              </p>
+            </div>
+          )}
+
         </div>
 
       </main>
 
-      {/* Simple Footer */}
-      <footer className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 border-t border-zinc-900 text-center text-xs text-zinc-500 font-medium flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span>© {new Date().getFullYear()} Prizom AI Studio. Controlled Rollout Phase.</span>
-        <div className="flex items-center gap-6">
-          <Link href="/" className="hover:text-zinc-300 transition-colors">Homepage</Link>
-          <Link href="/discover" className="hover:text-zinc-300 transition-colors">Prompt Catalog</Link>
-          <Link href="/terms" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
+      {/* Clean Modal for Early Access Submission */}
+      {showApplyModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-5 text-left">
+            <button
+              onClick={() => setShowApplyModal(false)}
+              className="absolute top-5 right-5 text-zinc-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-800"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">Request Early Access</h3>
+              <p className="text-xs text-zinc-400 font-medium">
+                Apply now to test AI Studio prompt reverse engineering before public launch.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmitApplication} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
+                  Why do you want Early Access? <span className="text-zinc-500 font-normal lowercase">(optional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Share your AI image creation use case or workflow..."
+                  className="w-full p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowApplyModal(false)}
+                  className="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit Request</span>
+                      <Send className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Minimal Footer */}
+      <footer className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 border-t border-zinc-900/80 text-center text-xs text-zinc-600 font-medium flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span>© {new Date().getFullYear()} Prizom AI Studio</span>
+        <div className="flex items-center gap-5 text-zinc-500">
+          <Link href="/" className="hover:text-zinc-300 transition-colors">Home</Link>
+          <Link href="/discover" className="hover:text-zinc-300 transition-colors">Discover</Link>
+          <Link href="/trending" className="hover:text-zinc-300 transition-colors">Trending</Link>
         </div>
       </footer>
 
