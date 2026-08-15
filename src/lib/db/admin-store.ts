@@ -244,7 +244,7 @@ const DEFAULT_HOW_STEPS: HowStep[] = [
 ];
 
 const DEFAULT_PROMO_BLOCKS: PromoBlock[] = [
-  { id: 'promo-access-key', title: 'Request an Access Key', content: 'Prizom is currently in an invite-only beta. If you are an AI prompt creator and want early access, please fill out our request form.', link_text: 'Request Access', link_url: 'https://forms.gle/popf1A15ktYrJhoA9', style: 'banner', order: 1, is_active: true }
+  { id: 'promo-ai-studio', title: 'Prizom AI Studio', content: 'Extract prompt formulas, Style DNA, and optics parameters from any image. Apply for Early Access today.', link_text: 'Get Early Access', link_url: '/studio', style: 'banner', order: 1, is_active: true }
 ];
 
 const DEFAULT_STORE: AdminStore = {
@@ -267,11 +267,11 @@ const DEFAULT_STORE: AdminStore = {
       "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1200&auto=format&fit=crop"
     ],
     hero_layout: "split",
-    announcement: "Invite-only beta is live! Fill up the access request form.",
+    announcement: "Prizom Public Launch is Live! AI Studio is now in Gated Early Access.",
     show_announcement: true,
-    announcement_cta_text: "Get Access Key",
-    banner_text: "Invite-only is live! For access key, fill up this form.",
-    banner_link: "https://forms.gle/popf1A15ktYrJhoA9",
+    announcement_cta_text: "Get Early Access",
+    banner_text: "Explore photorealistic AI prompt formulas & apply for AI Studio Early Access.",
+    banner_link: "/studio",
     show_banner: false,
     spotlight_creators: [],
     why_prizom_cards: DEFAULT_WHY_CARDS,

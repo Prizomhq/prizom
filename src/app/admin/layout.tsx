@@ -19,7 +19,8 @@ import {
   Mail,
   Clock,
   Search,
-  Command
+  Command,
+  Sparkles
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import PrizomLogo from '@/components/ui/PrizomLogo';
@@ -176,6 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       title: 'OPERATIONS',
       items: [
+        { label: 'AI Studio Early Access', path: '/admin/early-access', icon: Sparkles, roles: ['super_admin', 'admin'] },
         { label: 'Account Lifecycle', path: '/admin/lifecycle', icon: Clock, roles: ['super_admin', 'admin'] },
         { label: 'Team Clearance', path: '/admin/content?tab=team', icon: Settings, roles: ['super_admin'] }
       ]

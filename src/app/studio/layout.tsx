@@ -12,11 +12,7 @@ export default async function StudioLayout({
   const access = await verifyAiStudioAccessServer();
 
   if (!access.allowed) {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-600 selection:text-white flex items-center justify-center">
-        <StudioComingSoon />
-      </div>
-    );
+    return <StudioComingSoon accessResult={access} />;
   }
 
   return <>{children}</>;

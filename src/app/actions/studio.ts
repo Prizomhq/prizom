@@ -15,7 +15,7 @@ import { verifyAiStudioAccessServer } from '@/lib/ai-studio/guard';
 export async function getCreditBalanceAction() {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -46,7 +46,7 @@ export async function createStudioSessionAction(
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -127,7 +127,7 @@ export async function completeStudioSessionAction(
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -177,7 +177,7 @@ export async function completeStudioSessionAction(
 export async function getUserStudioHistoryAction(limit: number = 30) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -203,7 +203,7 @@ export async function getUserStudioHistoryAction(limit: number = 30) {
 export async function deleteStudioSessionAction(sessionId: string) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -237,7 +237,7 @@ export async function deleteStudioSessionAction(sessionId: string) {
 export async function refundFailedGenerationAction(sessionId: string, reason: string = 'generation_failed') {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -282,7 +282,7 @@ export async function refundFailedGenerationAction(sessionId: string, reason: st
 export async function claimDailyCreditsAction() {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -311,7 +311,7 @@ export async function claimDailyCreditsAction() {
 export async function getStudioSessionAction(sessionId: string) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -348,7 +348,7 @@ export async function refundStudioCreditsAction(
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -400,7 +400,7 @@ export async function recordFeedbackDeltaAction(
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -443,7 +443,7 @@ export async function logStudioTelemetryAction(input: {
 }) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   const supabase = await createClient();
@@ -478,7 +478,7 @@ export async function analyzeImageStudioAction(
 ) {
   const access = await verifyAiStudioAccessServer();
   if (!access.allowed) {
-    return { success: false, error: 'Prizom AI Studio is currently in private beta testing.' };
+    return { success: false, error: 'Prizom AI Studio is currently in gated Early Access release.' };
   }
 
   try {

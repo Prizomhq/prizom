@@ -291,6 +291,85 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
         </div>
       </section>
 
+      {/* SECTION 2.5: AI Studio Showcase & Coming Soon Gated Feature */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full bg-zinc-950 text-white rounded-3xl my-8 relative overflow-hidden border border-zinc-800 shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+          
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-900/40 border border-purple-700/40 text-purple-300 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+              <span>Prizom AI Studio — Coming Soon</span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+              Turn Any Image Into <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+                Detailed Reusable Prompts
+              </span>
+            </h2>
+
+            <p className="text-zinc-400 text-sm sm:text-base font-medium leading-relaxed">
+              AI Studio is our upcoming visual intelligence suite designed to help creators reverse engineer visual ideas. Upload an image to analyze Style DNA, optics parameters, and compiled prompt formulas.
+            </p>
+
+            {/* Creator Journey Loop */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              {[
+                { step: '01', title: 'Upload Image' },
+                { step: '02', title: 'Extract DNA' },
+                { step: '03', title: 'Compile Prompt' },
+                { step: '04', title: 'Publish & Share' }
+              ].map((s, i) => (
+                <div key={i} className="p-3 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-center">
+                  <span className="text-[10px] font-black text-purple-400 block">{s.step}</span>
+                  <span className="text-xs font-bold text-zinc-200 mt-0.5 block">{s.title}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <Link
+                href="/studio"
+                className="px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Get Early Access</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <span className="text-xs text-zinc-500 font-semibold text-center sm:text-left">
+                Gradual rollout in progress. Existing creators get priority waitlist.
+              </span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Feature Pipeline</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold">In Testing</span>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { title: 'Reverse Prompt Engineering', desc: 'Extracts exact prompt tokens, negative weights, and subject descriptors.' },
+                { title: 'Style DNA & Optics Analysis', desc: 'Identifies lighting schemas, camera lenses, apertures, and color harmony.' },
+                { title: 'Multi-Generator Compiling', desc: 'Outputs tailored parameters for Midjourney v6, Flux.1, and DALL-E 3.' }
+              ].map((feat, idx) => (
+                <div key={idx} className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    {feat.title}
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 font-medium pl-5 leading-relaxed">{feat.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {/* SECTION 3: Popular AI Prompt Formulas Catalog (Unified PromptCard Masonry Grid) */}
       <TrendingCatalogSection prompts={realPrompts} />
 

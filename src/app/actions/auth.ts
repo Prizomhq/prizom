@@ -129,27 +129,7 @@ export async function signUpAction(
     return { success: false, error: availability.error || 'Username is not available.' };
   }
 
-  // 5. Optional Invite Key validation (if provided)
-  const trimmedKey = inviteKey ? inviteKey.trim() : '';
-  if (trimmedKey) {
-    const adminSupabase = await createAdminClient();
-    const { data: keyData, error: keyError } = await adminSupabase
-      .from('invite_keys')
-      .select('*')
-      .ilike('key', trimmedKey)
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (keyError || !keyData) {
-      return { success: false, error: 'Invalid or inactive invite key.' };
-    }
-
-    if (keyData.uses >= keyData.max_uses) {
-      return { success: false, error: 'This invite key has reached its maximum usage limit.' };
-    }
-  }
-
-  // 6. Supabase Auth signup call
+  // 5. Supabase Auth signup call (Public Signup enabled)
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -157,7 +137,6 @@ export async function signUpAction(
     options: {
       data: {
         username: username.toLowerCase().trim(),
-        invite_key: trimmedKey || null,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://prizom.in'}/auth/callback`,
     },

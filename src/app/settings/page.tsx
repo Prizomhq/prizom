@@ -831,7 +831,7 @@ function SettingsContent() {
                           Roadmap
                         </h3>
                         <ul className="list-disc pl-5 space-y-1.5 text-zinc-600">
-                          <li><strong>Invite-Only Beta (Current):</strong> Onboarding the first 100 creators to refine visual workflows.</li>
+                          <li><strong>Public Launch & AI Studio Early Access (Current):</strong> Core registry open to all creators with AI Studio in controlled Early Access.</li>
                           <li><strong>Platform V2:</strong> Expanding semantic prompt search capabilities and cross-generator model tagging.</li>
                           <li><strong>Collaborative Remix Spaces:</strong> Introducing shared folders and style presets.</li>
                         </ul>

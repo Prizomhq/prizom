@@ -44,25 +44,7 @@ export async function createPromptAction(promptData: {
     return { success: false, error: 'Tags cannot exceed 25 characters each.' };
   }
 
-  // Check if user is approved (required for invite-only publishing)
-  const { data: profile, error: profileErr } = await supabase
-    .from('profiles')
-    .select('is_approved, role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileErr) {
-    console.error('Error fetching profile for publishing approval check:', profileErr);
-    return { success: false, error: 'Failed to verify account publishing approval.' };
-  }
-
-  const isApproved = profile?.is_approved || false;
-  const role = profile?.role || 'user';
-  const isPrivileged = ['super_admin', 'admin', 'moderator'].includes(role);
-
-  if (!isApproved && !isPrivileged) {
-    return { success: false, error: 'Publishing restricted: Your account is not approved yet.' };
-  }
+  // Public launch: All authenticated users are permitted to publish prompts.
 
   // 1. Rate Limiting checks
   try {

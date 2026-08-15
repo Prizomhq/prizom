@@ -433,12 +433,6 @@ function CreateContent() {
       return;
     }
 
-    const isPrivileged = ['super_admin', 'admin', 'moderator'].includes(userRole);
-    if (!isApproved && !isPrivileged) {
-      setError("Publishing restricted: Your account is not approved yet.");
-      return;
-    }
-
     setLoading(true);
     setUploadProgress(10);
 
@@ -581,32 +575,6 @@ function CreateContent() {
   }
 
   const isPrivileged = ['super_admin', 'admin', 'moderator'].includes(userRole);
-  const showBlockedState = !isApproved && !isPrivileged;
-
-  if (showBlockedState) {
-    return (
-      <div className="min-h-screen pt-20 flex flex-col items-center justify-center bg-[#fcfcfc] px-4">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-zinc-200 text-center shadow-sm">
-          <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="w-10 h-10 text-amber-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-zinc-900 mb-3">Publishing Restricted</h2>
-          <p className="text-zinc-500 mb-6 font-medium leading-relaxed">
-            Prizom is currently in an invite-only beta. Your account is not approved to publish new prompts yet.
-          </p>
-          <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100 text-left text-xs font-semibold text-amber-800 mb-8 leading-relaxed">
-            Please contact an administrator for approval, or verify your invite key in Settings.
-          </div>
-          <button 
-            onClick={() => router.push('/settings')}
-            className="w-full py-4 rounded-full text-sm font-bold text-white bg-zinc-900 hover:bg-zinc-800 transition-all flex items-center justify-center cursor-pointer"
-          >
-            Go to Settings <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen pb-6 md:pb-20 pt-8 bg-[#fcfcfc]">
