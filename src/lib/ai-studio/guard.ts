@@ -76,8 +76,10 @@ export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult
       if (
         eaError.code === 'PGRST205' || 
         eaError.code === '42P01' || 
+        eaError.code === '42501' ||
         eaError.message?.includes('schema cache') ||
-        eaError.message?.includes('does not exist')
+        eaError.message?.includes('does not exist') ||
+        eaError.message?.includes('permission denied')
       ) {
         return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'coming_soon', earlyAccessRecord: null };
       }

@@ -114,8 +114,10 @@ export async function getUserEarlyAccessStatusAction() {
       if (
         error.code === 'PGRST205' || 
         error.code === '42P01' || 
+        error.code === '42501' ||
         error.message?.includes('schema cache') || 
-        error.message?.includes('does not exist')
+        error.message?.includes('does not exist') ||
+        error.message?.includes('permission denied')
       ) {
         return { success: true, record: null };
       }
@@ -172,12 +174,14 @@ export async function adminGetEarlyAccessApplicationsAction(statusFilter?: strin
       if (
         error.code === 'PGRST205' || 
         error.code === '42P01' || 
+        error.code === '42501' ||
         error.message?.includes('schema cache') || 
-        error.message?.includes('does not exist')
+        error.message?.includes('does not exist') ||
+        error.message?.includes('permission denied')
       ) {
         return { 
           success: false, 
-          error: "Database table 'public.ai_studio_early_access' is not initialized in Supabase. Please execute 'supabase/40_ai_studio_early_access.sql' in the Supabase SQL Editor." 
+          error: "Database permission denied or table missing on 'public.ai_studio_early_access'. Please run the GRANT statements in Supabase SQL Editor." 
         };
       }
       throw error;
