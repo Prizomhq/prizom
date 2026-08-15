@@ -4,15 +4,80 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getStudioProjects, togglePinStudioProject, deleteStudioProject, StudioProject } from '@/lib/ai-studio/projects-store';
-import { FolderKanban, Pin, Trash2, Search, Plus, Sparkles, Clock, ArrowRight } from 'lucide-react';
+import { getUserStudioHistoryAction, deleteStudioSessionAction } from '@/app/actions/studio';
+import { FolderKanban, Pin, Trash2, Search, Plus, Sparkles, Clock, ArrowRight, Loader2 } from 'lucide-react';
 
 export function StudioProjectsClient() {
   const [projects, setProjects] = useState<StudioProject[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState<'all' | 'pinned'>('all');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProjects(getStudioProjects());
+    let isMounted = true;
+
+    async function loadUserProjects() {
+      try {
+        const localProjects = getStudioProjects();
+        const serverRes = await getUserStudioHistoryAction();
+        
+        if (serverRes.success && serverRes.history && isMounted) {
+          const serverProjects: StudioProject[] = serverRes.history.map(({ session, latestVersion }: any) => {
+            const rawAg = latestVersion?.ag_router_response;
+            let parsedAg: any = null;
+            if (rawAg) {
+              if (typeof rawAg === 'string') {
+                try { parsedAg = JSON.parse(rawAg); } catch (_) {}
+              } else if (typeof rawAg === 'object') {
+                parsedAg = rawAg;
+              }
+            }
+
+            const promptTitle = latestVersion?.prompt_text && latestVersion.prompt_text !== 'Visual prompt deconstruction'
+              ? latestVersion.prompt_text.slice(0, 40) + '...'
+              : (parsedAg?.metadata?.title || 'Studio Prompt Deconstruction');
+
+            return {
+              id: session.id,
+              title: promptTitle,
+              description: latestVersion?.prompt_text || 'AI image reverse engineering analysis',
+              imageUrl: session.cloudinary_url,
+              aspectRatio: session.aspect_ratio || '1:1',
+              category: parsedAg?.metadata?.category || 'Concept Art',
+              tags: ['prizom-studio'],
+              pinned: false,
+              activeVersion: session.active_version || 1,
+              versionsCount: 1,
+              agRouterResponse: parsedAg,
+              createdAt: session.created_at,
+              updatedAt: session.updated_at
+            };
+          });
+
+          // Merge server projects with local projects (server projects take precedence)
+          const mergedMap = new Map<string, StudioProject>();
+          serverProjects.forEach(p => mergedMap.set(p.id, p));
+          localProjects.forEach(p => {
+            if (!mergedMap.has(p.id)) mergedMap.set(p.id, p);
+          });
+
+          setProjects(Array.from(mergedMap.values()));
+        } else if (isMounted) {
+          setProjects(localProjects);
+        }
+      } catch (err) {
+        console.error('Failed to load user studio history:', err);
+        if (isMounted) setProjects(getStudioProjects());
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadUserProjects();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleTogglePin = (id: string, e: React.MouseEvent) => {
@@ -21,11 +86,12 @@ export function StudioProjectsClient() {
     setProjects(updated);
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this studio project?')) {
       const updated = deleteStudioProject(id);
       setProjects(updated);
+      await deleteStudioSessionAction(id).catch(() => {});
     }
   };
 
@@ -104,7 +170,12 @@ export function StudioProjectsClient() {
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length > 0 ? (
+        {loading ? (
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-3xl p-12 text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto" />
+            <p className="text-xs text-zinc-400 font-bold">Loading your studio workspace history...</p>
+          </div>
+        ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProjects.map((project) => (
               <div

@@ -66,11 +66,23 @@ export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult
     }
 
     // 2. Fetch Early Access application status from ai_studio_early_access
-    const { data: earlyAccess } = await supabase
+    const { data: earlyAccess, error: eaError } = await supabase
       .from('ai_studio_early_access')
       .select('status, created_at, reason')
       .eq('user_id', user.id)
       .maybeSingle();
+
+    if (eaError) {
+      if (
+        eaError.code === 'PGRST205' || 
+        eaError.code === '42P01' || 
+        eaError.message?.includes('schema cache') ||
+        eaError.message?.includes('does not exist')
+      ) {
+        return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'coming_soon', earlyAccessRecord: null };
+      }
+      console.error('[AI STUDIO GUARD EA ERROR]', eaError);
+    }
 
     if (earlyAccess) {
       const eaRecord = {
@@ -99,7 +111,7 @@ export async function verifyAiStudioAccessServer(): Promise<AiStudioAccessResult
     }
 
     return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'coming_soon', earlyAccessRecord: null };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[AI STUDIO GUARD ERROR]', err);
     return { allowed: false, isPublic: false, isSuperAdmin: false, reason: 'coming_soon', earlyAccessRecord: null };
   }

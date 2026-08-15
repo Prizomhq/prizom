@@ -110,7 +110,17 @@ export async function getUserEarlyAccessStatusAction() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      if (
+        error.code === 'PGRST205' || 
+        error.code === '42P01' || 
+        error.message?.includes('schema cache') || 
+        error.message?.includes('does not exist')
+      ) {
+        return { success: true, record: null };
+      }
+      throw error;
+    }
 
     return { success: true, record };
   } catch (err: any) {
@@ -158,7 +168,20 @@ export async function adminGetEarlyAccessApplicationsAction(statusFilter?: strin
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      if (
+        error.code === 'PGRST205' || 
+        error.code === '42P01' || 
+        error.message?.includes('schema cache') || 
+        error.message?.includes('does not exist')
+      ) {
+        return { 
+          success: false, 
+          error: "Database table 'public.ai_studio_early_access' is not initialized in Supabase. Please execute 'supabase/40_ai_studio_early_access.sql' in the Supabase SQL Editor." 
+        };
+      }
+      throw error;
+    }
 
     const applications: EarlyAccessApplication[] = (data || []).map((item: any) => ({
       id: item.id,

@@ -164,6 +164,13 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('prizom_interests_v2');
+      localStorage.removeItem('prizom_ai_studio_projects_v2');
+      localStorage.removeItem('prizom_ai_studio_snapshots_v2');
+    }
+    setUser(null);
+    setProfile(null);
     router.push('/');
     router.refresh();
   };
