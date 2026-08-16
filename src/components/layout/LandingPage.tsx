@@ -133,13 +133,16 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
     loadData();
   }, []);
 
-  const isNoticeBannerVisible = (homepage.show_banner ?? homepage.heroBannerEnabled) && Boolean(homepage.banner_text || homepage.heroBannerText);
-  const noticeBannerText = homepage.banner_text || homepage.heroBannerText || '';
-  const noticeBannerLink = homepage.banner_link || homepage.heroBannerLink || '/studio';
+  const noticeText = homepage.banner_text || homepage.heroBannerText || '';
+  const noticeLink = homepage.banner_link || homepage.heroBannerLink || '/studio';
+  const noticeEnabled = homepage.show_banner ?? homepage.heroBannerEnabled ?? false;
+  const isNoticeBannerVisible = Boolean(noticeEnabled && noticeText);
 
-  const isAnnouncementBannerVisible = (homepage.show_announcement ?? homepage.heroBannerEnabled) && Boolean(homepage.announcement || homepage.heroBannerText);
-  const announcementText = homepage.announcement || homepage.heroBannerText || '';
+  const announcementText = homepage.announcement || '';
   const announcementLink = homepage.banner_link || homepage.heroBannerLink || '/studio';
+  const announcementEnabled = homepage.show_announcement === true;
+  // Render Announcement Banner only if Notice Banner is NOT visible and announcement is explicitly enabled
+  const isAnnouncementBannerVisible = !isNoticeBannerVisible && Boolean(announcementEnabled && announcementText);
 
   const isStudioBannerVisible = homepage.show_studio_banner ?? homepage.showStudioBanner ?? true;
   const studioBannerTitle = homepage.studio_banner_title || homepage.studioBannerTitle || 'Turn Any Image Into Detailed Reusable Prompts';
@@ -153,11 +156,11 @@ export default function LandingPage({ cmsData }: LandingPageProps) {
       {/* 1. Notice Banner (CMS driven) */}
       {isNoticeBannerVisible && (
         <div className="w-full bg-zinc-950 text-white text-center py-2 px-4 relative z-10 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-          <span>{noticeBannerText}</span>
-          {noticeBannerLink && (
+          <span>{noticeText}</span>
+          {noticeLink && (
             <Link 
               id="notice-banner-link"
-              href={noticeBannerLink}
+              href={noticeLink}
               className="text-indigo-400 hover:text-indigo-300 underline ml-2 shrink-0 transition-colors"
             >
               Check it out →
