@@ -127,12 +127,12 @@ function StudioContent() {
 
   if (hydrating) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+      <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
         <div className="relative flex items-center justify-center">
-          <div className="absolute inset-0 bg-purple-500 blur-xl opacity-30 rounded-full animate-pulse" />
-          <PrizomAIStudioMark size={40} className="relative z-10 animate-spin" />
+          <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
+          <PrizomAIStudioMark size={40} className="relative z-10 animate-spin text-indigo-600" />
         </div>
-        <p className="text-sm font-bold text-white tracking-tight">Restoring Prizom AI Studio Session...</p>
+        <p className="text-sm font-semibold text-slate-700 tracking-tight">Restoring Prizom AI Studio Session...</p>
       </div>
     );
   }
@@ -151,7 +151,7 @@ function StudioContent() {
 export function StudioClientWrapper({ initialCredits }: { initialCredits: number }) {
   return (
     <StudioProvider initialCredits={initialCredits}>
-      <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-600 selection:text-white pb-20">
+      <div className="min-h-screen bg-[var(--background)] text-slate-900 selection:bg-indigo-600 selection:text-white pb-20">
         <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <StudioContent />
         </main>
@@ -159,3 +159,4 @@ export function StudioClientWrapper({ initialCredits }: { initialCredits: number
     </StudioProvider>
   );
 }
+

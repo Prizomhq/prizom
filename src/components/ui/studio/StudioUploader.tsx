@@ -200,25 +200,34 @@ export function StudioUploader() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-8">
+    <div className="w-full max-w-3xl mx-auto px-4 py-6 sm:py-10">
       {/* Official Prizom AI Studio Hero Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-white text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 border border-slate-200/80 shadow-sm mb-4">
           <PrizomAIStudioLogo size="sm" showBadge={true} />
-          <span className="text-purple-400 font-mono text-[11px] border-l border-zinc-700 pl-2.5">1 Credit / Gen</span>
+          <span className="text-indigo-600 font-mono text-[11px] font-bold border-l border-slate-200 pl-2.5">
+            1 Credit / Generation
+          </span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
-          Image to Universal Prompt
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight mb-3">
+          Turn an image into its prompt.
         </h1>
-        <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-          Upload any visual artwork for 11-stage optical perception and universal prompt reconstruction.
+        <p className="text-slate-600 font-medium text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+          Upload any AI-generated artwork and Prizom will analyze its visual elements to reconstruct a detailed, reusable prompt.
         </p>
       </div>
 
+      {/* Actionable Validation Error Card */}
       {uploadError && (
-        <div className="mb-6 p-4 bg-red-950/50 border border-red-900/50 rounded-2xl flex items-center gap-3 text-red-400 text-sm font-semibold animate-in fade-in duration-200 shadow-inner">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{uploadError}</span>
+        <div className="mb-6 p-4 sm:p-5 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex items-start gap-3.5 text-amber-900 text-xs sm:text-sm animate-in fade-in duration-200 shadow-sm">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-bold text-amber-950">Unable to analyze image</h4>
+            <p className="text-amber-800 leading-relaxed">{uploadError}</p>
+            <p className="text-amber-700 font-medium text-[11px] pt-1">
+              Tip: Ensure your file is a JPG, PNG, or WebP under 10MB and contains visual artistic content.
+            </p>
+          </div>
         </div>
       )}
 
@@ -228,10 +237,10 @@ export function StudioUploader() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative border border-dashed rounded-[2.5rem] p-10 sm:p-14 text-center cursor-pointer transition-all duration-500 overflow-hidden ${
+        className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 overflow-hidden ${
           isDragging
-            ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_50px_rgba(168,85,247,0.25)] scale-[1.02]'
-            : 'border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] backdrop-blur-xl'
+            ? 'border-indigo-500 bg-indigo-50/80 shadow-lg scale-[1.01]'
+            : 'border-slate-200/80 bg-white/80 hover:bg-white hover:border-indigo-400/80 hover:shadow-md glass-card'
         }`}
       >
         <input
@@ -242,36 +251,33 @@ export function StudioUploader() {
           className="hidden"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
-
         <div className="relative z-10">
           {isCompressing || isUploading ? (
             <div className="flex flex-col items-center justify-center py-6">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-purple-500 blur-xl opacity-30 rounded-full animate-pulse" />
-                <Loader2 className="relative w-12 h-12 text-purple-400 animate-spin" />
+              <div className="relative mb-4">
+                <div className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-50 rounded-full animate-pulse" />
+                <Loader2 className="relative w-10 h-10 text-indigo-600 animate-spin" />
               </div>
-              <p className="text-white font-bold text-lg mb-1 tracking-tight">
-                {isCompressing ? 'Inspecting Technical Dimensions...' : 'Analyzing Visual Data...'}
+              <p className="text-slate-900 font-bold text-base sm:text-lg mb-1 tracking-tight">
+                {isCompressing ? 'Inspecting image details...' : 'Uploading image for analysis...'}
               </p>
               {selectedFileMeta && (
-                <div className="mt-2 text-xs font-mono text-purple-300 bg-purple-950/60 border border-purple-800/40 px-3 py-1 rounded-full">
-                  {selectedFileMeta.name} • {selectedFileMeta.sizeFormatted} • {selectedFileMeta.mimeType}
+                <div className="mt-2 text-xs font-mono text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-3 py-1 rounded-full">
+                  {selectedFileMeta.name} • {selectedFileMeta.sizeFormatted}
                 </div>
               )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center">
-              <div className="relative w-20 h-20 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <PrizomAIStudioMark size={36} />
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-indigo-50/80 border border-indigo-100 flex items-center justify-center mb-5 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                <PrizomAIStudioMark size={32} />
               </div>
               
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 tracking-tight">
-                Drag & Drop image here, or <span className="text-purple-400 underline decoration-purple-500/40 underline-offset-4">browse file</span>
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 tracking-tight">
+                Drag & drop an image here, or <span className="text-indigo-600 underline decoration-indigo-300 underline-offset-4 font-extrabold">upload image</span>
               </h3>
-              <p className="text-zinc-400 text-xs sm:text-sm font-medium mb-6">
-                Supports JPG, PNG, WebP up to 10MB • <kbd className="px-2 py-0.5 rounded bg-zinc-800 text-purple-300 font-mono text-[11px] border border-zinc-700">Ctrl+V</kbd> paste enabled
+              <p className="text-slate-500 text-xs sm:text-sm font-medium mb-6">
+                Supported formats: JPG, PNG, WebP up to 10MB • <kbd className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px] border border-slate-200">Ctrl+V</kbd> to paste
               </p>
 
               <button
@@ -280,40 +286,41 @@ export function StudioUploader() {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <PrizomAIStudioMark size={16} />
-                <span>Reconstruct Universal Prompt (1 Credit)</span>
+                <span>Upload Image & Generate Prompt (1 Credit)</span>
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Credit Status */}
-      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-zinc-400 bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800">
-        <span className="flex items-center gap-1.5 text-zinc-400">
-          <Layers className="w-3.5 h-3.5 text-purple-400/80" /> 4-Layer Aspect Ratio & 11-Stage Vision Engine
+      {/* Credit Status Bar */}
+      <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-600 bg-white/90 p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <span className="flex items-center gap-2 text-slate-600 font-medium">
+          <Layers className="w-4 h-4 text-indigo-600" />
+          <span>Automated visual composition & prompt deconstruction</span>
         </span>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="font-bold text-purple-300 bg-purple-950/80 border border-purple-800/40 px-3 py-1 rounded-full font-mono">
+          <span className="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-3 py-1 rounded-full font-mono">
             Balance: {state.credits} Credits
           </span>
 
           <button
             type="button"
             onClick={() => setIsTopUpOpen(true)}
-            className="px-3.5 py-1 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+            className="px-3.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1 cursor-pointer"
           >
-            <Zap className="w-3.5 h-3.5" /> Top Up
+            <Zap className="w-3.5 h-3.5 text-indigo-300" /> Top Up
           </button>
 
           <button
             type="button"
             onClick={handleClaimDailyCredits}
             disabled={isClaiming}
-            className="px-3 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+            className="px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
           >
             {isClaiming ? 'Claiming...' : '🎁 Daily'}
           </button>
@@ -321,7 +328,7 @@ export function StudioUploader() {
       </div>
 
       {claimStatus && (
-        <div className="mt-2 text-center text-xs font-bold text-emerald-400 animate-in fade-in">
+        <div className="mt-2 text-center text-xs font-bold text-emerald-600 animate-in fade-in">
           {claimStatus}
         </div>
       )}
@@ -460,9 +467,9 @@ function PastGenerationsSection() {
 
   if (loading) {
     return (
-      <div className="mt-10 p-6 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl text-center">
-        <Loader2 className="w-6 h-6 text-purple-400 animate-spin mx-auto mb-2" />
-        <span className="text-xs text-zinc-400 font-medium">Loading session history...</span>
+      <div className="mt-10 p-6 bg-white/80 border border-slate-200/80 rounded-3xl text-center shadow-sm">
+        <Loader2 className="w-5 h-5 text-indigo-600 animate-spin mx-auto mb-2" />
+        <span className="text-xs text-slate-500 font-medium">Loading recent generations...</span>
       </div>
     );
   }
@@ -472,11 +479,11 @@ function PastGenerationsSection() {
   return (
     <div className="mt-10 space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <History className="w-4 h-4 text-purple-400" /> Restore Previous Work ({history.length})
+        <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+          <History className="w-4 h-4 text-indigo-600" /> Recent Generations ({history.length})
         </h3>
-        <span className="text-[11px] text-zinc-500 font-mono">
-          Saved in account history
+        <span className="text-[11px] text-slate-400 font-mono">
+          Saved in account
         </span>
       </div>
 
@@ -494,7 +501,7 @@ function PastGenerationsSection() {
           const promptSnippet = (rawSnippet && rawSnippet !== 'Visual prompt deconstruction')
             ? rawSnippet
             : 'Universal Visual Spec';
-          const title = parsedAg?.metadata?.title || (promptSnippet !== 'Universal Visual Spec' ? promptSnippet.slice(0, 32) + '...' : 'Universal Visual Spec');
+          const title = parsedAg?.metadata?.title || (promptSnippet !== 'Universal Visual Spec' ? promptSnippet.slice(0, 32) + '...' : 'Reconstructed Prompt');
           const aspectRatio = session.aspect_ratio || parsedAg?.metadata?.aspectRatio || '1:1';
           const createdDate = new Date(session.created_at).toLocaleDateString(undefined, {
             month: 'short',
@@ -507,9 +514,9 @@ function PastGenerationsSection() {
             <div
               key={session.id}
               onClick={() => handleOpenSession(session.id, session.cloudinary_url)}
-              className="group relative bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 rounded-2xl p-4 transition-all duration-300 cursor-pointer flex gap-3.5 items-center shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+              className="group relative bg-white/90 hover:bg-white border border-slate-200/80 hover:border-indigo-300 rounded-2xl p-4 transition-all duration-300 cursor-pointer flex gap-3.5 items-center shadow-sm hover:shadow-md"
             >
-              <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800">
+              <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
                 {session.cloudinary_url ? (
                   <img
                     src={session.cloudinary_url}
@@ -517,46 +524,46 @@ function PastGenerationsSection() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-zinc-600">
+                  <div className="flex items-center justify-center h-full text-slate-400">
                     <FileText className="w-5 h-5" />
                   </div>
                 )}
-                <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono font-bold text-purple-300">
+                <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-slate-900/80 text-[9px] font-mono font-bold text-white">
                   {aspectRatio}
                 </span>
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1 mb-1">
-                  <h4 className="text-xs font-extrabold text-white truncate group-hover:text-purple-300 transition-colors">
+                  <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
                     {title}
                   </h4>
                   <button
                     type="button"
                     onClick={(e) => handleDeleteSession(e, session.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-all rounded"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 transition-all rounded"
                     title="Delete session"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-sans mb-1.5">
+                <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed font-sans mb-1.5">
                   {promptSnippet}
                 </p>
 
-                <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-mono">
-                  <Clock className="w-3 h-3 text-purple-400/80" />
+                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                  <Clock className="w-3 h-3 text-indigo-500" />
                   <span>{createdDate}</span>
-                  <span className="text-zinc-600">•</span>
-                  <span className="capitalize text-purple-400 font-bold">{session.status}</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="capitalize text-indigo-600 font-bold">{session.status}</span>
                 </div>
               </div>
 
               {loadingSessionId === session.id ? (
-                <Loader2 className="w-4 h-4 text-purple-400 animate-spin shrink-0" />
+                <Loader2 className="w-4 h-4 text-indigo-600 animate-spin shrink-0" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors shrink-0" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors shrink-0" />
               )}
             </div>
           );
@@ -565,3 +572,4 @@ function PastGenerationsSection() {
     </div>
   );
 }
+

@@ -167,28 +167,28 @@ export function CreditTopUpModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl my-8">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl my-8 text-slate-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-800 mb-6">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-950/80 border border-purple-500/40 text-purple-300 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
               <Zap className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                 Top Up AI Studio Credits
               </h3>
-              <p className="text-xs text-zinc-400 font-medium">
-                Current Balance: <span className="text-purple-300 font-bold font-mono">{currentBalance} Credits</span>
+              <p className="text-xs text-slate-500 font-medium">
+                Current Balance: <span className="text-indigo-700 font-bold font-mono">{currentBalance} Credits</span>
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-zinc-950 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer text-xs font-bold"
+            className="p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-all cursor-pointer text-xs font-bold"
           >
             ✕
           </button>
@@ -196,20 +196,20 @@ export function CreditTopUpModal({
 
         {/* Alerts */}
         {error && (
-          <div className="mb-4 p-3 rounded-2xl bg-red-950/60 border border-red-900/60 text-xs text-red-300 font-semibold">
+          <div className="mb-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-bold">
             {error}
           </div>
         )}
         {successMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 font-bold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-bold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             {successMsg}
           </div>
         )}
 
         {/* Package Selector */}
         <div className="space-y-3 mb-6">
-          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
             Select Credit Package
           </label>
 
@@ -222,12 +222,12 @@ export function CreditTopUpModal({
                   onClick={() => setSelectedPack(pkg)}
                   className={`relative p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                     isSelected
-                      ? 'bg-purple-950/50 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.2)]'
-                      : 'bg-zinc-950 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60'
+                      ? 'bg-indigo-50/60 border-indigo-500 shadow-sm'
+                      : 'bg-slate-50/80 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
                   }`}
                 >
                   {pkg.popular && (
-                    <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-[10px] font-black text-white uppercase tracking-wider shadow-sm">
+                    <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-wider shadow-sm">
                       Best Value
                     </span>
                   )}
@@ -235,7 +235,7 @@ export function CreditTopUpModal({
                   <div className="flex items-center gap-3.5">
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        isSelected ? 'border-purple-400 bg-purple-600' : 'border-zinc-700 bg-zinc-900'
+                        isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 bg-white'
                       }`}
                     >
                       {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
@@ -243,18 +243,18 @@ export function CreditTopUpModal({
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-extrabold text-white">{pkg.name}</span>
-                        <span className="text-xs font-mono font-bold text-purple-300 bg-purple-950 px-2 py-0.5 rounded border border-purple-800/50">
+                        <span className="text-sm font-extrabold text-slate-900">{pkg.name}</span>
+                        <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200/60">
                           +{pkg.credits} Credits
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-400 font-medium">{pkg.tagline}</p>
+                      <p className="text-[11px] text-slate-500 font-medium">{pkg.tagline}</p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-base font-black text-white">₹{pkg.priceInr}</span>
-                    <span className="text-[10px] text-zinc-500 font-mono block">INR</span>
+                    <span className="text-base font-black text-slate-900">₹{pkg.priceInr}</span>
+                    <span className="text-[10px] text-slate-400 font-mono block">INR</span>
                   </div>
                 </div>
               );
@@ -267,26 +267,27 @@ export function CreditTopUpModal({
           type="button"
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+          className="w-full py-3.5 px-6 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
         >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin text-purple-200" />
+              <Loader2 className="w-4 h-4 animate-spin text-indigo-300" />
               <span>Verifying with Razorpay...</span>
             </>
           ) : (
             <>
-              <CreditCard className="w-4 h-4" />
+              <CreditCard className="w-4 h-4 text-indigo-300" />
               <span>Pay ₹{selectedPack.priceInr} for +{selectedPack.credits} Credits</span>
             </>
           )}
         </button>
 
-        <div className="mt-4 text-center flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 font-medium">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="mt-4 text-center flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-medium">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>Server-Verified 256-Bit SSL Instant Credit Top-Up</span>
         </div>
       </div>
     </div>
   );
 }
+

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import PrizomLogo from '@/components/ui/PrizomLogo';
 
 interface PrizomAIStudioMarkProps {
   className?: string;
@@ -9,9 +10,10 @@ interface PrizomAIStudioMarkProps {
 }
 
 /**
- * Prizom AI Studio Official Brand Mark
- * Original geometric optics mark: Precision prism hexagon + light refraction beam + prompt vector brackets.
- * Concept: Image -> Optical Prism Refraction -> Prompt Structure.
+ * Prizom AI Studio Feature Mark
+ * Original geometric optics mark: Precision prism hexagon + light refraction beam + prompt vector node.
+ * Concept: Image -> Optical Prism Refraction -> Prompt Syntax.
+ * Optimized for light & dark surfaces at 16px, 20px, 24px, 32px, 48px, 64px.
  */
 export function PrizomAIStudioMark({
   className = '',
@@ -32,8 +34,8 @@ export function PrizomAIStudioMark({
       <defs>
         {/* Core Prizom Electric Gradient */}
         <linearGradient id={`${gradientId}-bg`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#A855F7" />
-          <stop offset="50%" stopColor="#6366F1" />
+          <stop offset="0%" stopColor="#4F46E5" />
+          <stop offset="50%" stopColor="#9333EA" />
           <stop offset="100%" stopColor="#06B6D4" />
         </linearGradient>
         {/* Optical Accent Gradient */}
@@ -43,8 +45,8 @@ export function PrizomAIStudioMark({
         </linearGradient>
         {/* Refraction Beam Glow */}
         <linearGradient id={`${gradientId}-beam`} x1="12" y1="24" x2="36" y2="24">
-          <stop offset="0%" stopColor="#C084FC" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.9" />
+          <stop offset="0%" stopColor="#818CF8" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.9" />
         </linearGradient>
       </defs>
 
@@ -106,20 +108,23 @@ export function PrizomAIStudioLogo({
   size = 'md',
   showBadge = true
 }: PrizomAIStudioLogoProps) {
-  const iconSize = size === 'sm' ? 20 : size === 'lg' ? 32 : 24;
+  const logoSize = size === 'sm' ? 24 : size === 'lg' ? 36 : 28;
+  const iconSize = size === 'sm' ? 18 : size === 'lg' ? 26 : 22;
   const textSize = size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-xl' : 'text-base';
   const badgeSize = size === 'sm' ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2 py-0.5';
 
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
-      <PrizomAIStudioMark size={iconSize} />
+      {/* Official Prizom Brand Logo */}
+      <PrizomLogo size={logoSize} />
       <div className="flex items-center gap-2">
-        <span className={`font-extrabold tracking-tight text-white ${textSize}`}>
+        <span className={`font-extrabold tracking-tight text-slate-900 ${textSize}`}>
           Prizom
         </span>
         {showBadge && (
-          <span className={`font-mono font-bold uppercase tracking-widest bg-purple-950/80 text-purple-300 border border-purple-800/50 rounded-md ${badgeSize}`}>
-            AI Studio
+          <span className={`inline-flex items-center gap-1.5 font-mono font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-md ${badgeSize}`}>
+            <PrizomAIStudioMark size={iconSize} />
+            <span>AI Studio</span>
           </span>
         )}
       </div>
@@ -130,10 +135,11 @@ export function PrizomAIStudioLogo({
 export function PrizomAIStudioCompact({ className = '' }: { className?: string }) {
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
-      <PrizomAIStudioMark size={16} />
-      <span className="text-xs font-bold text-white tracking-tight">AI Studio</span>
+      <PrizomLogo size={18} />
+      <span className="text-xs font-bold text-slate-900 tracking-tight">AI Studio</span>
     </div>
   );
 }
 
 export default PrizomAIStudioMark;
+

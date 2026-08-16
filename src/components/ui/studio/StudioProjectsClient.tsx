@@ -104,64 +104,64 @@ export function StudioProjectsClient() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-20">
+    <div className="min-h-screen bg-[var(--background)] text-slate-900 pb-20">
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900 border border-zinc-800/80 rounded-3xl p-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/90 border border-slate-200/80 rounded-3xl p-6 shadow-sm glass-card">
           <div>
             <div className="flex items-center gap-2">
-              <FolderKanban className="w-4 h-4 text-purple-400" />
-              <span className="text-xs font-black uppercase tracking-wider text-purple-300">
-                Workspace Persistence & Version Control
+              <FolderKanban className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs font-black uppercase tracking-wider text-indigo-700">
+                Studio Workspace & Saved Drafts
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-              Studio Projects & Saved Drafts
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              Studio Projects
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm font-medium mt-1">
-              Organize reverse engineered images, version iterations, and target prompt collections.
+            <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+              Organize reconstructed image prompts, saved iterations, and prompt collections.
             </p>
           </div>
 
           <Link
             href="/studio"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs transition-all shadow-lg active:scale-95 shrink-0"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition-all shadow-md active:scale-95 shrink-0"
           >
-            <Plus className="w-4 h-4" />
-            <span>New Reverse Analysis</span>
+            <Plus className="w-4 h-4 text-indigo-300" />
+            <span>New Generation</span>
           </Link>
         </div>
 
         {/* Search & Filter Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search projects, tags, or categories..."
-              className="w-full pl-10 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFilterTab('all')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                 filterTab === 'all'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
               All Projects ({projects.length})
             </button>
             <button
               onClick={() => setFilterTab('pinned')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                 filterTab === 'pinned'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
               Pinned ({projects.filter((p) => p.pinned).length})
@@ -171,19 +171,19 @@ export function StudioProjectsClient() {
 
         {/* Projects Grid */}
         {loading ? (
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-3xl p-12 text-center space-y-3">
-            <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto" />
-            <p className="text-xs text-zinc-400 font-bold">Loading your studio workspace history...</p>
+          <div className="bg-white/80 border border-slate-200/80 rounded-3xl p-12 text-center space-y-3 shadow-sm">
+            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-bold">Loading studio project history...</p>
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-zinc-900 border border-zinc-800/80 rounded-3xl overflow-hidden shadow-lg group hover:border-purple-500/40 transition-all flex flex-col"
+                className="bg-white/90 border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm group hover:border-indigo-300 transition-all flex flex-col glass-card"
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-zinc-950 overflow-hidden">
+                <div className="relative aspect-video bg-slate-100 overflow-hidden border-b border-slate-100">
                   {project.imageUrl ? (
                     <Image
                       src={project.imageUrl}
@@ -194,7 +194,7 @@ export function StudioProjectsClient() {
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-zinc-600 text-xs font-bold">
+                    <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">
                       No Image Preview
                     </div>
                   )}
@@ -204,8 +204,8 @@ export function StudioProjectsClient() {
                       onClick={(e) => handleTogglePin(project.id, e)}
                       className={`p-1.5 rounded-xl backdrop-blur-md border transition-all ${
                         project.pinned
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                          : 'bg-zinc-950/60 text-zinc-400 border-zinc-800 hover:text-white'
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-white/80 text-slate-500 border-slate-200 hover:text-slate-900'
                       }`}
                       title={project.pinned ? 'Unpin project' : 'Pin project'}
                     >
@@ -213,14 +213,14 @@ export function StudioProjectsClient() {
                     </button>
                     <button
                       onClick={(e) => handleDelete(project.id, e)}
-                      className="p-1.5 rounded-xl bg-zinc-950/60 text-zinc-400 border border-zinc-800 hover:text-rose-400 hover:border-rose-900 transition-all"
+                      className="p-1.5 rounded-xl bg-white/80 text-slate-500 border border-slate-200 hover:text-rose-600 hover:border-rose-200 transition-all"
                       title="Delete project"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
-                  <span className="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-zinc-950/80 backdrop-blur-md text-purple-300 text-[10px] font-extrabold border border-purple-500/30">
+                  <span className="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-slate-900/80 text-white text-[10px] font-extrabold backdrop-blur-md">
                     {project.category}
                   </span>
                 </div>
@@ -228,22 +228,22 @@ export function StudioProjectsClient() {
                 {/* Content Details */}
                 <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm font-extrabold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                       {project.title}
                     </h3>
-                    <p className="text-xs text-zinc-400 line-clamp-2 mt-1 font-medium">
+                    <p className="text-xs text-slate-600 line-clamp-2 mt-1 font-medium leading-relaxed">
                       {project.description}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-bold text-zinc-500">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-zinc-500" />
+                      <Clock className="w-3 h-3 text-slate-400" />
                       <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-purple-400">
-                      <span>v{project.activeVersion} ({project.versionsCount} snaps)</span>
+                    <div className="flex items-center gap-1 text-indigo-600">
+                      <span>v{project.activeVersion}</span>
                     </div>
                   </div>
                 </div>
@@ -251,18 +251,18 @@ export function StudioProjectsClient() {
             ))}
           </div>
         ) : (
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-3xl p-12 text-center space-y-4">
-            <Sparkles className="w-10 h-10 text-purple-400 mx-auto" />
-            <h3 className="text-lg font-bold text-white">No Studio Projects Found</h3>
-            <p className="text-xs text-zinc-400 max-w-sm mx-auto font-medium">
-              Upload an image in AI Studio to reverse engineer visual prompts and save project iterations.
+          <div className="bg-white/90 border border-slate-200/80 rounded-3xl p-12 text-center space-y-4 glass-card shadow-sm">
+            <Sparkles className="w-10 h-10 text-indigo-600 mx-auto" />
+            <h3 className="text-lg font-black text-slate-900">No Studio Projects Found</h3>
+            <p className="text-xs text-slate-600 max-w-sm mx-auto font-medium">
+              Upload an image in AI Studio to reconstruct visual prompts and save your generations.
             </p>
             <Link
               href="/studio"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs transition-all shadow-lg"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition-all shadow-md"
             >
               <span>Launch AI Studio</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-indigo-300" />
             </Link>
           </div>
         )}
@@ -270,3 +270,4 @@ export function StudioProjectsClient() {
     </div>
   );
 }
+

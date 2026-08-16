@@ -45,24 +45,18 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-purple-500 selection:text-white flex flex-col justify-between overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-[var(--background)] text-slate-900 selection:bg-indigo-600 selection:text-white flex flex-col justify-between overflow-x-hidden font-sans">
       
-      {/* Refined Ambient Background Backdrop */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-purple-900/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-900/10 rounded-full blur-[120px]" />
-      </div>
-
       {/* Top Header Navigation */}
       <header className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 flex items-center justify-between">
         <Link href="/" className="inline-flex items-center gap-3 group transition-opacity hover:opacity-90">
           <PrizomLogo size={32} />
-          <span className="font-bold text-base text-white tracking-tight">Prizom</span>
+          <span className="font-extrabold text-lg text-slate-900 tracking-tight">Prizom</span>
         </Link>
 
         <Link
           href="/"
-          className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900/50"
+          className="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors px-3.5 py-1.5 rounded-full border border-slate-200 bg-white shadow-sm"
         >
           Back to Home
         </Link>
@@ -71,45 +65,44 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
       {/* Main Hero Waiting Room Container */}
       <main className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-12 flex-1 flex flex-col justify-center items-center text-center">
         
-        {/* Original Prizom AI Studio Icon Badge */}
-        <div className="mb-8 relative group">
-          <div className="absolute inset-0 bg-purple-500/20 rounded-3xl blur-xl transition-all duration-500 group-hover:bg-purple-500/30" />
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-zinc-900 border border-purple-500/30 flex items-center justify-center shadow-2xl shadow-purple-950/40">
+        {/* Prizom AI Studio Feature Icon Badge */}
+        <div className="mb-6 relative group">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-indigo-50/80 border border-indigo-100 flex items-center justify-center shadow-md">
             <PrizomAIStudioMark size={48} variant="gradient" />
           </div>
         </div>
 
         {/* Status Pill */}
-        <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/60 border border-purple-800/40 text-purple-300 text-xs font-bold uppercase tracking-widest">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          <span>Coming Soon</span>
+        <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-xs font-bold uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+          <span>Early Access Rollout</span>
         </div>
 
         {/* Primary Product Title */}
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+        <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight mb-3 leading-tight">
           AI Studio
         </h1>
 
-        {/* One-Line Value Proposition */}
-        <p className="text-zinc-400 text-base sm:text-lg font-medium max-w-lg mx-auto mb-10 leading-relaxed text-balance">
+        {/* Value Proposition */}
+        <p className="text-slate-600 text-base sm:text-lg font-medium max-w-lg mx-auto mb-8 leading-relaxed">
           Turn your AI-generated images into detailed, reusable prompts.
         </p>
 
-        {/* Primary Access Control Card & Journey */}
-        <div className="w-full max-w-md bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-2xl transition-all">
+        {/* Primary Access Control Card */}
+        <div className="w-full max-w-md bg-white/90 border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-md glass-card transition-all">
 
-          {/* 1. Normal User (Logged in, not applied yet) */}
+          {/* 1. Logged in user, early access open */}
           {currentStatus === 'coming_soon' && (
             <div className="space-y-4 text-center">
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-purple-950/50 hover:shadow-purple-500/25 flex items-center justify-center gap-2.5 cursor-pointer active:scale-98"
+                className="w-full py-3.5 px-6 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer active:scale-95"
               >
-                <span>Get Early Access</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Request Early Access</span>
+                <ArrowRight className="w-4 h-4 text-indigo-300" />
               </button>
-              <p className="text-xs text-zinc-500 font-medium">
-                We&apos;ll notify you when it&apos;s ready.
+              <p className="text-xs text-slate-500 font-medium">
+                We will notify you as soon as your access is approved.
               </p>
             </div>
           )}
@@ -119,12 +112,12 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
             <div className="space-y-4 text-center">
               <Link
                 href="/login?next=/studio"
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-purple-950/50 hover:shadow-purple-500/25 flex items-center justify-center gap-2.5 cursor-pointer active:scale-98"
+                className="w-full py-3.5 px-6 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer active:scale-95"
               >
                 <span>Log In & Request Early Access</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-indigo-300" />
               </Link>
-              <p className="text-xs text-zinc-500 font-medium">
+              <p className="text-xs text-slate-500 font-medium">
                 Log in to join the Early Access waitlist.
               </p>
             </div>
@@ -133,15 +126,15 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
           {/* 3. Pending Application User */}
           {currentStatus === 'pending' && (
             <div className="space-y-3 text-center">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-1">
                 <Clock className="w-5 h-5" />
               </div>
-              <h2 className="text-base font-bold text-white">Early Access Requested</h2>
-              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
-                We&apos;ll let you know when AI Studio is available for you.
+              <h2 className="text-base font-bold text-slate-900">Early Access Requested</h2>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Your application is currently under review by the team.
               </p>
               <div className="pt-2">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Waitlist Pending</span>
                 </span>
@@ -152,9 +145,9 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
           {/* 4. Rejected Application User */}
           {currentStatus === 'rejected' && (
             <div className="space-y-3 text-center">
-              <h2 className="text-base font-bold text-white">Early Access Status</h2>
-              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
-                Access is currently restricted during early rollout, but standard release will be available soon.
+              <h2 className="text-base font-bold text-slate-900">Early Access Status</h2>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Access is restricted during early rollout, but general release will open soon.
               </p>
             </div>
           )}
@@ -162,12 +155,12 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
           {/* 5. Revoked User */}
           {currentStatus === 'revoked' && (
             <div className="space-y-3 text-center">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 mb-1">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 border border-rose-200 mb-1">
                 <ShieldAlert className="w-5 h-5" />
               </div>
-              <h2 className="text-base font-bold text-white">Access Restricted</h2>
-              <p className="text-xs text-zinc-400 font-medium leading-relaxed">
-                Early access permission for your account has been updated by administration.
+              <h2 className="text-base font-bold text-slate-900">Access Restricted</h2>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Early access permission has been updated for this account.
               </p>
             </div>
           )}
@@ -178,40 +171,40 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
 
       {/* Clean Modal for Early Access Submission */}
       {showApplyModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-5 text-left">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-5 text-left">
             <button
               onClick={() => setShowApplyModal(false)}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-800"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white">Request Early Access</h3>
-              <p className="text-xs text-zinc-400 font-medium">
-                Apply now to test AI Studio prompt reverse engineering before public launch.
+              <h3 className="text-lg font-bold text-slate-900">Request Early Access</h3>
+              <p className="text-xs text-slate-600 font-medium">
+                Apply to test AI Studio prompt reconstruction before public launch.
               </p>
             </div>
 
             <form onSubmit={handleSubmitApplication} className="space-y-4">
               {error && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
-                  Why do you want Early Access? <span className="text-zinc-500 font-normal lowercase">(optional)</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Why do you want Early Access? <span className="text-slate-400 font-normal lowercase">(optional)</span>
                 </label>
                 <textarea
                   rows={3}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Share your AI image creation use case or workflow..."
-                  className="w-full p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+                  placeholder="Share your AI image creation workflow or use case..."
+                  className="w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
 
@@ -219,14 +212,14 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
                 <button
                   type="button"
                   onClick={() => setShowApplyModal(false)}
-                  className="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
+                  className="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -236,7 +229,7 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
                   ) : (
                     <>
                       <span>Submit Request</span>
-                      <Send className="w-3.5 h-3.5" />
+                      <Send className="w-3.5 h-3.5 text-indigo-300" />
                     </>
                   )}
                 </button>
@@ -247,15 +240,16 @@ export function StudioComingSoon({ accessResult, userEmail }: StudioComingSoonPr
       )}
 
       {/* Minimal Footer */}
-      <footer className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 border-t border-zinc-900/80 text-center text-xs text-zinc-600 font-medium flex flex-col sm:flex-row items-center justify-between gap-3">
+      <footer className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 border-t border-slate-200/60 text-center text-xs text-slate-500 font-medium flex flex-col sm:flex-row items-center justify-between gap-3">
         <span>© {new Date().getFullYear()} Prizom AI Studio</span>
-        <div className="flex items-center gap-5 text-zinc-500">
-          <Link href="/" className="hover:text-zinc-300 transition-colors">Home</Link>
-          <Link href="/discover" className="hover:text-zinc-300 transition-colors">Discover</Link>
-          <Link href="/trending" className="hover:text-zinc-300 transition-colors">Trending</Link>
+        <div className="flex items-center gap-5 text-slate-500">
+          <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
+          <Link href="/discover" className="hover:text-slate-900 transition-colors">Discover</Link>
+          <Link href="/trending" className="hover:text-slate-900 transition-colors">Trending</Link>
         </div>
       </footer>
 
     </div>
   );
 }
+
