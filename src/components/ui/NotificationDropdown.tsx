@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useTransition } from 'react';
-import { Bell, RefreshCw, CheckCheck, Inbox, Zap, Heart, Bookmark, UserPlus, Trophy, ShieldAlert, BadgeCheck, AlertTriangle } from 'lucide-react';
-import { getNotifications, getUnreadNotificationCount, markAllNotificationsAsRead, markNotificationAsRead, NotificationItem } from '@/app/actions/notifications';
+import { Bell, RefreshCw, CheckCheck, Inbox, Zap, Heart, Bookmark, UserPlus, Trophy, ShieldAlert, BadgeCheck, AlertTriangle, Trash2 } from 'lucide-react';
+import { getNotifications, getUnreadNotificationCount, markAllNotificationsAsRead, markNotificationAsRead, deleteNotification, NotificationItem } from '@/app/actions/notifications';
 import Avatar from '@/components/ui/Avatar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -94,6 +94,17 @@ export default function NotificationDropdown() {
     });
   };
 
+  const handleDeleteItem = (e: React.MouseEvent, id: string, wasRead: boolean) => {
+    e.stopPropagation();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    if (!wasRead) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+    startTransition(async () => {
+      await deleteNotification(id);
+    });
+  };
+
   // Helper for relative timestamps
   const getRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -110,8 +121,8 @@ export default function NotificationDropdown() {
   };
 
   const handleItemClick = (e: React.MouseEvent, item: NotificationItem) => {
-    // If the click occurred inside an <a> tag, do not intercept
-    if ((e.target as HTMLElement).closest('a')) return;
+    // If the click occurred inside an <a> tag or delete button, do not intercept
+    if ((e.target as HTMLElement).closest('a') || (e.target as HTMLElement).closest('button')) return;
 
     setIsOpen(false);
 
@@ -134,6 +145,18 @@ export default function NotificationDropdown() {
       router.push(`/creator/${profileUsername}`);
     } else if (item.type === 'verification' && profileUsername) {
       router.push(`/creator/${profileUsername}`);
+    } else if (item.type === 'moderation') {
+      if (item.text.toLowerCase().includes('suspended') || item.text.toLowerCase().includes('banned') || item.text.toLowerCase().includes('appeal')) {
+        router.push('/account-appeal');
+      } else if (item.entityId) {
+        router.push(`/prompt/${item.entityId}`);
+      } else {
+        router.push('/settings');
+      }
+    } else if (item.type === 'report') {
+      if (item.entityId) {
+        router.push(`/prompt/${item.entityId}`);
+      }
     }
   };
 
@@ -310,7 +333,7 @@ export default function NotificationDropdown() {
                   <div 
                     key={item.id}
                     onClick={(e) => handleItemClick(e, item)}
-                    className={`px-5 py-4 flex items-start space-x-3.5 border-b border-zinc-100/50 hover:bg-zinc-50/80 transition-all duration-300 cursor-pointer ${styles.bg} ${styles.glow} ${!item.isRead ? 'bg-indigo-500/[0.06]' : ''}`}
+                    className={`group px-5 py-4 flex items-start space-x-3.5 border-b border-zinc-100/50 hover:bg-zinc-50/80 transition-all duration-300 cursor-pointer relative ${styles.bg} ${styles.glow} ${!item.isRead ? 'bg-indigo-500/[0.06]' : ''}`}
                   >
                     {/* Left Column: Avatar & Action Badge */}
                     <div className="relative shrink-0">
@@ -338,7 +361,7 @@ export default function NotificationDropdown() {
                     </div>
 
                     {/* Middle Column: Text details */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-4">
                       <p className="text-xs font-semibold text-zinc-500 leading-relaxed break-words">
                         {item.actor && !isSystemType && (
                           <Link 
@@ -356,10 +379,20 @@ export default function NotificationDropdown() {
                       </span>
                     </div>
 
-                    {/* Right Column: Unread Indicator Dot */}
-                    {!item.isRead && (
-                      <div className="w-2.5 h-2.5 bg-red-500 rounded-full shrink-0 self-center shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
-                    )}
+                    {/* Right Column: Unread Dot + Delete Action */}
+                    <div className="flex items-center gap-1.5 shrink-0 self-center">
+                      {!item.isRead && (
+                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteItem(e, item.id, item.isRead)}
+                        title="Delete notification"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })

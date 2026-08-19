@@ -205,6 +205,11 @@ export async function reportUser(reportedId: string, reason: string, details?: s
   }
 
   const user = session.user;
+  await assertNotSuspendedOrBanned(user.id);
+
+  if (!reason || !reason.trim()) {
+    return { success: false, error: 'Report reason is required.' };
+  }
 
   if (user.id === reportedId) {
     return { success: false, error: 'You cannot report yourself.' };
@@ -249,7 +254,7 @@ export async function reportUser(reportedId: string, reason: string, details?: s
       .insert([{
         reporter_id: user.id,
         reported_id: reportedId,
-        reason,
+        reason: reason.trim(),
         details: details || ''
       }]);
 
@@ -261,7 +266,7 @@ export async function reportUser(reportedId: string, reason: string, details?: s
       null,
       'report',
       reportedId,
-      `Your report against creator (ID: ${reportedId.substring(0, 8)}...) for "${reason}" has been submitted successfully.`
+      `Your report against creator (ID: ${reportedId.substring(0, 8)}...) for "${reason.trim()}" has been submitted successfully.`
     );
 
     return { success: true };
@@ -283,6 +288,11 @@ export async function reportPrompt(promptId: string, reason: string, details?: s
   }
 
   const user = session.user;
+  await assertNotSuspendedOrBanned(user.id);
+
+  if (!reason || !reason.trim()) {
+    return { success: false, error: 'Report reason is required.' };
+  }
 
   try {
     // Self-reporting validation
@@ -344,7 +354,7 @@ export async function reportPrompt(promptId: string, reason: string, details?: s
       .insert([{
         reporter_id: user.id,
         prompt_id: promptId,
-        reason,
+        reason: reason.trim(),
         details: details || '',
         prompt_snapshot: snapshot
       }]);
@@ -357,7 +367,7 @@ export async function reportPrompt(promptId: string, reason: string, details?: s
       null,
       'report',
       promptId,
-      `Your report against prompt (ID: ${promptId.substring(0, 8)}...) for "${reason}" has been submitted successfully.`
+      `Your report against prompt (ID: ${promptId.substring(0, 8)}...) for "${reason.trim()}" has been submitted successfully.`
     );
 
     return { success: true };

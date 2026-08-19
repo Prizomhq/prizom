@@ -1890,6 +1890,45 @@ export async function updateReportStatus(
 
   if (error) return { success: false, error: error.message };
 
+  // Bulk update duplicate active reports for the same target asset to prevent queue clutter
+  if (status === 'resolved' || status === 'dismissed') {
+    const targetColumn = type === 'prompt' ? 'prompt_id' : 'reported_id';
+    const targetId = type === 'prompt' ? reportData?.prompt_id : reportData?.reported_id;
+    if (targetId) {
+      const { data: siblingReports } = await supabaseAdmin
+        .from(table)
+        .select('id, reporter_id')
+        .eq(targetColumn, targetId)
+        .neq('id', reportId)
+        .in('status', ['pending', 'under_review']);
+
+      if (siblingReports && siblingReports.length > 0) {
+        const siblingIds = siblingReports.map((r: any) => r.id);
+        await supabaseAdmin
+          .from(table)
+          .update({ status })
+          .in('id', siblingIds);
+
+        const textLabel = status === 'resolved' ? 'resolved' : 'dismissed after review';
+        for (const sRep of siblingReports) {
+          if (sRep.reporter_id) {
+            try {
+              await triggerNotification(
+                sRep.reporter_id,
+                null,
+                'report',
+                sRep.id,
+                `Your report against ${type} (Ref ID: ${sRep.id.substring(0, 8)}...) has been ${textLabel}.`
+              );
+            } catch (e) {
+              console.error('Failed to notify sibling reporter:', e);
+            }
+          }
+        }
+      }
+    }
+  }
+
   await supabaseAdmin
     .from('moderation_logs')
     .insert([{

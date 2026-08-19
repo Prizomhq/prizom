@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { checkBlockStatus } from './moderation';
 
@@ -142,10 +142,36 @@ export async function markNotificationAsRead(notificationId: string) {
   }
 }
 
+/**
+ * Delete a single notification for the logged-in user.
+ */
+export async function deleteNotification(notificationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .match({ id: notificationId, user_id: user.id });
+
+    if (error) throw error;
+
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting notification:', error);
+    return { success: false, error: error.message };
+  }
+}
 
 /**
  * Internal Server action to create a notification safely.
- * Checks for block relations before sending.
+ * Checks for block relations before sending. Bypasses client RLS via Admin Client.
  */
 export async function triggerNotification(
   recipientUserId: string,
@@ -154,14 +180,14 @@ export async function triggerNotification(
   entityId: string | null,
   text: string
 ) {
-  const supabase = await createClient();
+  const supabaseAdmin = await createAdminClient();
 
   // If there is an actor, ensure they aren't blocked by the recipient, and haven't blocked the recipient
   if (actorId) {
     if (recipientUserId === actorId) return { success: false, error: 'Self notifications ignored' };
 
-    // Check block status (running as system / server query bypasses standard RLS constraints check status)
-    const { data: blockExists } = await supabase
+    // Check block status (running as system / server query bypasses standard RLS constraints)
+    const { data: blockExists } = await supabaseAdmin
       .from('blocked_users')
       .select('id')
       .or(`and(blocker_id.eq.${recipientUserId},blocked_id.eq.${actorId}),and(blocker_id.eq.${actorId},blocked_id.eq.${recipientUserId})`)
@@ -173,7 +199,7 @@ export async function triggerNotification(
   }
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('notifications')
       .insert([{
         user_id: recipientUserId,

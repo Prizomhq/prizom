@@ -15,13 +15,15 @@ import {
   BadgeCheck, 
   AlertTriangle, 
   ArrowLeft,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { 
   getNotifications, 
   getUnreadNotificationCount, 
   markAllNotificationsAsRead, 
   markNotificationAsRead, 
+  deleteNotification,
   NotificationItem 
 } from '@/app/actions/notifications';
 import Avatar from '@/components/ui/Avatar';
@@ -36,10 +38,11 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
 
-  // Fetch logged-in user profile username for achievement routing
+  // Fetch logged-in user profile username for achievement routing & set user ID
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -47,13 +50,14 @@ export default function NotificationsPage() {
         router.push('/login');
         return;
       }
+      setUserId(user.id);
       const { data } = await supabase.from('profiles').select('username').eq('id', user.id).single();
       if (data) setProfileUsername(data.username);
     };
     fetchProfile();
   }, [supabase, router]);
 
-  // Fetch initial notifications and counts on mount
+  // Fetch initial notifications and counts on mount & subscribe to realtime updates
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
@@ -62,12 +66,6 @@ export default function NotificationsPage() {
         setUnreadCount(count);
         const list = await getNotifications();
         setNotifications(list);
-
-        // Automatically mark all as read when opening notifications page
-        if (count > 0) {
-          await markAllNotificationsAsRead();
-          setUnreadCount(0);
-        }
       } catch (err) {
         console.error('Failed to load notifications:', err);
       } finally {
@@ -75,7 +73,30 @@ export default function NotificationsPage() {
       }
     };
     fetchInitialData();
-  }, []);
+
+    if (!userId) return;
+
+    // Subscribe to realtime notification updates for this user
+    const channel = supabase
+      .channel(`page-notifications-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          fetchInitialData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, supabase]);
 
   const handleMarkAllRead = () => {
     // Optimistic UI update
@@ -84,6 +105,17 @@ export default function NotificationsPage() {
 
     startTransition(async () => {
       await markAllNotificationsAsRead();
+    });
+  };
+
+  const handleDeleteItem = (e: React.MouseEvent, id: string, wasRead: boolean) => {
+    e.stopPropagation();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    if (!wasRead) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+    startTransition(async () => {
+      await deleteNotification(id);
     });
   };
 
@@ -103,8 +135,8 @@ export default function NotificationsPage() {
   };
 
   const handleItemClick = (e: React.MouseEvent, item: NotificationItem) => {
-    // If the click occurred inside an <a> tag, do not intercept
-    if ((e.target as HTMLElement).closest('a')) return;
+    // If the click occurred inside an <a> tag or delete button, do not intercept
+    if ((e.target as HTMLElement).closest('a') || (e.target as HTMLElement).closest('button')) return;
 
     // Optimistically mark as read on the client
     if (!item.isRead) {
@@ -125,6 +157,18 @@ export default function NotificationsPage() {
       router.push(`/creator/${profileUsername}`);
     } else if (item.type === 'verification' && profileUsername) {
       router.push(`/creator/${profileUsername}`);
+    } else if (item.type === 'moderation') {
+      if (item.text.toLowerCase().includes('suspended') || item.text.toLowerCase().includes('banned') || item.text.toLowerCase().includes('appeal')) {
+        router.push('/account-appeal');
+      } else if (item.entityId) {
+        router.push(`/prompt/${item.entityId}`);
+      } else {
+        router.push('/settings');
+      }
+    } else if (item.type === 'report') {
+      if (item.entityId) {
+        router.push(`/prompt/${item.entityId}`);
+      }
     }
   };
 
@@ -293,7 +337,7 @@ export default function NotificationsPage() {
                   <div 
                     key={item.id}
                     onClick={(e) => handleItemClick(e, item)}
-                    className={`px-6 py-5 flex items-start space-x-4 hover:bg-zinc-50/70 transition-all duration-250 cursor-pointer ${styles.bg} ${styles.glow} ${!item.isRead ? 'bg-indigo-500/[0.04]' : ''}`}
+                    className={`group px-6 py-5 flex items-start space-x-4 hover:bg-zinc-50/70 transition-all duration-250 cursor-pointer relative ${styles.bg} ${styles.glow} ${!item.isRead ? 'bg-indigo-500/[0.04]' : ''}`}
                   >
                     {/* Left Column: Avatar & Action Badge */}
                     <div className="relative shrink-0">
@@ -321,7 +365,7 @@ export default function NotificationsPage() {
                     </div>
 
                     {/* Middle Column: Text details */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-4">
                       <p className="text-sm font-semibold text-zinc-500 leading-relaxed break-words">
                         {item.actor && !isSystemType && (
                           <Link 
@@ -338,10 +382,20 @@ export default function NotificationsPage() {
                       </span>
                     </div>
 
-                    {/* Right Column: Unread Indicator Dot */}
-                    {!item.isRead && (
-                      <div className="w-2.5 h-2.5 bg-red-500 rounded-full shrink-0 self-center shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                    )}
+                    {/* Right Column: Unread Dot + Delete Action */}
+                    <div className="flex items-center gap-2 shrink-0 self-center">
+                      {!item.isRead && (
+                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteItem(e, item.id, item.isRead)}
+                        title="Delete notification"
+                        className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
