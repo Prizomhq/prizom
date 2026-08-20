@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, MapPin, Link as LinkIcon, Calendar, Image as ImageIcon, Bookmark, Repeat, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Link as LinkIcon, Calendar, Image as ImageIcon, Bookmark, Repeat, ShieldAlert, BadgeCheck, Sparkles, Compass } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import MasonryGrid from '@/components/ui/MasonryGrid';
 import PromptCard from '@/components/ui/PromptCard';
@@ -8,6 +8,8 @@ import { checkIsFollowing } from '@/app/actions/follows';
 import CreatorTabs from './CreatorTabs';
 import Avatar from '@/components/ui/Avatar';
 import CreatorStats from '@/components/ui/CreatorStats';
+import ActionMessageBanner from '@/components/ui/ActionMessageBanner';
+import FollowButton from '@/components/ui/FollowButton';
 import { checkBlockStatus } from '@/app/actions/moderation';
 import { getUserAchievements, triggerAchievementCheck } from '@/app/actions/achievements';
 import CreatorProfileActions from '@/components/ui/CreatorProfileActions';
@@ -181,6 +183,15 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
     removedPrompts = removed || [];
   }
 
+  // Fetch recommended creators for continuous discovery loop
+  const { data: recommendedCreators } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, avatar_url, bio, follower_count, badges')
+    .neq('id', creator.id)
+    .not('role', 'in', '("suspended","banned","permanently_banned","disabled")')
+    .order('follower_count', { ascending: false })
+    .limit(4);
+
   // If viewing own profile, run self achievement checks to qualify/unlock badges under their own RLS session
   if (isOwnProfile) {
     try {
@@ -244,18 +255,14 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-[var(--color-electric-blue)]/5 via-[var(--color-neon-purple)]/5 to-transparent blur-[120px] pointer-events-none -z-10"></div>
 
-      {/* Warning Banner if removed prompts exist */}
+      {/* Structured Moderation Message Banner if removed prompts exist */}
       {isOwnProfile && removedPrompts.length > 0 && (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <div className="bg-red-50 border border-red-200 rounded-3xl p-6 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 text-red-900/90 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-            <ShieldAlert className="w-8 h-8 text-red-500 shrink-0" />
-            <div className="flex-1 text-center sm:text-left">
-              <h4 className="font-extrabold text-sm uppercase tracking-wider">Action Required: Content Removed</h4>
-              <p className="text-xs font-semibold text-zinc-500 mt-1 leading-relaxed">
-                One or more of your prompt templates have been removed by the moderation team. You have a 15-day grace period to appeal the removal. Access the <strong className="text-zinc-800">Removed Content</strong> tab below to submit appeals.
-              </p>
-            </div>
-          </div>
+          <ActionMessageBanner 
+            variant="moderation"
+            title="Content Moderation Notice"
+            description={`One or more of your prompt templates were unpublished following a community guidelines review. You have a 15-day grace period to appeal. Access the "Removed Content" tab below to review and submit an appeal.`}
+          />
         </div>
       )}
 
@@ -365,6 +372,60 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
           removedPrompts={removedPrompts}
           isOwnProfile={isOwnProfile}
         />
+      )}
+
+      {/* Continuous Discovery Footer */}
+      {!anyBlock && recommendedCreators && recommendedCreators.length > 0 && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 border-t border-zinc-200/60 mt-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-neon-purple" />
+                More Creators You Might Like
+              </h3>
+              <p className="text-xs font-semibold text-zinc-500 mt-0.5">
+                Explore prompt collections and templates from other top AI creators.
+              </p>
+            </div>
+            <Link
+              href="/discover"
+              className="inline-flex items-center gap-1.5 text-xs font-black text-neon-purple hover:underline"
+            >
+              <Compass className="w-4 h-4" />
+              Explore All
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recommendedCreators.map((rc: any) => (
+              <div 
+                key={rc.id} 
+                className="bg-white border border-zinc-200/80 rounded-3xl p-5 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-all"
+              >
+                <Link href={`/creator/${rc.username}`}>
+                  <Avatar 
+                    src={rc.avatar_url} 
+                    username={rc.username} 
+                    size="lg" 
+                    className="mb-3 hover:scale-105 transition-transform" 
+                  />
+                </Link>
+                <Link 
+                  href={`/creator/${rc.username}`}
+                  className="font-black text-sm text-zinc-900 hover:text-indigo-600 transition-colors truncate max-w-full"
+                >
+                  {rc.full_name || rc.username}
+                </Link>
+                <span className="text-xs text-zinc-400 font-bold mb-3">@{rc.username}</span>
+                <FollowButton 
+                  targetId={rc.id} 
+                  targetUsername={rc.username} 
+                  isLoggedIn={isLoggedIn} 
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
     </div>

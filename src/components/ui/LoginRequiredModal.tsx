@@ -10,13 +10,19 @@ interface LoginRequiredModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  intentAction?: 'follow' | 'like' | 'save' | 'remix';
+  targetCreatorId?: string;
+  targetUsername?: string;
 }
 
 export default function LoginRequiredModal({ 
   isOpen, 
   onClose,
   title = 'Authentication Required',
-  description = 'Create Prizom account to like prompts, build collections, remix ideas, and join the community.'
+  description = 'Create Prizom account to like prompts, build collections, remix ideas, and join the community.',
+  intentAction,
+  targetCreatorId,
+  targetUsername
 }: LoginRequiredModalProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -36,12 +42,29 @@ export default function LoginRequiredModal({
 
   if (!isOpen || !mounted) return null;
 
+  const saveIntent = () => {
+    if (intentAction && targetCreatorId) {
+      try {
+        sessionStorage.setItem('prizom_pending_intent', JSON.stringify({
+          action: intentAction,
+          targetId: targetCreatorId,
+          targetUsername: targetUsername || '',
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Failed to save pending intent to sessionStorage:', e);
+      }
+    }
+  };
+
   const handleSignUp = () => {
+    saveIntent();
     onClose();
     router.push('/signup');
   };
 
   const handleLogIn = () => {
+    saveIntent();
     onClose();
     router.push('/login');
   };

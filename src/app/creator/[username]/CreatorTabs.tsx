@@ -1,9 +1,7 @@
-'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Grid, Bookmark, Image as ImageIcon, Layers, FolderPlus, Repeat, AlertTriangle, X } from 'lucide-react';
+import { Grid, Bookmark, Image as ImageIcon, Layers, FolderPlus, Repeat, AlertTriangle, X, CheckCircle, Rocket, Users } from 'lucide-react';
 import MasonryGrid from '@/components/ui/MasonryGrid';
 import PromptCard from '@/components/ui/PromptCard';
 import { getOptimizedImageUrl } from '@/lib/cloudinary-client';
@@ -115,34 +113,81 @@ export default function CreatorTabs({
         {/* Prompts Tab */}
         {activeTab === 'prompts' && (
           prompts.length === 0 ? (
-            <div className="text-center py-32 bg-white rounded-[3rem] border border-zinc-200/60 shadow-sm relative overflow-hidden max-w-4xl mx-auto">
+            <div className="py-16 px-6 bg-white rounded-[3rem] border border-zinc-200/60 shadow-sm relative overflow-hidden max-w-4xl mx-auto">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] blur-[100px] opacity-[0.05] pointer-events-none"></div>
               {isOwnProfile ? (
-                <>
-                  <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 bg-gradient-to-br from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 border border-[var(--color-neon-purple)]/20 shadow-inner">
-                    <Layers className="w-10 h-10 text-[var(--color-neon-purple)]" />
+                <div className="max-w-2xl mx-auto text-center space-y-6">
+                  <div className="w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto bg-gradient-to-br from-[var(--color-neon-purple)]/10 to-[var(--color-electric-blue)]/10 border border-[var(--color-neon-purple)]/20 shadow-inner">
+                    <Rocket className="w-9 h-9 text-[var(--color-neon-purple)]" />
                   </div>
-                  <h3 className="text-2xl font-black mb-3 text-zinc-900 tracking-tight">Share your first prompt</h3>
-                  <p className="text-zinc-500 font-medium leading-relaxed max-w-sm mx-auto">
-                    Your creative work deserves an audience. Publish your first AI prompt and join the Prizom creator community.
-                  </p>
-                  <Link
-                    href="/create"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--color-neon-purple)] to-[var(--color-electric-blue)] text-white text-sm font-bold hover:shadow-[0_8px_20px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5 mt-6"
-                  >
-                    Create Your First Prompt
-                  </Link>
-                </>
+                  <div>
+                    <h3 className="text-2xl font-black text-zinc-900 tracking-tight mb-2">Welcome to Your Creator Home!</h3>
+                    <p className="text-zinc-500 font-medium text-sm leading-relaxed max-w-md mx-auto">
+                      Complete your creator activation steps below to showcase your prompt templates and build your audience on Prizom.
+                    </p>
+                  </div>
+
+                  {/* 3-Step Progressive Activation Journey */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left pt-4">
+                    {/* Step 1 */}
+                    <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/60 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Step 1</span>
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <h4 className="font-extrabold text-sm text-emerald-950">Account Created</h4>
+                        <p className="text-xs text-emerald-800/80 mt-1">Your creator profile is live and searchable.</p>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="p-5 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700">Step 2</span>
+                          <Rocket className="w-4 h-4 text-indigo-600" />
+                        </div>
+                        <h4 className="font-extrabold text-sm text-indigo-950">Publish 1st Prompt</h4>
+                        <p className="text-xs text-indigo-800/80 mt-1">Share your first AI template with the community.</p>
+                      </div>
+                      <Link
+                        href="/create"
+                        className="mt-4 w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold text-center transition-colors shadow-xs"
+                      >
+                        Create Prompt
+                      </Link>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="p-5 rounded-2xl bg-purple-50/80 border border-purple-200/80 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">Step 3</span>
+                          <Users className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <h4 className="font-extrabold text-sm text-purple-950">Follow 3 Creators</h4>
+                        <p className="text-xs text-purple-800/80 mt-1">Build your feed with inspiration from peers.</p>
+                      </div>
+                      <Link
+                        href="/discover"
+                        className="mt-4 w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold text-center transition-colors shadow-xs"
+                      >
+                        Discover Peers
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <>
+                <div className="text-center py-12">
                   <div className="w-24 h-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-zinc-100 shadow-inner">
                     <Layers className="w-10 h-10 text-zinc-300" />
                   </div>
-                  <h3 className="text-2xl font-black mb-3 text-zinc-900 tracking-tight">No prompts yet</h3>
+                  <h3 className="text-2xl font-black mb-3 text-zinc-900 tracking-tight">No prompts published yet</h3>
                   <p className="text-zinc-500 font-medium leading-relaxed max-w-sm mx-auto">
-                    This creator hasn&apos;t published any prompts yet. Follow them to get notified when they do.
+                    This creator hasn&apos;t published any prompts yet. Follow them to receive instant updates when they publish new prompt templates.
                   </p>
-                </>
+                </div>
               )}
             </div>
           ) : (
