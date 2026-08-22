@@ -86,15 +86,10 @@ export function CreditTopUpModal({
         return;
       }
 
-      // Step 1: Create Order via Server Action
+      // Step 1: Create Order via Server Action (Server-enforced package catalog)
       const orderRes = await createRazorpayOrder({
-        amount: selectedPack.priceInr,
-        currency: 'INR',
+        packageId: selectedPack.id,
         type: 'pack_purchase',
-        metadata: {
-          package_id: selectedPack.id,
-          credits: selectedPack.credits,
-        },
       });
 
       if (!orderRes.success || !orderRes.order) {

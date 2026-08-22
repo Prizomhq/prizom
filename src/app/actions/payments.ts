@@ -4,10 +4,44 @@ import crypto from 'crypto';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { razorpayClient } from '@/lib/razorpay';
 
+export interface CreditPackageDefinition {
+  id: string;
+  name: string;
+  priceInr: number;
+  credits: number;
+}
+
+/**
+ * CANONICAL SERVER-SIDE CREDIT PACKAGE CATALOG
+ * Real money and credit grants MUST depend 100% on this catalog.
+ * The client cannot modify prices or credit amounts.
+ */
+export const SERVER_CREDIT_PACKAGES: Record<string, CreditPackageDefinition> = {
+  pack_starter: {
+    id: 'pack_starter',
+    name: 'Starter Pack',
+    priceInr: 99,
+    credits: 25,
+  },
+  pack_pro: {
+    id: 'pack_pro',
+    name: 'Pro Creator Pack',
+    priceInr: 249,
+    credits: 75,
+  },
+  pack_power: {
+    id: 'pack_power',
+    name: 'Power Studio Pack',
+    priceInr: 599,
+    credits: 200,
+  },
+};
+
 export interface CreateOrderParams {
-  amount: number; // In INR (e.g. 999 for ₹999)
+  packageId?: string; // Required for pack_purchase
+  amount?: number;    // Used for tip (validated server-side)
   currency?: string;
-  type: 'subscription' | 'tip' | 'pack_purchase';
+  type: 'subscription' | 'tip' | 'pack_purchase' | 'top_up';
   creatorId?: string;
   metadata?: Record<string, any>;
 }
@@ -22,9 +56,40 @@ export async function createRazorpayOrder(params: CreateOrderParams) {
     }
 
     const currency = params.currency || 'INR';
-    const amountInPaise = Math.round(params.amount * 100); // Razorpay requires amount in smallest currency sub-unit
+    let finalAmountInr = 0;
+    let creditsGranted = 0;
+    let packageId = params.packageId || 'custom';
 
-    // Create Razorpay Order via SDK
+    // 1. Server-side Package & Amount Resolution
+    if (params.type === 'pack_purchase' || params.type === 'top_up') {
+      const selectedPkg = params.packageId ? SERVER_CREDIT_PACKAGES[params.packageId] : null;
+      if (!selectedPkg) {
+        return { success: false, error: 'Invalid or missing credit package selection.' };
+      }
+      finalAmountInr = selectedPkg.priceInr;
+      creditsGranted = selectedPkg.credits;
+      packageId = selectedPkg.id;
+    } else if (params.type === 'tip') {
+      if (!params.creatorId) {
+        return { success: false, error: 'Creator ID is required for tipping.' };
+      }
+      if (params.creatorId === user.id) {
+        return { success: false, error: 'Self-tipping is strictly prohibited.' };
+      }
+      const tipAmount = Math.floor(Number(params.amount) || 0);
+      if (tipAmount < 10 || tipAmount > 10000) {
+        return { success: false, error: 'Tip amount must be between ₹10 and ₹10,000 INR.' };
+      }
+      finalAmountInr = tipAmount;
+    } else if (params.type === 'subscription') {
+      finalAmountInr = 999;
+    } else {
+      return { success: false, error: 'Invalid payment transaction type.' };
+    }
+
+    const amountInPaise = Math.round(finalAmountInr * 100);
+
+    // 2. Create Order via Razorpay SDK
     const orderOptions = {
       amount: amountInPaise,
       currency,
@@ -32,14 +97,15 @@ export async function createRazorpayOrder(params: CreateOrderParams) {
       notes: {
         user_id: user.id,
         type: params.type,
+        package_id: packageId,
+        credits: creditsGranted,
         creator_id: params.creatorId || '',
-        ...params.metadata,
       },
     };
 
     const razorpayOrder = await razorpayClient.orders.create(orderOptions);
 
-    // Save pending transaction record in database
+    // 3. Store Pending Transaction in DB
     const adminSupabase = await createAdminClient();
     const { error: dbError } = await adminSupabase
       .from('transactions')
@@ -47,15 +113,19 @@ export async function createRazorpayOrder(params: CreateOrderParams) {
         user_id: user.id,
         creator_id: params.creatorId || null,
         type: params.type,
-        amount: params.amount,
+        amount: finalAmountInr,
         currency,
         status: 'pending',
         razorpay_order_id: razorpayOrder.id,
-        metadata: params.metadata || {},
+        metadata: {
+          package_id: packageId,
+          credits: creditsGranted,
+          ...params.metadata,
+        },
       });
 
     if (dbError) {
-      console.error('[Payments] Failed to save pending transaction:', dbError);
+      console.error('[Payments] Failed to record pending transaction:', dbError);
     }
 
     return {
@@ -86,24 +156,52 @@ export async function verifyRazorpayPayment(
       return { success: false, error: 'Authentication required' };
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret || secret === 'placeholder_secret') {
+      console.error('[Payments Critical]: RAZORPAY_KEY_SECRET is missing or placeholder!');
+      return { success: false, error: 'Razorpay payment verification is temporarily unavailable.' };
+    }
+
+    // Timing-safe HMAC signature verification
     const generatedSignature = crypto
       .createHmac('sha256', secret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex');
 
-    if (generatedSignature !== razorpay_signature) {
+    const signatureValid = crypto.timingSafeEqual(
+      Buffer.from(generatedSignature, 'utf8'),
+      Buffer.from(razorpay_signature, 'utf8')
+    );
+
+    if (!signatureValid) {
       return { success: false, error: 'Payment signature verification failed' };
     }
 
     const adminSupabase = await createAdminClient();
 
-    // Fetch existing pending transaction
-    const { data: transaction } = await adminSupabase
+    // Fetch existing pending transaction & verify ownership
+    const { data: transaction, error: txErr } = await adminSupabase
       .from('transactions')
       .select('*')
       .eq('razorpay_order_id', razorpay_order_id)
       .single();
+
+    if (txErr || !transaction) {
+      return { success: false, error: 'Transaction record not found' };
+    }
+
+    if (transaction.user_id !== user.id) {
+      return { success: false, error: 'Unauthorized payment verification attempt' };
+    }
+
+    if (transaction.status === 'completed') {
+      return {
+        success: true,
+        message: 'Payment already verified',
+        alreadyProcessed: true,
+        transactionType: transaction.type,
+      };
+    }
 
     // Update transaction to completed
     await adminSupabase
@@ -116,8 +214,48 @@ export async function verifyRazorpayPayment(
       })
       .eq('razorpay_order_id', razorpay_order_id);
 
-    // If subscription or pro purchase, activate Creator Pro on profile
-    if (transaction?.type === 'subscription') {
+    // Business Logic Handlers
+    let newBalance: number | undefined;
+    let creditsGranted: number | undefined;
+
+    if (transaction.type === 'pack_purchase' || transaction.type === 'top_up') {
+      const { topUpCreditsAtomic } = await import('@/lib/ai-studio/credits');
+      
+      const pkgId = transaction.metadata?.package_id;
+      const pkg = pkgId ? SERVER_CREDIT_PACKAGES[pkgId] : null;
+      creditsGranted = pkg ? pkg.credits : (Number(transaction.metadata?.credits) || 10);
+
+      const topUpRes = await topUpCreditsAtomic(
+        user.id,
+        creditsGranted,
+        razorpay_payment_id,
+        pkgId || 'topup_pack',
+        adminSupabase
+      );
+
+      newBalance = topUpRes.balanceAfter;
+    } else if (transaction.type === 'tip' && transaction.creator_id) {
+      // Execute creator tip RPC
+      const { data: rpcData, error: rpcError } = await adminSupabase.rpc('process_creator_tip_atomic', {
+        p_tipper_id: user.id,
+        p_creator_id: transaction.creator_id,
+        p_gross_amount: transaction.amount,
+        p_razorpay_payment_id: razorpay_payment_id,
+        p_razorpay_order_id: razorpay_order_id,
+      });
+
+      if (rpcError) {
+        console.error('[Payments] Tip RPC processing error:', rpcError);
+      }
+
+      // Create in-app notification for creator
+      await adminSupabase.from('notifications').insert({
+        user_id: transaction.creator_id,
+        actor_id: user.id,
+        type: 'system',
+        content: `❤️ You received a ₹${transaction.amount} creator tip!`,
+      });
+    } else if (transaction.type === 'subscription') {
       await adminSupabase
         .from('profiles')
         .update({ is_pro: true })
@@ -135,40 +273,14 @@ export async function verifyRazorpayPayment(
         });
     }
 
-    // If pack_purchase or top_up, grant AI Studio credits atomically & idempotently
-    let newBalance: number | undefined;
-    let creditsGranted: number | undefined;
-
-    if (transaction?.type === 'pack_purchase' || transaction?.type === 'top_up') {
-      const { topUpCreditsAtomic } = await import('@/lib/ai-studio/credits');
-      
-      // Package mapping: metadata credits > amount-based calculation (1 credit per ₹4 approx)
-      creditsGranted = Number(transaction.metadata?.credits) || (
-        transaction.amount >= 599 ? 200 :
-        transaction.amount >= 249 ? 75 :
-        transaction.amount >= 99 ? 25 : 10
-      );
-
-      const topUpRes = await topUpCreditsAtomic(
-        user.id,
-        creditsGranted,
-        razorpay_payment_id,
-        transaction.metadata?.package_id || 'topup_pack',
-        adminSupabase
-      );
-
-      newBalance = topUpRes.balanceAfter;
-    }
-
     return {
       success: true,
       message: 'Payment verified successfully!',
-      transactionType: transaction?.type || 'payment',
+      transactionType: transaction.type,
       creditsGranted,
-      newBalance
+      newBalance,
     };
   } catch (err: any) {
-
     console.error('[Payments] Razorpay Signature Verification Error:', err);
     return { success: false, error: err.message || 'Signature verification failed' };
   }

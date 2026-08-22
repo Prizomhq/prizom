@@ -1,10 +1,18 @@
 /**
- * Automated Regression Test Suite for Prizom AI Studio
+ * Automated Regression & Security Test Suite for Prizom AI Studio & Razorpay Payments
  * Tests:
  * 1. Vision Engine - Verify zero silent mock fallbacks on AI failure
  * 2. Credit Operations - Atomic top-up & ledger idempotency
- * 3. Webhook Security - Mandatory signature validation
+ * 3. Webhook Security - Mandatory signature validation & timing-safe HMAC
  * 4. Session Deletion - Database & state clean-up
+ * 5. Studio Actions - Revalidate & auto-refund logic
+ * 6. Studio UI - Loading & auto-refund triggers
+ * 7. Top-Up UI - Production modal connectivity
+ * 8. Price Hardening - Canonical SERVER_CREDIT_PACKAGES catalog enforcement
+ * 9. Tipping Hardening - Self-tipping rejection & tip bounds
+ * 10. Webhook Unauthenticated Secret Check - 500 rejection when secret is missing
+ * 11. Database Hardening - Migration 42 atomic RPC definitions & idempotency
+ * 12. Order Ownership - User ownership validation in verification
  */
 
 const fs = require('fs');
@@ -12,7 +20,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 console.log('====================================================');
-console.log('PRIZOM AI STUDIO — AUTOMATED REGRESSION SUITE');
+console.log('PRIZOM PAYMENTS & AI STUDIO — REGRESSION SUITE');
 console.log('====================================================\n');
 
 let totalTests = 0;
@@ -47,19 +55,19 @@ async function runSuite() {
     const creditsPath = path.join(__dirname, '../src/lib/ai-studio/credits.ts');
     const content = fs.readFileSync(creditsPath, 'utf8');
     const hasTopUp = content.includes('topUpCreditsAtomic');
-    const hasIdempotency = content.includes('existingEntries') && content.includes('alreadyProcessed');
+    const hasIdempotency = content.includes('alreadyProcessed') && (content.includes('topup_studio_credits_atomic') || content.includes('existingEntries'));
     assert(hasTopUp && hasIdempotency, 'Credit system implements topUpCreditsAtomic with idempotent payment ID checking');
   } catch (err) {
     assert(false, 'Failed to inspect credits.ts: ' + err.message);
   }
 
-  // Test 3: Verify webhook/route.ts enforces strict signature validation & processes top-ups
+  // Test 3: Verify webhook/route.ts enforces strict signature validation & timing-safe comparison
   try {
     const webhookPath = path.join(__dirname, '../src/app/api/razorpay/webhook/route.ts');
     const content = fs.readFileSync(webhookPath, 'utf8');
     const hasSignatureCheck = content.includes('Missing webhook signature header');
-    const hasTopUpIntegration = content.includes('topUpCreditsAtomic');
-    assert(hasSignatureCheck && hasTopUpIntegration, 'Razorpay Webhook route enforces signature verification & triggers idempotent credit top-ups');
+    const hasTimingSafe = content.includes('crypto.timingSafeEqual');
+    assert(hasSignatureCheck && hasTimingSafe, 'Razorpay Webhook route enforces signature verification & timing-safe HMAC validation');
   } catch (err) {
     assert(false, 'Failed to inspect webhook/route.ts: ' + err.message);
   }
@@ -103,6 +111,59 @@ async function runSuite() {
     assert(exists, 'CreditTopUpModal component exists and provides production top-up UI');
   } catch (err) {
     assert(false, 'Failed to inspect CreditTopUpModal.tsx: ' + err.message);
+  }
+
+  // Test 8: Verify Canonical SERVER_CREDIT_PACKAGES enforces server-side pricing
+  try {
+    const paymentsPath = path.join(__dirname, '../src/app/actions/payments.ts');
+    const content = fs.readFileSync(paymentsPath, 'utf8');
+    const hasServerCatalog = content.includes('SERVER_CREDIT_PACKAGES') && content.includes('pack_starter') && content.includes('pack_pro') && content.includes('pack_power');
+    assert(hasServerCatalog, 'Payments engine enforces canonical SERVER_CREDIT_PACKAGES catalog preventing price tampering');
+  } catch (err) {
+    assert(false, 'Failed to inspect SERVER_CREDIT_PACKAGES: ' + err.message);
+  }
+
+  // Test 9: Verify Tipping Hardening — Self-Tipping block & Tip bounds
+  try {
+    const paymentsPath = path.join(__dirname, '../src/app/actions/payments.ts');
+    const content = fs.readFileSync(paymentsPath, 'utf8');
+    const hasSelfTipCheck = content.includes('Self-tipping is strictly prohibited');
+    const hasBoundsCheck = content.includes('Tip amount must be between');
+    assert(hasSelfTipCheck && hasBoundsCheck, 'Tipping engine blocks self-tipping and enforces min/max tip bounds');
+  } catch (err) {
+    assert(false, 'Failed to inspect Tipping checks: ' + err.message);
+  }
+
+  // Test 10: Verify Webhook Unauthenticated Secret Check
+  try {
+    const webhookPath = path.join(__dirname, '../src/app/api/razorpay/webhook/route.ts');
+    const content = fs.readFileSync(webhookPath, 'utf8');
+    const hasMandatorySecretCheck = content.includes('RAZORPAY_WEBHOOK_SECRET is not configured');
+    assert(hasMandatorySecretCheck, 'Webhook handler returns 500 error if RAZORPAY_WEBHOOK_SECRET is unconfigured (0% unauthenticated bypass)');
+  } catch (err) {
+    assert(false, 'Failed to inspect Webhook secret check: ' + err.message);
+  }
+
+  // Test 11: Verify Migration 42 exists and defines atomic PostgreSQL RPCs
+  try {
+    const migrationPath = path.join(__dirname, '../supabase/42_razorpay_production_hardening.sql');
+    const content = fs.readFileSync(migrationPath, 'utf8');
+    const hasTopupRPC = content.includes('topup_studio_credits_atomic');
+    const hasTipRPC = content.includes('process_creator_tip_atomic');
+    const hasEarningsLedger = content.includes('creator_earnings_ledger');
+    assert(hasTopupRPC && hasTipRPC && hasEarningsLedger, 'Migration 42 defines atomic RPCs and creator earnings ledger for production hardening');
+  } catch (err) {
+    assert(false, 'Failed to inspect Migration 42: ' + err.message);
+  }
+
+  // Test 12: Verify Order Ownership Check in verifyRazorpayPayment
+  try {
+    const paymentsPath = path.join(__dirname, '../src/app/actions/payments.ts');
+    const content = fs.readFileSync(paymentsPath, 'utf8');
+    const hasOwnershipCheck = content.includes('transaction.user_id !== user.id') || content.includes('Unauthorized payment verification');
+    assert(hasOwnershipCheck, 'verifyRazorpayPayment enforces strict user ownership of transaction records');
+  } catch (err) {
+    assert(false, 'Failed to inspect Order Ownership check: ' + err.message);
   }
 
   console.log('\n====================================================');

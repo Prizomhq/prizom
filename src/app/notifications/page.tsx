@@ -341,7 +341,7 @@ export default function NotificationsPage() {
                   >
                     {/* Left Column: Avatar & Action Badge */}
                     <div className="relative shrink-0">
-                      {item.actor && !isSystemType ? (
+                      {item.actor && item.actor.username && !isSystemType ? (
                         <Link href={`/creator/${item.actor.username}`} className="block relative z-10">
                           <Avatar 
                             src={item.actor.avatarUrl} 
@@ -367,7 +367,7 @@ export default function NotificationsPage() {
                     {/* Middle Column: Text details */}
                     <div className="flex-1 min-w-0 pr-4">
                       <p className="text-sm font-semibold text-zinc-500 leading-relaxed break-words">
-                        {item.actor && !isSystemType && (
+                        {item.actor && item.actor.username && !isSystemType && (
                           <Link 
                             href={`/creator/${item.actor.username}`} 
                             className="font-black text-zinc-900 hover:text-indigo-600 transition-colors mr-1"

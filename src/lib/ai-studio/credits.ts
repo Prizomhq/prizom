@@ -164,7 +164,26 @@ export async function topUpCreditsAtomic(
 ): Promise<{ success: boolean; balanceAfter: number; alreadyProcessed?: boolean }> {
   const supabase = customClient || (await createAdminClient());
 
-  // Idempotency check: inspect ai_credit_ledger for reason 'topup_purchase' and razorpayPaymentId
+  // Attempt atomic PostgreSQL RPC execution first for strict concurrency safety & idempotency
+  const { data: rpcData, error: rpcError } = await supabase.rpc('topup_studio_credits_atomic', {
+    p_user_id: userId,
+    p_credits: amount,
+    p_razorpay_payment_id: razorpayPaymentId,
+    p_package_id: packageId,
+  });
+
+  if (!rpcError && rpcData && rpcData.length > 0) {
+    const res = rpcData[0];
+    if (res.success) {
+      return {
+        success: true,
+        balanceAfter: res.balance_after,
+        alreadyProcessed: Boolean(res.already_processed),
+      };
+    }
+  }
+
+  // Fallback JS idempotent flow if RPC is not yet applied in local database
   const { data: existingEntries } = await supabase
     .from('ai_credit_ledger')
     .select('balance_after, id, metadata')
@@ -222,7 +241,6 @@ export async function topUpCreditsAtomic(
 
   if (ledgerErr) {
     console.warn('[CREDITS TOPUP WARN] Ledger insert notice:', ledgerErr.message);
-    // Retry without metadata field if remote table lacks column
     if (ledgerErr.message && ledgerErr.message.includes('metadata')) {
       delete ledgerPayload.metadata;
       await supabase.from('ai_credit_ledger').insert([ledgerPayload]);

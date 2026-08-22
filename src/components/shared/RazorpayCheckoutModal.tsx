@@ -10,29 +10,34 @@ interface RazorpayCheckoutModalProps {
   onClose: () => void;
   title: string;
   description: string;
-  amount: number;
+  amount?: number;
   type: 'subscription' | 'tip' | 'pack_purchase';
   creatorId?: string;
   creatorName?: string;
   onSuccess?: () => void;
 }
 
+const PRESET_TIPS = [50, 100, 250, 500, 1000];
+
 export default function RazorpayCheckoutModal({
   isOpen,
   onClose,
   title,
   description,
-  amount,
+  amount: defaultAmount = 100,
   type,
   creatorId,
   creatorName,
   onSuccess,
 }: RazorpayCheckoutModalProps) {
+  const [tipAmount, setTipAmount] = useState<number>(defaultAmount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const finalPayableAmount = type === 'tip' ? tipAmount : defaultAmount;
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -49,11 +54,19 @@ export default function RazorpayCheckoutModal({
   };
 
   const handlePayment = async () => {
+    if (loading) return;
+
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
 
     try {
+      if (type === 'tip' && (tipAmount < 10 || tipAmount > 10000)) {
+        setError('Tip amount must be between ₹10 and ₹10,000 INR.');
+        setLoading(false);
+        return;
+      }
+
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
         setError('Failed to load Razorpay Payment Gateway SDK. Check network connection.');
@@ -63,7 +76,7 @@ export default function RazorpayCheckoutModal({
 
       // Step 1: Create Razorpay Order via Server Action
       const orderRes = await createRazorpayOrder({
-        amount,
+        amount: finalPayableAmount,
         currency: 'INR',
         type,
         creatorId,
@@ -84,7 +97,7 @@ export default function RazorpayCheckoutModal({
         amount: order.amount,
         currency: order.currency,
         name: SITE_CONFIG.name,
-        description,
+        description: type === 'tip' ? `Creator Tip to @${creatorName || 'creator'}` : description,
         order_id: order.id,
         theme: {
           color: '#8b5cf6', // Neon Purple Accent
@@ -103,7 +116,7 @@ export default function RazorpayCheckoutModal({
           );
 
           if (verifyRes.success) {
-            setSuccessMsg('Payment successful! Your order has been processed.');
+            setSuccessMsg('Payment successful! Your transaction has been verified.');
             if (onSuccess) onSuccess();
             setTimeout(() => {
               onClose();
@@ -154,16 +167,58 @@ export default function RazorpayCheckoutModal({
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 p-1.5 rounded-lg hover:bg-zinc-100 transition-colors text-sm font-bold"
+            className="text-zinc-400 hover:text-zinc-600 p-1.5 rounded-lg hover:bg-zinc-100 transition-colors text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
+        {/* Tip Selector for Tipping Flow */}
+        {type === 'tip' && (
+          <div className="my-4 space-y-3">
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+              Select Tip Amount (INR)
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              {PRESET_TIPS.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setTipAmount(preset)}
+                  className={`py-2 text-xs font-black rounded-xl border transition-all cursor-pointer ${
+                    tipAmount === preset
+                      ? 'bg-rose-50 border-rose-500 text-rose-600 shadow-xs'
+                      : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                  }`}
+                >
+                  ₹{preset}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2">
+              <label className="text-[11px] font-semibold text-zinc-500 block mb-1">
+                Custom Tip Amount (Min ₹10 — Max ₹10,000)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">₹</span>
+                <input
+                  type="number"
+                  min={10}
+                  max={10000}
+                  value={tipAmount}
+                  onChange={(e) => setTipAmount(Number(e.target.value))}
+                  className="w-full pl-7 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-900 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Order Details */}
-        <div className="my-5 p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2">
+        <div className="my-4 p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2">
           <div className="flex justify-between items-center text-xs font-semibold text-zinc-600">
-            <span>Item / Tier</span>
+            <span>Item / Purpose</span>
             <span className="text-zinc-900 font-bold">{title}</span>
           </div>
           {creatorName && (
@@ -174,7 +229,7 @@ export default function RazorpayCheckoutModal({
           )}
           <div className="pt-2 border-t border-zinc-200/60 flex justify-between items-center text-sm font-bold text-zinc-900">
             <span>Total Payable</span>
-            <span className="text-base font-extrabold text-purple-600">₹{amount} INR</span>
+            <span className="text-base font-extrabold text-purple-600">₹{finalPayableAmount} INR</span>
           </div>
         </div>
 
@@ -206,7 +261,7 @@ export default function RazorpayCheckoutModal({
             ) : (
               <>
                 <CreditCard className="w-4 h-4" />
-                Pay ₹{amount} with Razorpay
+                Pay ₹{finalPayableAmount} with Razorpay
               </>
             )}
           </button>

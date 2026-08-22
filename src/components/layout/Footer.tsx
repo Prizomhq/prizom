@@ -38,7 +38,7 @@ export default function Footer() {
   ];
 
   const supportLinks = settings?.support_links || [
-    { label: "Contact Us", url: "/#contact" }
+    { label: "Contact Support", url: "/settings?tab=contact-support" }
   ];
 
   return (
