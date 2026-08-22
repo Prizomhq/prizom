@@ -115,12 +115,12 @@ async function runSuite() {
 
   // Test 8: Verify Canonical SERVER_CREDIT_PACKAGES enforces server-side pricing
   try {
-    const paymentsPath = path.join(__dirname, '../src/app/actions/payments.ts');
-    const content = fs.readFileSync(paymentsPath, 'utf8');
+    const configPath = path.join(__dirname, '../src/lib/payments/config.ts');
+    const content = fs.readFileSync(configPath, 'utf8');
     const hasServerCatalog = content.includes('SERVER_CREDIT_PACKAGES') && content.includes('pack_starter') && content.includes('pack_pro') && content.includes('pack_power');
     assert(hasServerCatalog, 'Payments engine enforces canonical SERVER_CREDIT_PACKAGES catalog preventing price tampering');
   } catch (err) {
-    assert(false, 'Failed to inspect SERVER_CREDIT_PACKAGES: ' + err.message);
+    assert(false, 'Failed to inspect SERVER_CREDIT_PACKAGES in config.ts: ' + err.message);
   }
 
   // Test 9: Verify Tipping Hardening — Self-Tipping block & Tip bounds

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createAdminClient } from '@/lib/supabase/server';
-import { SERVER_CREDIT_PACKAGES } from '@/app/actions/payments';
+import { SERVER_CREDIT_PACKAGES } from '@/lib/payments/config';
 
 export async function POST(request: Request) {
   try {
